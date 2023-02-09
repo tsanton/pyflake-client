@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  testing:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_TAG: ${PYTHON_TAG}
+        REQUIREMENTS_FILE_PATH: dev.requirements.txt
+    command: py.test --junitxml=xunit-reports/xunit-result-all.xml --cov --cov-report=xml:coverage-reports/coverage.xml --cov-report=html:coverage-reports/
+    volumes:
+      - ./test-results/xunit-reports/:/src/xunit-reports/
+      - ./test-results/coverage-reports/:/src/coverage-reports/
+
+# docker-compose -f docker-compose.yaml -f docker-compose.override.yaml build
+# docker-compose -f docker-compose.yaml -f docker-compose.override.yaml run testing

@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  testing:
+    environment:
+      - SNOWFLAKE_ACCOUNT
+      - SNOWFLAKE_HOST
+      - SNOWFLAKE_UID
+      - SNOWFLAKE_PWD
+      - SNOWFLAKE_ROLE
+      - SNOWFLAKE_WH
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_TAG: 3.10.9-slim-bullseye
+        REQUIREMENTS_FILE_PATH: requirements.txt
