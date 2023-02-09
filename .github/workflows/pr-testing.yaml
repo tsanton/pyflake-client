@@ -1,0 +1,34 @@
+name: pr-validation
+
+on:  
+  pull_request:
+    types: ["opened", "synchronize"]  
+
+
+jobs:
+  ci:
+    name: pr-testing
+    uses: tsanton/github-action-templates/.github/workflows/python-github-package-ci.yaml@main
+    permissions:
+      issues: read
+      contents: read
+      checks: write
+      pull-requests: write
+    with:
+      compose_file_path: ./
+      compose_file_name: docker-compose.yaml
+      additional_compose_build_files: |
+        ./docker-compose.override.yaml
+      run_test: true
+      additional_compose_test_files: |
+        ./docker-compose.override.yaml
+      test_service_name: testing
+      env_vars: |
+        PYTHON_TAG=3.10.9-slim-bullseye
+        SNOWFLAKE_ROLE=ACCOUNTADMIN
+        SNOWFLAKE_WH=COMPUTE_WH
+    secrets:
+      SNOWFLAKE_ACCOUNT: ${{ github.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_HOST: ${{ github.SNOWFLAKE_HOST }}
+      SNOWFLAKE_UID: ${{ github.SNOWFLAKE_UID }}
+      SNOWFLAKE_PWD: ${{ github.SNOWFLAKE_PWD }}
