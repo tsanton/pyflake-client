@@ -14,6 +14,7 @@ jobs:
       contents: read
       checks: write
       pull-requests: write
+    secrets: inherit
     with:
       compose_file_path: ./
       compose_file_name: docker-compose.yaml
@@ -27,8 +28,3 @@ jobs:
         PYTHON_TAG=3.10.9-slim-bullseye
         SNOWFLAKE_ROLE=ACCOUNTADMIN
         SNOWFLAKE_WH=COMPUTE_WH
-    secrets:
-      SNOWFLAKE_ACCOUNT: ${{ github.SNOWFLAKE_ACCOUNT }}
-      SNOWFLAKE_HOST: ${{ github.SNOWFLAKE_HOST }}
-      SNOWFLAKE_UID: ${{ github.SNOWFLAKE_UID }}
-      SNOWFLAKE_PWD: ${{ github.SNOWFLAKE_PWD }}
