@@ -15,7 +15,7 @@ class RoleRelationship(ISnowflakeDescribable):
 
     def get_describe_statement(self) -> str:
         """get_describe_statement"""
-        return f"""
+        return """
 with show_role_inheritance_relationship as procedure(child_role varchar, parent_role varchar)
     returns variant not null
     language python
@@ -24,13 +24,13 @@ with show_role_inheritance_relationship as procedure(child_role varchar, parent_
     handler = 'show_role_inheritance_relationship_py'
 as '
 def show_role_inheritance_relationship_py(snowpark_session, child_role_py: str, parent_role_py:str):
-    res = {{}}
-    for row in snowpark_session.sql(f"SHOW GRANTS ON ROLE {{child_role_py.upper()}}").to_local_iterator():
+    res = {}
+    for row in snowpark_session.sql(f"SHOW GRANTS ON ROLE {child_role_py.upper()}").to_local_iterator():
         if row["granted_on"] == "ROLE" and row["privilege"] == "USAGE" and row["granted_to"] == "ROLE" and row["grantee_name"] == parent_role_py.upper():
-                return {{**row.as_dict(), **{{"child_role_name": child_role_py.upper(), "parent_role_name": parent_role_py.upper()}}}}
+                return {**row.as_dict(), **{"child_role_name": child_role_py.upper(), "parent_role_name": parent_role_py.upper()}}
     return res
 '
-call show_role_inheritance_relationship('{self.child_role_name}', '{self.parent_role_name}');"""
+call show_role_inheritance_relationship('%(str1)s', '%(str2)s');""" % {"str1": self.child_role_name, "str2": self.parent_role_name}
 
     def is_procedure(self) -> bool:
         """is_procedure"""
