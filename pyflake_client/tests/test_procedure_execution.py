@@ -6,17 +6,16 @@
 import queue
 
 from pyflake_client.models.assets.procedure import Procedure as ProcedureAsset
-from pyflake_client.models.describables.procedure import Procedure as ProcedureDescribable
-from pyflake_client.models.entities.procedure import Procedure as ProcedureEntity
 from pyflake_client.models.enums.column_type import ColumnType
+from pyflake_client.models.executables.procedure import Procedure as ProcedureExec
 from pyflake_client.pyflake_client import PyflakeClient
 
 
-from pyflake_client.tests.utilities import _spawn_with_rwc_privileges, compare
+from pyflake_client.tests.utilities import _spawn_with_rwc_privileges
 
 
-def test_create_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_procedure"""
+def test_execute_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    """test_execute_procedure_zero_args"""
     ### Arrange ###
     db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
     sql: str = f"""
@@ -31,23 +30,23 @@ def test_create_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.Li
     $$;
     """
     proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, "TEST_PROC", [], sql)
+    proc_exec = ProcedureExec(db.db_name, s.schema_name, "TEST_PROC", [])
 
     try:
         flake.register_asset(proc, assets_queue)
-        sf_proc: ProcedureEntity = flake.describe(ProcedureDescribable(proc.database_name, proc.schema_name, proc.name), ProcedureEntity)
+
+        ### Act ###
+        res = flake.execute(proc_exec)
         ### Assert ###
-        assert sf_proc.name == proc.name
-        assert sf_proc.catalog_name == proc.database_name
-        assert sf_proc.schema_name == proc.schema_name
-        assert compare(sf_proc.procedure_args, proc.args)
+        assert res == "Hello you"
 
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
 
 
-def test_create_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_procedure"""
+def test_execute_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    """test_execute_procedure_one_arg"""
     ### Arrange ###
     db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
     sql: str = f"""
@@ -62,23 +61,23 @@ def test_create_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.Lifo
     $$;
     """
     proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, "TEST_PROC", [ColumnType.VARCHAR], sql)
+    proc_exec = ProcedureExec(db.db_name, s.schema_name, "TEST_PROC", ["Tullebukk"])
 
     try:
         flake.register_asset(proc, assets_queue)
-        sf_proc: ProcedureEntity = flake.describe(ProcedureDescribable(proc.database_name, proc.schema_name, proc.name), ProcedureEntity)
+
+        ### Act ###
+        res = flake.execute(proc_exec)
         ### Assert ###
-        assert sf_proc.name == proc.name
-        assert sf_proc.catalog_name == proc.database_name
-        assert sf_proc.schema_name == proc.schema_name
-        assert compare(sf_proc.procedure_args, proc.args)
+        assert res == "Hello Tullebukk"
 
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
 
 
-def test_create_procedure_multiple_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_procedure"""
+def test_execute_procedure_multiple_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    """test_execute_procedure_multiple_args"""
     ### Arrange ###
     db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
     sql: str = f"""
@@ -93,15 +92,15 @@ def test_create_procedure_multiple_args(flake: PyflakeClient, assets_queue: queu
     $$;
     """
     proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, "TEST_PROC", [ColumnType.VARCHAR, ColumnType.VARCHAR], sql)
+    proc_exec = ProcedureExec(db.db_name, s.schema_name, "TEST_PROC", ["Hello you", "Tullebukk"])
 
     try:
         flake.register_asset(proc, assets_queue)
-        sf_proc: ProcedureEntity = flake.describe(ProcedureDescribable(proc.database_name, proc.schema_name, proc.name), ProcedureEntity)
+
+        ### Act ###
+        res = flake.execute(proc_exec)
         ### Assert ###
-        assert sf_proc.name == proc.name
-        assert sf_proc.catalog_name == proc.database_name
-        assert sf_proc.schema_name == proc.schema_name
-        assert compare(sf_proc.procedure_args, proc.args)
+        assert res == "Hello you Tullebukk"
 
     finally:
         ### Cleanup ###
