@@ -14,6 +14,7 @@ from snowflake.connector.errors import ProgrammingError
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
 from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
+from pyflake_client.models.executables.snowflake_executable_interface import ISnowflakeExecutable
 from pyflake_client.models.mergeables.snowflake_mergable_interface import ISnowflakeMergable
 
 
@@ -36,6 +37,17 @@ class PyflakeClient:
             if not row:
                 return None
             return row[0]
+
+    def execute(self, executable: ISnowflakeExecutable) -> Any:
+        """execute"""
+        with self._conn.cursor() as cur:
+            cur.execute(executable.get_exec_statement())
+            data = cur.fetchall()
+            if not data:
+                return None
+            if len(data) == 1:
+                return data[0][0]
+            return [x[0] for x in data]
 
     def create_asset(self, obj: ISnowflakeAsset) -> None:
         """create_asset"""

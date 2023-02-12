@@ -44,12 +44,18 @@ def _spawn_with_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQue
     r4 = RoleRelationship(rwc.name, "SYSADMIN")
     s: Schema = Schema(database=d, schema_name=schema_name, comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=rwc.name)
 
-    rp = ["SELECT", "REFERENCES"]
-    r_privilege = Grant(RoleSchemaFutureGrant(r.name, d.db_name, s.schema_name, ObjectType.TABLE), rp)
-    rwp = ["INSERT", "UPDATE", "DELETE", "TRUNCATE"]
-    rw_privilege = Grant(RoleSchemaFutureGrant(rw.name, d.db_name, s.schema_name, ObjectType.TABLE), rwp)
+    r_table = ["SELECT", "REFERENCES"]
+    r_procedure = ["USAGE"]
+    rw_table = ["INSERT", "UPDATE", "DELETE", "TRUNCATE"]
+    # rw_procedure = []
     rwcp = ["OWNERSHIP"]
-    rwc_privilege = Grant(RoleSchemaFutureGrant(rwc.name, d.db_name, s.schema_name, ObjectType.TABLE), rwcp)
+    table_privilege_r = Grant(RoleSchemaFutureGrant(r.name, d.db_name, s.schema_name, ObjectType.TABLE), r_table)
+    table_privilege_rw = Grant(RoleSchemaFutureGrant(rw.name, d.db_name, s.schema_name, ObjectType.TABLE), rw_table)
+    table_privilege_rwc = Grant(RoleSchemaFutureGrant(rwc.name, d.db_name, s.schema_name, ObjectType.TABLE), rwcp)
+
+    procedure_privilege_r = Grant(RoleSchemaFutureGrant(r.name, d.db_name, s.schema_name, ObjectType.PROCEDURE), r_procedure)
+    # procedure_privilege_rw = Grant(RoleSchemaFutureGrant(rw.name, d.db_name, s.schema_name, ObjectType.PROCEDURE), rw_procedure)
+    procedure_privilege_rwc = Grant(RoleSchemaFutureGrant(rwc.name, d.db_name, s.schema_name, ObjectType.PROCEDURE), rwcp)
     try:
         flake.register_asset(db_sys_admin, assets_queue)
         flake.register_asset(db_usr_admin, assets_queue)
@@ -62,9 +68,12 @@ def _spawn_with_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQue
         flake.register_asset(r3, assets_queue)
         flake.register_asset(r4, assets_queue)
         flake.register_asset(s, assets_queue)
-        flake.register_asset(r_privilege, assets_queue)
-        flake.register_asset(rw_privilege, assets_queue)
-        flake.register_asset(rwc_privilege, assets_queue)
+        flake.register_asset(table_privilege_r, assets_queue)
+        flake.register_asset(table_privilege_rw, assets_queue)
+        flake.register_asset(table_privilege_rwc, assets_queue)
+        flake.register_asset(procedure_privilege_r, assets_queue)
+        # flake.register_asset(procedure_privilege_rw, assets_queue)
+        flake.register_asset(procedure_privilege_rwc, assets_queue)
     except Exception as err:
         flake.delete_assets(assets_queue)
         raise err

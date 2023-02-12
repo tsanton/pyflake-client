@@ -1,4 +1,4 @@
-"""role_hierarchy"""
+"""role_ascendants"""
 # pylint: disable=consider-using-f-string
 from dataclasses import dataclass
 from dacite import Config
@@ -7,8 +7,8 @@ from pyflake_client.models.describables.snowflake_describable_interface import I
 
 
 @dataclass(frozen=True)
-class RoleHierarchy(ISnowflakeDescribable):
-    """RoleHierarchy: all roles higher in the role hierarchy with USAGE on this role"""
+class RoleAscendants(ISnowflakeDescribable):
+    """RoleAscendants: all roles higher in the role hierarchy with USAGE on this role"""
     role_name: str
 
     def get_describe_statement(self) -> str:
@@ -25,7 +25,7 @@ def show_grants_on_role_py(snowpark_session, role_name: str, links_removed:int):
     res = []
     try:
         for row in snowpark_session.sql(f"SHOW GRANTS ON ROLE {role_name}").to_local_iterator():
-            if row["privilege"] == "USAGE":
+            if row["privilege"] == "USAGE" and row["granted_on"] in ["ROLE", "DATABASE_ROLE"]:
                 res.append({ **row.as_dict(), **{
 						"distance_from_source": links_removed,
 						"role_name": row["name"],
@@ -50,7 +50,7 @@ def show_all_roles_that_inherit_source_py(snowpark_session, role_name: str, link
 def main_py(snowpark_session, base_role_name_py:str):
     res = []
     show_all_roles_that_inherit_source_py(snowpark_session, base_role_name_py, 0, res)
-    return {"name": base_role_name_py, "inheriting_roles": res}
+    return {"name": base_role_name_py, "ascendant_roles": res}
 '
 call show_all_roles_that_inherit_source('%(s1)s');""" % {"s1": self.role_name}
 

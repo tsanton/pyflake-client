@@ -1,4 +1,4 @@
-"""ISnowflakeDescribable"""
+"""snowflake_describable_interface"""
 from abc import ABC, abstractmethod
 from dacite import Config
 

@@ -1,4 +1,4 @@
-"""test_role_hierarchy"""
+"""test_role_ascendants"""
 # pylint: disable=line-too-long
 # pylint: disable=too-many-locals
 
@@ -7,20 +7,20 @@ import uuid
 
 from pyflake_client.pyflake_client import PyflakeClient
 
-from pyflake_client.models.entities.role_hierarchy import RoleHierarchy as RoleHierarchyEntity
-from pyflake_client.models.describables.role_hierarchy import RoleHierarchy as RoleHierarchyDescribable
+from pyflake_client.models.entities.role_ascendants import RoleAscendants as RoleAscendantsEntity
+from pyflake_client.models.describables.role_ascendants import RoleAscendants as RoleAscendantsDescribable
 from pyflake_client.models.assets.role import Role
 from pyflake_client.models.assets.role_relationship import RoleRelationship
 
 
-def test_get_role_hierarchy(flake: PyflakeClient):
-    """test_get_role_hierarchy: we know that USERADMIN -> SECURITYADMIN -> ACCOUNTADMIN"""
+def test_get_role_ascendants(flake: PyflakeClient):
+    """test_get_role_ascendants: we know that USERADMIN -> SECURITYADMIN -> ACCOUNTADMIN"""
     ### Act ###
-    hierarchy: RoleHierarchyEntity = flake.describe(RoleHierarchyDescribable("USERADMIN"), RoleHierarchyEntity)
+    hierarchy: RoleAscendantsEntity = flake.describe(RoleAscendantsDescribable("USERADMIN"), RoleAscendantsEntity)
 
-    sec_admin = next((r for r in hierarchy.inheriting_roles if r.parent_role_name == "SECURITYADMIN"), None)
-    acc_admin = next((r for r in hierarchy.inheriting_roles if r.parent_role_name == "ACCOUNTADMIN"), None)
-    sys_admin = next((r for r in hierarchy.inheriting_roles if r.parent_role_name == "SYSADMIN"), None)
+    sec_admin = next((r for r in hierarchy.ascendant_roles if r.parent_role_name == "SECURITYADMIN"), None)
+    acc_admin = next((r for r in hierarchy.ascendant_roles if r.parent_role_name == "ACCOUNTADMIN"), None)
+    sys_admin = next((r for r in hierarchy.ascendant_roles if r.parent_role_name == "SYSADMIN"), None)
 
     ### Assert ###
     assert hierarchy.name == "USERADMIN"
@@ -33,8 +33,8 @@ def test_get_role_hierarchy(flake: PyflakeClient):
     assert acc_admin.parent_role_name == "ACCOUNTADMIN"
 
 
-def test_create_role_hierarchy(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_role_hierarchy"""
+def test_create_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    """test_create_role_ascendants"""
     ### Arrange ###
     child1_role = Role("IGT_CHILD1_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
     child2_role = Role("IGT_CHILD2_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
@@ -63,16 +63,16 @@ def test_create_role_hierarchy(flake: PyflakeClient, assets_queue: queue.LifoQue
         flake.register_asset(sysadmin_great_grandparent_relationship, assets_queue)
 
         ### Act ###
-        hierarchy: RoleHierarchyEntity = flake.describe(RoleHierarchyDescribable("IGT_CHILD1_ROLE"), RoleHierarchyEntity)
-        parent = next((r for r in hierarchy.inheriting_roles if r.parent_role_name == parent_role.name), None)
-        grandparent1 = next((r for r in hierarchy.inheriting_roles if r.parent_role_name ==
+        hierarchy: RoleAscendantsEntity = flake.describe(RoleAscendantsDescribable("IGT_CHILD1_ROLE"), RoleAscendantsEntity)
+        parent = next((r for r in hierarchy.ascendant_roles if r.parent_role_name == parent_role.name), None)
+        grandparent1 = next((r for r in hierarchy.ascendant_roles if r.parent_role_name ==
                              grandparent1_role.name), None)
-        grandparent2 = next((r for r in hierarchy.inheriting_roles if r.parent_role_name ==
+        grandparent2 = next((r for r in hierarchy.ascendant_roles if r.parent_role_name ==
                              grandparent2_role.name), None)
-        great_grandparent = next((r for r in hierarchy.inheriting_roles if r.parent_role_name ==
+        great_grandparent = next((r for r in hierarchy.ascendant_roles if r.parent_role_name ==
                                  great_grandparent_role.name), None)
-        sys_admin = next((r for r in hierarchy.inheriting_roles if r.parent_role_name == "SYSADMIN"), None)
-        acc_admin = next((r for r in hierarchy.inheriting_roles if r.parent_role_name == "ACCOUNTADMIN"), None)
+        sys_admin = next((r for r in hierarchy.ascendant_roles if r.parent_role_name == "SYSADMIN"), None)
+        acc_admin = next((r for r in hierarchy.ascendant_roles if r.parent_role_name == "ACCOUNTADMIN"), None)
 
         ### Assert ###
         # {parent: 0, grandparent: 1, great_grandparent: 2, sysadmin: 3, accountadmin: 4}
@@ -101,8 +101,8 @@ def test_create_role_hierarchy(flake: PyflakeClient, assets_queue: queue.LifoQue
         flake.delete_assets(assets_queue)
 
 
-def test_broken_role_hierarchy(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_broken_role_hierarchy"""
+def test_broken_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    """test_broken_role_ascendants"""
     ### Arrange ###
     child1_role = Role("IGT_CHILD1_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
     child2_role = Role("IGT_CHILD2_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
@@ -127,12 +127,12 @@ def test_broken_role_hierarchy(flake: PyflakeClient, assets_queue: queue.LifoQue
         flake.register_asset(sysadmin_great_grandparent_relationship, assets_queue)
 
         ### Act ###
-        hierarchy: RoleHierarchyEntity = flake.describe(RoleHierarchyDescribable("IGT_CHILD1_ROLE"), RoleHierarchyEntity)
-        parent = next((r for r in hierarchy.inheriting_roles if r.parent_role_name == parent_role.name), None)
-        grandparent = next((r for r in hierarchy.inheriting_roles if r.parent_role_name == grandparent_role.name), None)
-        great_grandparent = next((r for r in hierarchy.inheriting_roles if r.parent_role_name == great_grandparent_role.name), None)
-        sys_admin = next((r for r in hierarchy.inheriting_roles if r.parent_role_name == "SYSADMIN"), None)
-        acc_admin = next((r for r in hierarchy.inheriting_roles if r.parent_role_name == "ACCOUNTADMIN"), None)
+        hierarchy: RoleAscendantsEntity = flake.describe(RoleAscendantsDescribable("IGT_CHILD1_ROLE"), RoleAscendantsEntity)
+        parent = next((r for r in hierarchy.ascendant_roles if r.parent_role_name == parent_role.name), None)
+        grandparent = next((r for r in hierarchy.ascendant_roles if r.parent_role_name == grandparent_role.name), None)
+        great_grandparent = next((r for r in hierarchy.ascendant_roles if r.parent_role_name == great_grandparent_role.name), None)
+        sys_admin = next((r for r in hierarchy.ascendant_roles if r.parent_role_name == "SYSADMIN"), None)
+        acc_admin = next((r for r in hierarchy.ascendant_roles if r.parent_role_name == "ACCOUNTADMIN"), None)
 
         ### Assert ###
         # {parent: 0, grandparent: 1, great_grandparent: 2, sysadmin: 3, accountadmin: 4}
