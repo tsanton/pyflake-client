@@ -9,7 +9,7 @@ from pyflake_client.models.assets.procedure import Procedure as ProcedureAsset
 from pyflake_client.models.describables.procedure import Procedure as ProcedureDescribable
 from pyflake_client.models.entities.procedure import Procedure as ProcedureEntity
 from pyflake_client.models.enums.column_type import ColumnType
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 
 
 from pyflake_client.tests.utilities import _spawn_with_rwc_privileges, compare

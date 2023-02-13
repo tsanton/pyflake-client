@@ -2,7 +2,7 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-locals
 
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 
 from pyflake_client.models.entities.role_descendants import RoleDescendants as RoleDescendantsEntity
 from pyflake_client.models.describables.role_descendants import RoleDescendants as RoleDescendantsDescribable

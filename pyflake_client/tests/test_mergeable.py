@@ -8,7 +8,7 @@ from datetime import date
 import queue
 
 from pyflake_client.models.assets.table import Table
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 from pyflake_client.tests.models.mergable_entity import TABLE_NAME, TABLE_COLUMN_DEFINITION, MergableEntity
 
 from pyflake_client.tests.utilities import _spawn_with_rwc_privileges

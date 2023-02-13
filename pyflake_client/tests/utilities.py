@@ -15,7 +15,7 @@ from pyflake_client.models.assets.grant import Grant
 from pyflake_client.models.assets.grants.role_schema_future_grant import RoleSchemaFutureGrant
 from pyflake_client.models.enums.object_type import ObjectType
 
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 
 
 def compare(x, y) -> bool:

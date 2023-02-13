@@ -9,7 +9,7 @@ from pyflake_client.models.enums.object_type import ObjectType
 from pyflake_client.models.assets.grant import Grant
 from pyflake_client.models.assets.table import Column, Table
 from pyflake_client.models.assets.grants.role_schema_future_grant import RoleSchemaFutureGrant as RoleSchemaFutureGrantAsset
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 from pyflake_client.tests.utilities import _spawn_without_rwc_privileges, compare
 
 from pyflake_client.models.describables.grants.role_schema_object_grant import RoleSchemaObjectGrant

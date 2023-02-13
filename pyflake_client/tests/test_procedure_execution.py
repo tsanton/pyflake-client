@@ -8,7 +8,7 @@ import queue
 from pyflake_client.models.assets.procedure import Procedure as ProcedureAsset
 from pyflake_client.models.enums.column_type import ColumnType
 from pyflake_client.models.executables.procedure import Procedure as ProcedureExec
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 
 
 from pyflake_client.tests.utilities import _spawn_with_rwc_privileges

@@ -7,7 +7,7 @@ import pytest
 import snowflake.connector
 from snowflake.connector import SnowflakeConnection
 
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 
 
 # https://docs.pytest.org/en/6.2.x/fixture.html#fixture-scopes
