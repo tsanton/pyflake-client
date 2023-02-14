@@ -17,9 +17,12 @@ class AnonymousProcedure(ISnowflakeExecutable):
     def get_call_statement(self) -> str:
         proc_args = ""
         for arg in sorted(self.procedure_args, key=lambda x: x.positional_order):
-            match arg.data_type:
-                case ColumnType.VARCHAR: proc_args += f"'{str(arg.value)}',"
-                case ColumnType.INTEGER: proc_args += f"{int(arg.value)},"
-                case _: raise ValueError(f"ColumnType ${arg.data_type} is not mapped")
+            # Not using match self.type: for python 3.8 compatability
+            if arg.data_type == ColumnType.VARCHAR:
+                proc_args += f"'{str(arg.value)}',"
+            elif arg.data_type == ColumnType.INTEGER:
+                proc_args += f"{int(arg.value)},"
+            else:
+                raise ValueError(f"ColumnType ${arg.data_type} is not mapped")
         test = f"{self.procedure_definition}\ncall {self.procedure_name}({proc_args.rstrip(',')});"
         return test

@@ -52,7 +52,7 @@ class PyflakeClient:
         """create_asset"""
         self._create_asset(obj)
 
-    def register_asset(self, obj: ISnowflakeAsset, asset_queue: queue.LifoQueue[ISnowflakeAsset]) -> None:
+    def register_asset(self, obj: ISnowflakeAsset, asset_queue: queue.LifoQueue) -> None:
         """register_asset"""
         asset_queue.put(obj)
         self._create_asset(obj)
@@ -65,7 +65,7 @@ class PyflakeClient:
         """delete_asset"""
         self._delete_asset(obj)
 
-    def delete_assets(self, asset_queue: queue.LifoQueue[ISnowflakeAsset]) -> None:
+    def delete_assets(self, asset_queue: queue.LifoQueue) -> None:
         """delete_asset"""
         while not asset_queue.empty():
             self._delete_asset(asset_queue.get())
