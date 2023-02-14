@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/Tsanton/pyflake-client/compare/v0.3.0...v0.3.1) (2023-02-14)
+
+
+### Bug Fixes
+
+* remove subtype hinting for 3.8 ([8ab5adc](https://github.com/Tsanton/pyflake-client/commit/8ab5adc19026f282082b6c00ae6d8ef4f5cb8e8e))
+
 ## [0.3.0](https://github.com/Tsanton/pyflake-client/compare/v0.2.0...v0.3.0) (2023-02-14)
 
 
