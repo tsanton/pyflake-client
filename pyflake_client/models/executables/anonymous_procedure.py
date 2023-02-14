@@ -1,5 +1,4 @@
-"""procedure"""
-# pylint: disable=line-too-long
+"""anonymous_procedure"""
 from dataclasses import dataclass
 from typing import List
 from pyflake_client.models.enums.column_type import ColumnType
@@ -9,11 +8,10 @@ from pyflake_client.models.executables.snowflake_executable_interface import ISn
 
 
 @dataclass(frozen=True)
-class Procedure(ISnowflakeExecutable):
-    """Procedure"""
-    database_name: str
-    schema_name: str
+class AnonymousProcedure(ISnowflakeExecutable):
+    """AnonymousProcedure"""
     procedure_name: str
+    procedure_definition: str
     procedure_args: List[ProcedureArg]
 
     def get_call_statement(self) -> str:
@@ -23,4 +21,5 @@ class Procedure(ISnowflakeExecutable):
                 case ColumnType.VARCHAR: proc_args += f"'{str(arg.value)}',"
                 case ColumnType.INTEGER: proc_args += f"{int(arg.value)},"
                 case _: raise ValueError(f"ColumnType ${arg.data_type} is not mapped")
-        return f"call {self.database_name}.{self.schema_name}.{self.procedure_name}({proc_args.rstrip(',')});"
+        test = f"{self.procedure_definition}\ncall {self.procedure_name}({proc_args.rstrip(',')});"
+        return test

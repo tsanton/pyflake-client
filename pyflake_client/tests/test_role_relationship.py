@@ -3,7 +3,7 @@
 import queue
 import uuid
 
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 
 from pyflake_client.models.assets.role_relationship import RoleRelationship as RoleRelationshipAsset
 from pyflake_client.models.assets.role import Role

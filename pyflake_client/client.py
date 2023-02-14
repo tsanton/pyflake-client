@@ -10,7 +10,6 @@ from dacite import from_dict
 from snowflake.connector import SnowflakeConnection
 from snowflake.connector.errors import ProgrammingError
 
-
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
 from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
@@ -41,7 +40,7 @@ class PyflakeClient:
     def execute(self, executable: ISnowflakeExecutable) -> Any:
         """execute"""
         with self._conn.cursor() as cur:
-            cur.execute(executable.get_exec_statement())
+            cur.execute(executable.get_call_statement())
             data = cur.fetchall()
             if not data:
                 return None

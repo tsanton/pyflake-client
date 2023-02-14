@@ -10,7 +10,7 @@ from pyflake_client.models.assets.grants.role_schema_future_grant import RoleSch
 from pyflake_client.models.assets.grant import Grant as GrantAsset
 from pyflake_client.models.entities.grants.role_schema_future_grant import RoleSchemaFutureGrants
 from pyflake_client.models.describables.grants.role_schema_future_grant import RoleSchemaFutureGrant as RoleSchemaFutureGrantDescribable
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 from pyflake_client.tests.utilities import compare, _spawn_database_and_schema
 
 # region table

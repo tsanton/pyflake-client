@@ -8,7 +8,7 @@ from pyflake_client.models.assets.grant import Grant as GrantAsset
 from pyflake_client.models.assets.grants.role_schema_future_grant import RoleSchemaFutureGrant as RoleSchemaFutureGrantAsset
 from pyflake_client.models.entities.grants.schema_object_grant import SchemaObjectGrants
 from pyflake_client.tests.utilities import compare, _spawn_database_and_schema
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.table import Column, Table
 from pyflake_client.models.assets.role_relationship import RoleRelationship
 from pyflake_client.models.describables.grants.schema_object_grant import SchemaObjectGrant

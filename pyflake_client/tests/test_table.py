@@ -10,8 +10,7 @@ from pyflake_client.models.describables.table import Table as TableDescribable
 from pyflake_client.models.enums.column_type import ColumnType
 from pyflake_client.models.assets.database import Database
 from pyflake_client.models.assets.schema import Schema
-
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 
 
 def test_create_table(flake: PyflakeClient, assets_queue: queue.LifoQueue):

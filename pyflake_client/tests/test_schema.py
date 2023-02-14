@@ -4,7 +4,7 @@ import queue
 import uuid
 from datetime import date
 
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as AssetsDatabase
 from pyflake_client.models.assets.schema import Schema as AssetsSchema
 from pyflake_client.models.entities.schema import Schema as EntitiesSchema

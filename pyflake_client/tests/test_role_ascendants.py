@@ -5,7 +5,7 @@
 import queue
 import uuid
 
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 
 from pyflake_client.models.entities.role_ascendants import RoleAscendants as RoleAscendantsEntity
 from pyflake_client.models.describables.role_ascendants import RoleAscendants as RoleAscendantsDescribable

@@ -3,7 +3,7 @@
 import queue
 import uuid
 
-from pyflake_client.pyflake_client import PyflakeClient
+from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.role import Role as AssetsRole
 from pyflake_client.models.assets.database import Database as AssetsDatabase
 from pyflake_client.models.assets.grant import Grant as GrantAsset
