@@ -4,6 +4,9 @@ import os
 with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
+with open("requirements.txt", "r", encoding="utf-8") as f:
+    required = f.read().splitlines()
+
 setuptools.setup(
     name="pyflake-client",
     version=os.getenv("PYFLAKE_SEMVER", "0.0.1"),
@@ -23,9 +26,7 @@ setuptools.setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
-    install_requires=[
-        "snowflake-connector-python==2.9.0"
-    ],
+    install_requires=required,
     packages=setuptools.find_packages(exclude=["*tests*"]),
     python_requires=">=3.8",
 )
