@@ -8,14 +8,15 @@ import queue
 from pyflake_client.models.assets.procedure import Procedure as ProcedureAsset
 from pyflake_client.models.enums.column_type import ColumnType
 from pyflake_client.models.executables.procedure import Procedure as ProcedureExec
+from pyflake_client.models.executables.procedure_arg import ProcedureArg
 from pyflake_client.client import PyflakeClient
 
 
 from pyflake_client.tests.utilities import _spawn_with_rwc_privileges
 
 
-def test_execute_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_execute_procedure_zero_args"""
+def test_call_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    """test_call_procedure_zero_args"""
     ### Arrange ###
     db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
     sql: str = f"""
@@ -45,8 +46,8 @@ def test_execute_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.L
         flake.delete_assets(assets_queue)
 
 
-def test_execute_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_execute_procedure_one_arg"""
+def test_call_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    """test_call_procedure_one_arg"""
     ### Arrange ###
     db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
     sql: str = f"""
@@ -61,7 +62,7 @@ def test_execute_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.Lif
     $$;
     """
     proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, "TEST_PROC", [ColumnType.VARCHAR], sql)
-    proc_exec = ProcedureExec(db.db_name, s.schema_name, "TEST_PROC", ["Tullebukk"])
+    proc_exec = ProcedureExec(db.db_name, s.schema_name, "TEST_PROC", [ProcedureArg(1, ColumnType.VARCHAR, "Tullebukk")])
 
     try:
         flake.register_asset(proc, assets_queue)
@@ -76,8 +77,8 @@ def test_execute_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.Lif
         flake.delete_assets(assets_queue)
 
 
-def test_execute_procedure_multiple_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_execute_procedure_multiple_args"""
+def test_call_procedure_multiple_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    """test_call_procedure_multiple_args"""
     ### Arrange ###
     db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
     sql: str = f"""
@@ -92,7 +93,10 @@ def test_execute_procedure_multiple_args(flake: PyflakeClient, assets_queue: que
     $$;
     """
     proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, "TEST_PROC", [ColumnType.VARCHAR, ColumnType.VARCHAR], sql)
-    proc_exec = ProcedureExec(db.db_name, s.schema_name, "TEST_PROC", ["Hello you", "Tullebukk"])
+    proc_exec = ProcedureExec(db.db_name, s.schema_name, "TEST_PROC", [
+        ProcedureArg(1, ColumnType.VARCHAR, "Hello you"),
+        ProcedureArg(2, ColumnType.VARCHAR, "Tullebukk"),
+    ])
 
     try:
         flake.register_asset(proc, assets_queue)

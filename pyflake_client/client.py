@@ -40,7 +40,7 @@ class PyflakeClient:
     def execute(self, executable: ISnowflakeExecutable) -> Any:
         """execute"""
         with self._conn.cursor() as cur:
-            cur.execute(executable.get_exec_statement())
+            cur.execute(executable.get_call_statement())
             data = cur.fetchall()
             if not data:
                 return None

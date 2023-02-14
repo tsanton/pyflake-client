@@ -6,5 +6,5 @@ class ISnowflakeExecutable(ABC):
     """ISnowflakeExecutable"""
 
     @abstractmethod
-    def get_exec_statement(self) -> str:
-        """get_exec_statement"""
+    def get_call_statement(self) -> str:
+        """get_call_statement"""

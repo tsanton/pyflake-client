@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setuptools.setup(
     name="pyflake-client",
-    version=os.getenv("PYFLAKE_SEMVER", "v0.0.1"),
+    version=os.getenv("PYFLAKE_SEMVER", "0.0.1"),
     author="Tobias Antonsen",
     author_email="tobias@tsant.no",
     description="A client written in Python for testing integrations manipulating DDL in Snowflake.",
