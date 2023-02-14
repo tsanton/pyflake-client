@@ -25,42 +25,41 @@ class Column:
         """to_snowflake_column"""
         output: str = f"{self.name} "
         default_value = None
-        match self.type:
-            # TODO: More type assertion?
-            case ColumnType.INTEGER:
-                output += f"INTEGER {'IDENTITY (1,1)' if self.identity else '' } %s %s %s"
-                default_value = self.default_value
-            case ColumnType.VARCHAR:
-                output += "VARCHAR(16777216) %s %s %s"
-                default_value = f"'{self.default_value}'" if self.default_value is not None else None
-            case ColumnType.BOOLEAN:
-                output += "BOOLEAN %s %s %s"
-                default_value = self.default_value
-            case ColumnType.NUMBER:
-                output += "NUMBER(38,37) %s %s %s"
-                default_value = self.default_value
-            case ColumnType.FLOAT:
-                output += "FLOAT %s %s %s"
-                default_value = self.default_value
-            case ColumnType.DATE:
-                output += "DATE %s %s %s"
-                default_value = None
-                if self.default_value is not None:
-                    assert isinstance(self.default_value, date)
-                    default_value = f"'{self.default_value.strftime('%Y-%m-%d')}'::date"
-            case ColumnType.TIMESTAMP:
-                output += "TIMESTAMP_NTZ(2) %s %s %s"
-                default_value = None
-                if self.default_value is not None:
-                    assert isinstance(self.default_value, datetime)
-                    default_value = f"'{self.default_value.strftime('%Y-%m-%dT%H:%M:%S.%f%z')}'::TIMESTAMP_NTZ(2)"
-            case ColumnType.ARRAY:
-                raise NotImplementedError("ARRAY not tested and implemented")
-            case ColumnType.OBJECT:
-                raise NotImplementedError("OBJECT not tested and implemented")
-            case ColumnType.VARIANT:
-                output += "VARIANT %s %s %s"
-                default_value = self.default_value
+        # Not using match self.type: for python 3.8 compatability
+        if self.type == ColumnType.INTEGER:
+            output += f"INTEGER {'IDENTITY (1,1)' if self.identity else '' } %s %s %s"
+            default_value = self.default_value
+        elif self.type == ColumnType.VARCHAR:
+            output += "VARCHAR(16777216) %s %s %s"
+            default_value = f"'{self.default_value}'" if self.default_value is not None else None
+        elif self.type == ColumnType.BOOLEAN:
+            output += "BOOLEAN %s %s %s"
+            default_value = self.default_value
+        elif self.type == ColumnType.NUMBER:
+            output += "NUMBER(38,37) %s %s %s"
+            default_value = self.default_value
+        elif self.type == ColumnType.FLOAT:
+            output += "FLOAT %s %s %s"
+            default_value = self.default_value
+        elif self.type == ColumnType.DATE:
+            output += "DATE %s %s %s"
+            default_value = None
+            if self.default_value is not None:
+                assert isinstance(self.default_value, date)
+                default_value = f"'{self.default_value.strftime('%Y-%m-%d')}'::date"
+        elif self.type == ColumnType.TIMESTAMP:
+            output += "TIMESTAMP_NTZ(2) %s %s %s"
+            default_value = None
+            if self.default_value is not None:
+                assert isinstance(self.default_value, datetime)
+                default_value = f"'{self.default_value.strftime('%Y-%m-%dT%H:%M:%S.%f%z')}'::TIMESTAMP_NTZ(2)"
+        elif self.type == ColumnType.ARRAY:
+            raise NotImplementedError("ARRAY not tested and implemented")
+        elif self.type == ColumnType.OBJECT:
+            raise NotImplementedError("OBJECT not tested and implemented")
+        elif self.type == ColumnType.VARIANT:
+            output += "VARIANT %s %s %s"
+            default_value = self.default_value
 
         return re.sub(" +", " ", output % (
             "NOT NULL" if self.not_null else "",

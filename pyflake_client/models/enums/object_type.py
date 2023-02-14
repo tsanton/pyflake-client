@@ -17,32 +17,31 @@ class ObjectType(str, Enum):
     TASK = "TASK"
 
     def __str__(self):
-        match self:
-            case ObjectType.TABLE:
-                return "TABLE"
-            case ObjectType.VIEW:
-                return "VIEW"
-            case ObjectType.MATVIEW:
-                return "MATERIALIZED VIEW"
-            case ObjectType.ACCOUNT:
-                return "ACCOUNT"
-            case ObjectType.STAGE:
-                return "STAGE"
-            case ObjectType.FILE_FORMAT:
-                return "FILE FORMAT"
-            case ObjectType.STREAM:
-                return "STREAM"
-            case ObjectType.PROCEDURE:
-                return "PROCEDURE"
-            case ObjectType.FUNCTION:
-                return "FUNCTION"
-            case ObjectType.SEQUENCE:
-                return "SEQUENCE"
-            case ObjectType.TASK:
-                return "TASK"
-            case _:
-                pass  # __str__ doesn't accept default case as return
-        return ""
+        # Not using match self.type: for python 3.8 compatability
+        if self == ObjectType.TABLE:
+            return "TABLE"
+        elif self == ObjectType.VIEW:
+            return "VIEW"
+        elif self == ObjectType.MATVIEW:
+            return "MATERIALIZED VIEW"
+        elif self == ObjectType.ACCOUNT:
+            return "ACCOUNT"
+        elif self == ObjectType.STAGE:
+            return "STAGE"
+        elif self == ObjectType.FILE_FORMAT:
+            return "FILE FORMAT"
+        elif self == ObjectType.STREAM:
+            return "STREAM"
+        elif self == ObjectType.PROCEDURE:
+            return "PROCEDURE"
+        elif self == ObjectType.FUNCTION:
+            return "FUNCTION"
+        elif self == ObjectType.SEQUENCE:
+            return "SEQUENCE"
+        elif self == ObjectType.TASK:
+            return "TASK"
+        else:
+            return ""
 
     def singularize(self) -> str:
         """singularize"""
@@ -50,26 +49,25 @@ class ObjectType(str, Enum):
 
     def pluralize(self) -> str:
         """pluralize"""
-        match self:
-            case ObjectType.TABLE:
-                return "TABLES"
-            case ObjectType.VIEW:
-                return "VIEWS"
-            case ObjectType.MATVIEW:
-                return "MATERIALIZED VIEWS"
-            case ObjectType.ACCOUNT:
-                return "ACCOUNTS"
-            case ObjectType.STAGE:
-                return "STAGES"
-            case ObjectType.FILE_FORMAT:
-                return "FILE FORMATS"
-            case ObjectType.STREAM:
-                return "STREAMS"
-            case ObjectType.PROCEDURE:
-                return "PROCEDURES"
-            case ObjectType.FUNCTION:
-                return "FUNCTIONS"
-            case ObjectType.SEQUENCE:
-                return "SEQUENCES"
-            case ObjectType.TASK:
-                return "TASKS"
+        if self == ObjectType.TABLE:
+            return "TABLES"
+        elif self == ObjectType.VIEW:
+            return "VIEWS"
+        elif self == ObjectType.MATVIEW:
+            return "MATERIALIZED VIEWS"
+        elif self == ObjectType.ACCOUNT:
+            return "ACCOUNTS"
+        elif self == ObjectType.STAGE:
+            return "STAGES"
+        elif self == ObjectType.FILE_FORMAT:
+            return "FILE FORMATS"
+        elif self == ObjectType.STREAM:
+            return "STREAMS"
+        elif self == ObjectType.PROCEDURE:
+            return "PROCEDURES"
+        elif self == ObjectType.FUNCTION:
+            return "FUNCTIONS"
+        elif self == ObjectType.SEQUENCE:
+            return "SEQUENCES"
+        elif self == ObjectType.TASK:
+            return "TASKS"
