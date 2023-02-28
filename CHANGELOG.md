@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/Tsanton/pyflake-client/compare/v0.3.1...v0.4.0) (2023-02-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* minor bump instead of patch
+
+### Features
+
+* added warehouse and warehouse grant ([1fdd261](https://github.com/Tsanton/pyflake-client/commit/1fdd261518d330662bca093b48667f65ee80879c))
+* minor bump instead of patch ([6e4b9a2](https://github.com/Tsanton/pyflake-client/commit/6e4b9a27091c620aca3917f58a548eacaedba424))
+
 ## [0.3.1](https://github.com/Tsanton/pyflake-client/compare/v0.3.0...v0.3.1) (2023-02-14)
 
 
