@@ -13,7 +13,7 @@ pip install git+https://github.com/Tsanton/pyflake-client@v0.1.0#egg=pyflake-cli
 pip install git+https://github.com/Tsanton/pyflake-client@master#egg=pyflake-client
 ```
 
-**requirements.txt?**
+**requirements.txt**
 ```
 package-one==1.9.4
 git+https://github.com/path/to/package-two@v1.0.0#egg=package-two
