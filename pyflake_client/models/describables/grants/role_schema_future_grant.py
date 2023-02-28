@@ -16,7 +16,7 @@ class RoleSchemaFutureGrant(ISnowflakeDescribable):
 
     def get_describe_statement(self) -> str:
         """get_describe_statement"""
-        return f"""
+        return """
 with get_role_future_schema_object_grants as procedure(role_name varchar, db_name varchar, schema_name varchar)
   returns variant not null
   language python
@@ -30,27 +30,27 @@ def scoped_privilege(db_name:str, schema_name:str, row):
         if len(parts) == 3 and parts[0] == db_name and parts[1] == schema_name:
             return True, row.as_dict()
     except:
-        return False, {{}}
-    return False, {{}}
+        return False, {}
+    return False, {}
 
 def get_role_future_schema_object_grants_py(snowpark_session, role_name_py: str, db_name_py:str, schema_name_py:str):
-  res = {{}}
+  res = {}
   try:
-      for row in snowpark_session.sql(f"SHOW FUTURE GRANTS TO ROLE {{role_name_py}}").to_local_iterator():
+      for row in snowpark_session.sql(f"SHOW FUTURE GRANTS TO ROLE {role_name_py}").to_local_iterator():
           scoped, data = scoped_privilege(db_name_py, schema_name_py, row)
           if scoped:
               res.setdefault(row["grant_on"], []).append(row["privilege"])
   except:
       pass
-  return {{
+  return {
     "role_name": role_name_py,
     "db_name": db_name_py,
     "schema_name": schema_name_py,
-    "future_grants": [{{"grant_target": k, "privileges": v}} for k, v in res.items()] 
-  }}
+    "future_grants": [{"grant_target": k, "privileges": v} for k, v in res.items()] 
+  }
 '
-call get_role_future_schema_object_grants('{self.role_name}', '{self.db_name}', '{self.schema_name}');
-"""
+call get_role_future_schema_object_grants('%(str1)s', '%(str2)s', '%(str3)s');
+""" % {"str1": self.role_name, "str2": self.db_name, "str3": self.schema_name}
 
     def is_procedure(self) -> bool:
         """is_procedure"""

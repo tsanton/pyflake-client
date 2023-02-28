@@ -16,12 +16,8 @@ from pyflake_client.client import PyflakeClient
 def test_create_table(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_table"""
     ### Arrange ###
-    database: Database = Database(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}")
-    schema: Schema = Schema(
-        database=database,
-        schema_name="SOME_SCHEMA",
-        comment=f"pyflake_client_TEST_{uuid.uuid4()}")
+    database: Database = Database("IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}")
+    schema: Schema = Schema(database=database, schema_name="SOME_SCHEMA", comment=f"pyflake_client_TEST_{uuid.uuid4()}")
     table = TableAsset(schema, "TEST", [
         Column("ID", ColumnType.INTEGER, identity=True),
         Column("SOME_VARCHAR", ColumnType.VARCHAR, primary_key=True)
