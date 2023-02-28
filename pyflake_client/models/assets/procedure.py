@@ -10,7 +10,6 @@ from pyflake_client.models.enums.column_type import ColumnType  # TODO: Rename C
 @dataclass(frozen=False)
 class Procedure(ISnowflakeAsset):
     """Procedure"""
-
     database_name: str
     schema_name: str
     name: str
