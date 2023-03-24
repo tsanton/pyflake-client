@@ -8,18 +8,25 @@ from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.role import Role as AssetsRole
 from pyflake_client.models.describables.role import Role as DescribablesRole
 from pyflake_client.models.entities.role import Role as EntitiesRole
+from pyflake_client.models.assets.role import Role as RoleAsset
 
 
 def test_create_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role"""
     ### Arrange ###
-    role: AssetsRole = AssetsRole("IGT_CREATE_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
+    role: AssetsRole = AssetsRole(
+        name="IGT_CREATE_ROLE",
+        owner=RoleAsset("USERADMIN"),
+        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
+    )
 
     try:
         flake.register_asset(role, assets_queue)
 
         ### Act ###
-        sf_role: EntitiesRole = flake.describe(DescribablesRole(role.name), EntitiesRole)
+        sf_role: EntitiesRole = flake.describe(
+            DescribablesRole(role.name), EntitiesRole
+        )
         ### Assert ###
         assert sf_role.name == role.name
         assert sf_role.comment == role.comment
@@ -37,13 +44,17 @@ def test_get_role(flake: PyflakeClient):
 
     ### Assert ###
     assert role.name == "ACCOUNTADMIN"
-    assert role.comment == "Account administrator can manage all aspects of the account."
+    assert (
+        role.comment == "Account administrator can manage all aspects of the account."
+    )
 
 
 def test_get_role_that_does_not_exist(flake: PyflakeClient):
     """test_get_role_that_does_not_exist"""
     ### Act ###
-    role: EntitiesRole = flake.describe(DescribablesRole("I_SURELY_DO_NOT_EXIST"), EntitiesRole)
+    role: EntitiesRole = flake.describe(
+        DescribablesRole("I_SURELY_DO_NOT_EXIST"), EntitiesRole
+    )
 
     ### Assert ###
     assert role is None
