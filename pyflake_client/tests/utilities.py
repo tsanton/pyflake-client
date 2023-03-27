@@ -42,7 +42,7 @@ def _spawn_with_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQue
     r2 = RoleRelationship(r.name, rw.name)
     r3 = RoleRelationship(rw.name, rwc.name)
     r4 = RoleRelationship(rwc.name, "SYSADMIN")
-    s: Schema = Schema(database=d, schema_name=schema_name, comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=rwc.name)
+    s: Schema = Schema(database=d, schema_name=schema_name, comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=Role(rwc.name))
 
     r_table = ["SELECT", "REFERENCES"]
     r_procedure = ["USAGE"]
@@ -86,8 +86,8 @@ def _spawn_database_and_schema(flake: PyflakeClient, assets_queue: queue.LifoQue
     db_name = "IGT_DEMO"
     db_sys_admin = Role(f"{db_name}_SYS_ADMIN", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
     database: Database = Database(db_name=db_name, comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=Role("SYSADMIN"))
-    schema1: Schema = Schema(database=database, schema_name="SCHEMA1", comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner="SYSADMIN")
-    schema2: Schema = Schema(database=database, schema_name="SCHEMA2", comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner="SYSADMIN")
+    schema1: Schema = Schema(database=database, schema_name="SCHEMA1", comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=Role("SYSADMIN"))
+    schema2: Schema = Schema(database=database, schema_name="SCHEMA2", comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=Role("SYSADMIN"))
 
     try:
         flake.register_asset(db_sys_admin, assets_queue)
@@ -114,7 +114,7 @@ def _spawn_without_rwc_privileges(flake: PyflakeClient, assets_queue: queue.Lifo
     r2 = RoleRelationship(r.name, rw.name)
     r3 = RoleRelationship(rw.name, rwc.name)
     r4 = RoleRelationship(rwc.name, "SYSADMIN")
-    s: Schema = Schema(database=d, schema_name=schema_name, comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=rwc.name)
+    s: Schema = Schema(database=d, schema_name=schema_name, comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=Role(rwc.name))
 
     try:
         flake.register_asset(db_sys_admin, assets_queue)
