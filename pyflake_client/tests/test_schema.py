@@ -5,6 +5,7 @@ import uuid
 from datetime import date
 
 from pyflake_client.client import PyflakeClient
+from pyflake_client.models.assets.role import Role as AssetsRole
 from pyflake_client.models.assets.database import Database as AssetsDatabase
 from pyflake_client.models.assets.schema import Schema as AssetsSchema
 from pyflake_client.models.entities.schema import Schema as EntitiesSchema
@@ -14,7 +15,7 @@ from pyflake_client.models.describables.schema import Schema as DescribabablesSc
 def test_create_schema(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_schema"""
     ### Arrange ###
-    database = AssetsDatabase("IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}")
+    database = AssetsDatabase("IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN"))
     some_schema = AssetsSchema(database=database, schema_name="SOME_SCHEMA", comment=f"pyflake_client_TEST_{uuid.uuid4()}")
     another_schema = AssetsSchema(database=database, schema_name="ANOTHER_SCHEMA", comment=f"pyflake_client_TEST_{uuid.uuid4()}")
 

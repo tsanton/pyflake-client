@@ -3,6 +3,7 @@
 import os
 import queue
 import uuid
+from typing import Generator
 
 import pytest
 import snowflake.connector
@@ -10,12 +11,12 @@ from snowflake.connector import SnowflakeConnection
 
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as AssetsDatabase
-from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.role import Role as AssetsRole
 
 
 # https://docs.pytest.org/en/6.2.x/fixture.html#fixture-scopes
 @pytest.fixture(scope="session")
-def flake() -> None:
+def flake() -> Generator:
     """flake"""
 
     conn: SnowflakeConnection = snowflake.connector.connect(
@@ -36,7 +37,7 @@ def flake() -> None:
 
 
 @pytest.fixture(scope="function")
-def assets_queue() -> None:
+def assets_queue() -> queue.LifoQueue:
     """assets_queue"""
     return queue.LifoQueue()
 
@@ -44,7 +45,7 @@ def assets_queue() -> None:
 @pytest.fixture(scope="function")
 def db_asset_fixture() -> AssetsDatabase:
     database: AssetsDatabase = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN")
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
     )
     return database
 

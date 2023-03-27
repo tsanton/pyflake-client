@@ -10,7 +10,7 @@ from pyflake_client.models.assets.database import Database as AssetsDatabase
 from pyflake_client.models.entities.database import Database as EntitiesDatabase
 from pyflake_client.models.describables.database import Database as DescribablesDatabase
 
-from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.role import Role as AssetsRole
 
 
 def test_create_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
@@ -18,7 +18,7 @@ def test_create_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 
     ### Arrange ###
     database: AssetsDatabase = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN")
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
     )
 
     try:

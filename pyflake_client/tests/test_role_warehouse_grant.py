@@ -18,7 +18,7 @@ from pyflake_client.models.describables.warehouse import Warehouse as WarehouseD
 def test_grant_role_warehouse_privileges(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_grant_role_warehouse_privileges"""
     ### Arrange ###
-    role = AssetsRole("IGT_CREATE_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
+    role = AssetsRole("IGT_CREATE_ROLE", AssetsRole("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
     warehouse: WarehouseAsset = WarehouseAsset("IGT_DEMO_WH", f"pyflake_client_TEST_{uuid.uuid4()}")
     privilege = GrantAsset(RoleWarehouseGrant(role.name, warehouse.warehouse_name), ["USAGE"])
 

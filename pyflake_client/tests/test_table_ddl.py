@@ -9,11 +9,10 @@ from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.assets.table import Column, Table as TableAsset
 
 
-def test_create_simple_table_ddl():
+def test_create_simple_table_ddl(db_asset_fixture: Database):
     """test_create_simple_table_ddl"""
     ### Arrange ###
-    db = Database("IGT_DEMO", "DB")
-    schema = Schema(database=db, schema_name="S1", comment="SCHEMA")
+    schema = Schema(database=db_asset_fixture, schema_name="S1", comment="SCHEMA")
     table = TableAsset(schema, "TEST", [Column("ID", ColumnType.INTEGER, identity=True)])
 
     ### Act ###
@@ -22,11 +21,10 @@ def test_create_simple_table_ddl():
     assert definition == """create or replace table IGT_DEMO.S1.TEST(ID INTEGER IDENTITY (1,1) NOT NULL)"""
 
 
-def test_create_complex_table_ddl():
+def test_create_complex_table_ddl(db_asset_fixture: Database):
     """test_create_complex_table_ddl"""
     ### Arrange ###
-    db = Database("IGT_DEMO", "DB")
-    schema = Schema(database=db, schema_name="S1", comment="SCHEMA")
+    schema = Schema(database=db_asset_fixture, schema_name="S1", comment="SCHEMA")
     table = TableAsset(schema, "TEST", [
         Column("ID", ColumnType.INTEGER, identity=True),
         Column("VARCHAR_NO_DEFAULT", ColumnType.VARCHAR),
@@ -39,11 +37,10 @@ def test_create_complex_table_ddl():
     assert definition == "create or replace table IGT_DEMO.S1.TEST(ID INTEGER IDENTITY (1,1) NOT NULL, VARCHAR_NO_DEFAULT VARCHAR(16777216) NOT NULL, VARCHAR_DEFAULT VARCHAR(16777216) NOT NULL DEFAULT 'YES')"
 
 
-def test_create_complex_table_with_primary_key_ddl():
+def test_create_complex_table_with_primary_key_ddl(db_asset_fixture: Database):
     """test_create_complex_table_ddl"""
     ### Arrange ###
-    db = Database("IGT_DEMO", "DB")
-    schema = Schema(database=db, schema_name="S1", comment="SCHEMA")
+    schema = Schema(database=db_asset_fixture, schema_name="S1", comment="SCHEMA")
     table = TableAsset(schema, "TEST", [
         Column("ID", ColumnType.INTEGER, identity=True),
         Column("VARCHAR_NO_DEFAULT", ColumnType.VARCHAR, primary_key=True),
@@ -56,13 +53,12 @@ def test_create_complex_table_with_primary_key_ddl():
     assert definition == "create or replace table IGT_DEMO.S1.TEST(ID INTEGER IDENTITY (1,1) NOT NULL, VARCHAR_NO_DEFAULT VARCHAR(16777216) NOT NULL, VARCHAR_DEFAULT VARCHAR(16777216) NOT NULL, PRIMARY KEY(VARCHAR_NO_DEFAULT,VARCHAR_DEFAULT))"
 
 
-def test_create_simple_table_with_default_date_ddl():
+def test_create_simple_table_with_default_date_ddl(db_asset_fixture: Database):
     """test_create_simple_table_ddl
     insert into <DB>.<SCHEMA>.TEST (SOME_DATE) values(default);
     """
     ### Arrange ###
-    db = Database("IGT_DEMO", "DB")
-    schema = Schema(database=db, schema_name="S1", comment="SCHEMA")
+    schema = Schema(database=db_asset_fixture, schema_name="S1", comment="SCHEMA")
     table = TableAsset(schema, "TEST", [
         Column("ID", ColumnType.INTEGER, identity=True),
         Column("SOME_DATE", ColumnType.DATE, default_value=date(2000, 1, 1)),
@@ -74,13 +70,12 @@ def test_create_simple_table_with_default_date_ddl():
     assert definition == """create or replace table IGT_DEMO.S1.TEST(ID INTEGER IDENTITY (1,1) NOT NULL, SOME_DATE DATE NOT NULL DEFAULT '2000-01-01'::date)"""
 
 
-def test_create_simple_table_with_default_datetime_ddl():
+def test_create_simple_table_with_default_datetime_ddl(db_asset_fixture: Database):
     """test_create_simple_table_ddl
     insert into <DB>.<SCHEMA>.TEST (SOME_DATETIME) values(default);
     """
     ### Arrange ###
-    db = Database("IGT_DEMO", "DB")
-    schema = Schema(database=db, schema_name="S1", comment="SCHEMA")
+    schema = Schema(database=db_asset_fixture, schema_name="S1", comment="SCHEMA")
     table = TableAsset(schema, "TEST", [
         Column("ID", ColumnType.INTEGER, identity=True),
         Column("SOME_DATETIME", ColumnType.TIMESTAMP, default_value=datetime(2000, 1, 1)),

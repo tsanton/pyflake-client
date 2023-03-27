@@ -54,8 +54,8 @@ class PyflakeClient:
 
     def register_asset(self, obj: ISnowflakeAsset, asset_queue: queue.LifoQueue) -> None:
         """register_asset"""
-        asset_queue.put(obj)
         self._create_asset(obj)
+        asset_queue.put(obj)
 
     def _create_asset(self, obj: ISnowflakeAsset):
         """create_asset"""
