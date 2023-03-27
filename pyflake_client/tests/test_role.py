@@ -8,7 +8,7 @@ from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.role import Role as AssetsRole
 from pyflake_client.models.describables.role import Role as DescribablesRole
 from pyflake_client.models.entities.role import Role as EntitiesRole
-from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.role import Role as AssetsRole
 
 
 def test_create_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
@@ -16,7 +16,7 @@ def test_create_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     ### Arrange ###
     role: AssetsRole = AssetsRole(
         name="IGT_CREATE_ROLE",
-        owner=RoleAsset("USERADMIN"),
+        owner=AssetsRole("USERADMIN"),
         comment=f"pyflake_client_TEST_{uuid.uuid4()}",
     )
 

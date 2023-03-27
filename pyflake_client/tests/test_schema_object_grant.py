@@ -51,7 +51,7 @@ def test_create_table_with_future_privileges(flake: PyflakeClient, assets_queue:
     """test_create_table_with_future_privileges"""
     ### Arrange ###
     d, s1, _ = _spawn_database_and_schema(flake, assets_queue)
-    role: Role = Role(f"{d.db_name}_{s1.schema_name}_ACCESS_ROLE_R", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
+    role: Role = Role(f"{d.db_name}_{s1.schema_name}_ACCESS_ROLE_R", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
     role_privileges = ["SELECT", "REFERENCES", "OWNERSHIP"]
     role_grant = GrantAsset(RoleSchemaFutureGrantAsset(role.name, d.db_name, s1.schema_name, ObjectType.TABLE), role_privileges)
     role_relationship = RoleRelationship(role.name, "SYSADMIN")

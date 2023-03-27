@@ -10,7 +10,7 @@ from pyflake_client.models.describables.database_role import (
     DatabaseRole as DescribablesRole,
 )
 from pyflake_client.models.entities.role import Role as EntitiesRole
-from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.role import Role as AssetsRole
 from pyflake_client.models.assets.database import Database as AssetsDatabase
 
 
@@ -24,7 +24,7 @@ def test_create_database_role(
     role: DatabaseRole = DatabaseRole(
         name="IGT_CREATE_ROLE",
         database_name=db_asset_fixture.db_name,
-        owner=RoleAsset("USERADMIN"),
+        owner=AssetsRole("USERADMIN"),
         comment=f"pyflake_client_TEST_{uuid.uuid4()}",
     )
 

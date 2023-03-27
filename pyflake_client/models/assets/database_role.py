@@ -1,27 +1,44 @@
-"""role"""
+"""database_role"""
 from dataclasses import dataclass
+from typing import Union
 
-from dacite import Config
-
-from pyflake_client.models.describables.snowflake_describable_interface import (
-    ISnowflakeDescribable,
+from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
+from pyflake_client.models.assets.grants.snowflake_principle_interface import (
+    ISnowflakePrinciple,
 )
+from pyflake_client.models.assets.role import Role as AccountRole
 
 
 @dataclass(frozen=True)
-class DatabaseRole(ISnowflakeDescribable):
-    """Role"""
+class DatabaseRole(ISnowflakeAsset, ISnowflakePrinciple):
+    """DatabaseRole"""
 
     name: str
-    db_name: str
+    database_name: str
+    owner: Union[ISnowflakePrinciple, None] = None
+    comment: str = ""
 
-    def get_describe_statement(self) -> str:
-        """get_describe_statement"""
-        return f"SHOW DATABASE ROLES LIKE '{self.name}' IN DATABASE {self.db_name};".upper()
+    def get_create_statement(self) -> str:
+        """get_create_statement"""
+        if self.owner is None:
+            raise ValueError("Create statement not supported for owner-less roles")
 
-    def is_procedure(self) -> bool:
-        """is_procedure"""
-        return False
+        if isinstance(self.owner, DatabaseRole):
+            role_type = "DATABASE ROLE"
+        elif isinstance(self.owner, AccountRole):
+            role_type = "ROLE"
+        else:
+            raise NotImplementedError(
+                "Ownership is not implementer for this interface type"
+            )
 
-    def get_dacite_config(self) -> Config:
-        return None
+        return f"""CREATE OR REPLACE DATABASE ROLE  {self.database_name}.{self.name} COMMENT = '{self.comment}';
+                   GRANT OWNERSHIP ON DATABASE ROLE {self.database_name}.{self.name} TO {role_type} {self.owner.get_identifier()}
+                    REVOKE CURRENT GRANTS;"""
+
+    def get_delete_statement(self) -> str:
+        """get_delete_statement"""
+        return f"DROP DATABASE ROLE IF EXISTS {self.database_name}.{self.name}"
+
+    def get_identifier(self) -> str:
+        return self.name

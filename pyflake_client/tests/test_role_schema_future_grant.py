@@ -20,7 +20,7 @@ def test_create_future_schema_table_privilege(flake: PyflakeClient, assets_queue
     """test_create_future_schema_table_privilege"""
     ### Arrange ###
     d, s1, _ = _spawn_database_and_schema(flake, assets_queue)
-    role: Role = Role(f"{d.db_name}_{s1.schema_name}_ACCESS_ROLE_R", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
+    role: Role = Role(f"{d.db_name}_{s1.schema_name}_ACCESS_ROLE_R", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
     privilege = GrantAsset(RoleSchemaFutureGrantAsset(role.name, d.db_name, s1.schema_name, ObjectType.TABLE), ["SELECT", "REFERENCES"])
 
     try:
@@ -46,7 +46,7 @@ def test_create_multiple_future_schema_table_privilege(flake: PyflakeClient, ass
     """test_create_multiple_future_schema_table_privilege"""
     ### Arrange ###
     d, s1, s2 = _spawn_database_and_schema(flake, assets_queue)
-    role: Role = Role(f"{d.db_name}_{s1.schema_name}_ACCESS_ROLE_R", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
+    role: Role = Role(f"{d.db_name}_{s1.schema_name}_ACCESS_ROLE_R", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
     privilege1 = GrantAsset(RoleSchemaFutureGrantAsset(role.name, d.db_name, s1.schema_name, ObjectType.TABLE), ["SELECT", "REFERENCES"])
     privilege2 = GrantAsset(RoleSchemaFutureGrantAsset(role.name, d.db_name, s2.schema_name, ObjectType.TABLE), ["SELECT"])
 

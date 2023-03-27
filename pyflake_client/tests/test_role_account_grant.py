@@ -14,7 +14,7 @@ from pyflake_client.models.entities.grants.role_grant import RoleGrants as RoleG
 def test_grant_role_account_privilege(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_grant_role_account_privilege"""
     ### Arrange ###
-    role = AssetsRole("IGT_CREATE_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
+    role = AssetsRole("IGT_CREATE_ROLE", AssetsRole("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
     privilege = GrantAsset(RoleAccountGrant(role.name), ["CREATE ACCOUNT"])
 
     try:
@@ -40,7 +40,7 @@ def test_grant_role_account_privilege(flake: PyflakeClient, assets_queue: queue.
 def test_grant_role_account_privileges(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_grant_role_account_privileges"""
     ### Arrange ###
-    role = AssetsRole("IGT_CREATE_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
+    role = AssetsRole("IGT_CREATE_ROLE", AssetsRole("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
     privilege = GrantAsset(RoleAccountGrant(role.name), ["CREATE ACCOUNT", "CREATE USER"])
 
     try:

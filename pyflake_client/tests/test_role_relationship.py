@@ -25,8 +25,8 @@ def test_get_role_relationship(flake: PyflakeClient):
 def test_create_role_relationship(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role_relationship"""
     ### Arrange ###
-    child_role: Role = Role("IGT_CHILD_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
-    parent_role: Role = Role("IGT_PARENT_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
+    child_role: Role = Role("IGT_CHILD_ROLE", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
+    parent_role: Role = Role("IGT_PARENT_ROLE", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
     try:
         flake.register_asset(child_role, assets_queue)
         flake.register_asset(parent_role, assets_queue)
@@ -48,8 +48,8 @@ def test_create_role_relationship(flake: PyflakeClient, assets_queue: queue.Lifo
 def test_delete_role_relationship(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role_relationship"""
     ### Arrange ###
-    child_role: Role = Role("IGT_CHILD_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
-    parent_role: Role = Role("IGT_PARENT_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
+    child_role: Role = Role("IGT_CHILD_ROLE", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
+    parent_role: Role = Role("IGT_PARENT_ROLE", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
     relationship = RoleRelationshipAsset(child_role.name, parent_role.name)
     relationship_describable = RoleRelationshipDescribable(child_role.name, parent_role.name)
     try:
