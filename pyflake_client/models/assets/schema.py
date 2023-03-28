@@ -2,7 +2,7 @@
 # pylint: disable=line-too-long
 from dataclasses import dataclass
 from pyflake_client.models.assets.database import Database
-from pyflake_client.models.assets.grants.snowflake_principle_interface import ISnowflakePrinciple
+from pyflake_client.models.assets.grants.snowflake_principle_interface import ISnowflakePrincipal
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 
 
@@ -12,7 +12,7 @@ class Schema(ISnowflakeAsset):
     database: Database
     schema_name: str
     comment: str
-    owner: ISnowflakePrinciple
+    owner: ISnowflakePrincipal
 
     def get_create_statement(self):
         """get_create_statement"""

@@ -16,8 +16,8 @@ def test_create_schema(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_schema"""
     ### Arrange ###
     database = AssetsDatabase("IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN"))
-    some_schema = AssetsSchema(database=database, schema_name="SOME_SCHEMA", comment=f"pyflake_client_TEST_{uuid.uuid4()}")
-    another_schema = AssetsSchema(database=database, schema_name="ANOTHER_SCHEMA", comment=f"pyflake_client_TEST_{uuid.uuid4()}")
+    some_schema = AssetsSchema(database=database, schema_name="SOME_SCHEMA", comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN"))
+    another_schema = AssetsSchema(database=database, schema_name="ANOTHER_SCHEMA", comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN"))
 
     try:
         flake.register_asset(database, assets_queue)

@@ -3,14 +3,14 @@ from dataclasses import dataclass
 from typing import Union
 
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.assets.grants.snowflake_principle_interface import ISnowflakePrinciple
+from pyflake_client.models.assets.grants.snowflake_principle_interface import ISnowflakePrincipal
 
 
 @dataclass(frozen=True)
-class Role(ISnowflakeAsset, ISnowflakePrinciple):
+class Role(ISnowflakeAsset, ISnowflakePrincipal):
     """Role"""
     name: str
-    owner: Union[ISnowflakePrinciple, None] = None
+    owner: Union[ISnowflakePrincipal, None] = None
     comment: str = ""
 
     def get_create_statement(self) -> str:

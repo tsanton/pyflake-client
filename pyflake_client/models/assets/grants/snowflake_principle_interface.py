@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-class ISnowflakePrinciple(ABC):
+class ISnowflakePrincipal(ABC):
     """ISnowflakePrinciple"""
     @abstractmethod
     def get_identifier(self) -> str:

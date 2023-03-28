@@ -21,7 +21,7 @@ def test_grant_role_future_schema_privilege(
     ):
     """test_grant_role_future_schema_privilege"""
     ### Arrange ###
-    schema = AssetsSchema(database=db_asset_fixture, schema_name="IGT_SCHEMA", comment=f"pyflake_client_TEST_{uuid.uuid4()}")
+    schema = AssetsSchema(database=db_asset_fixture, schema_name="IGT_SCHEMA", comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN"))
     role = AssetsRole("IGT_CREATE_ROLE", AssetsRole("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
     privilege = GrantAsset(RoleSchemaFutureGrant(role.name, db_asset_fixture.db_name, schema.schema_name, ObjectType.TABLE), ["SELECT"])
 
@@ -54,7 +54,7 @@ def test_grant_role_schema_privileges(
     ):
     """test_grant_role_schema_privileges"""
     ### Arrange ###
-    schema = AssetsSchema(database=db_asset_fixture, schema_name="IGT_SCHEMA", comment=f"pyflake_client_TEST_{uuid.uuid4()}")
+    schema = AssetsSchema(database=db_asset_fixture, schema_name="IGT_SCHEMA", comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN"))
     role = AssetsRole("IGT_CREATE_ROLE", AssetsRole("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
     p1 = GrantAsset(RoleSchemaFutureGrant(role.name, db_asset_fixture.db_name, schema.schema_name, ObjectType.TABLE), ["SELECT", "UPDATE"])
     p2 = GrantAsset(RoleSchemaFutureGrant(role.name, db_asset_fixture.db_name, schema.schema_name, ObjectType.VIEW),  ["SELECT", "REFERENCES"])
