@@ -1,71 +1,12 @@
 """table"""
 # pylint: disable=line-too-long
 from dataclasses import dataclass
-from typing import List, Any
-import re
-from datetime import date, datetime
+from typing import List, Union
 
-from pyflake_client.models.enums.column_type import ColumnType
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-
-
-@dataclass(frozen=True)
-class Column:
-    """Column"""
-    name: str
-    type: ColumnType
-    not_null: bool = True
-    primary_key: bool = False
-    unique: bool = False
-    identity: bool = False
-    default_value: Any = None
-
-    def to_snowflake_column(self) -> str:
-        """to_snowflake_column"""
-        output: str = f"{self.name} "
-        default_value = None
-        # Not using match self.type: for python 3.8 compatability
-        if self.type == ColumnType.INTEGER:
-            output += f"INTEGER {'IDENTITY (1,1)' if self.identity else '' } %s %s %s"
-            default_value = self.default_value
-        elif self.type == ColumnType.VARCHAR:
-            output += "VARCHAR(16777216) %s %s %s"
-            default_value = f"'{self.default_value}'" if self.default_value is not None else None
-        elif self.type == ColumnType.BOOLEAN:
-            output += "BOOLEAN %s %s %s"
-            default_value = self.default_value
-        elif self.type == ColumnType.NUMBER:
-            output += "NUMBER(38,37) %s %s %s"
-            default_value = self.default_value
-        elif self.type == ColumnType.FLOAT:
-            output += "FLOAT %s %s %s"
-            default_value = self.default_value
-        elif self.type == ColumnType.DATE:
-            output += "DATE %s %s %s"
-            default_value = None
-            if self.default_value is not None:
-                assert isinstance(self.default_value, date)
-                default_value = f"'{self.default_value.strftime('%Y-%m-%d')}'::date"
-        elif self.type == ColumnType.TIMESTAMP:
-            output += "TIMESTAMP_NTZ(2) %s %s %s"
-            default_value = None
-            if self.default_value is not None:
-                assert isinstance(self.default_value, datetime)
-                default_value = f"'{self.default_value.strftime('%Y-%m-%dT%H:%M:%S.%f%z')}'::TIMESTAMP_NTZ(2)"
-        elif self.type == ColumnType.ARRAY:
-            raise NotImplementedError("ARRAY not tested and implemented")
-        elif self.type == ColumnType.OBJECT:
-            raise NotImplementedError("OBJECT not tested and implemented")
-        elif self.type == ColumnType.VARIANT:
-            output += "VARIANT %s %s %s"
-            default_value = self.default_value
-
-        return re.sub(" +", " ", output % (
-            "NOT NULL" if self.not_null else "",
-            "UNIQUE" if self.unique else "",
-            "DEFAULT " + default_value if default_value is not None else ''
-        )).rstrip()
+from pyflake_client.models.assets.table_columns import Column
+from pyflake_client.models.assets.grants.snowflake_principle_interface import ISnowflakePrincipal
 
 
 @dataclass(frozen=True)
@@ -74,15 +15,19 @@ class Table(ISnowflakeAsset):
     schema: Schema
     table_name: str
     columns: List[Column]
-    owner: str = None
+    owner: ISnowflakePrincipal
 
     def get_create_statement(self) -> str:
-        base = f"create or replace table {self.schema.database.db_name}.{self.schema.schema_name}.{self.table_name}"
-        columns = ", ".join(x.to_snowflake_column() for x in self.columns)
-        pk_columns = [x.name for x in self.columns if x.primary_key]
-        primary_key = "PRIMARY KEY(" + ",".join(pk_columns) + ")" if len(pk_columns) > 0 else None
-        # TODO: add ownership if not none
-        return base + "(" + columns + (f", {primary_key}" if primary_key is not None else "") + ")"
+        primary_keys = [c.name for c in self.columns if c.primary_key]
+
+        table_definition = f"CREATE OR REPLACE TABLE {self.schema.database.db_name}.{self.schema.schema_name}.{self.table_name}"
+        table_definition += f" ({','.join(c.get_definition() for c in self.columns)}"
+        if len(primary_keys) > 0:
+            table_definition += f", PRIMARY KEY({','.join(primary_keys)})"
+        
+        table_definition += ")"
+        return table_definition
+
 
     def get_delete_statement(self) -> str:
         """get_delete_ddl"""

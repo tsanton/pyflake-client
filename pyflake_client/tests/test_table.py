@@ -4,7 +4,8 @@
 import queue
 import uuid
 
-from pyflake_client.models.assets.table import Column, Table as TableAsset
+from pyflake_client.models.assets.table import Table as TableAsset
+from pyflake_client.models.assets.table_columns import Column, Number, Varchar, Identity
 from pyflake_client.models.entities.table import Table as TableEntity
 from pyflake_client.models.describables.table import Table as TableDescribable
 from pyflake_client.models.enums.column_type import ColumnType
@@ -17,12 +18,22 @@ from pyflake_client.client import PyflakeClient
 def test_create_table(flake: PyflakeClient, assets_queue: queue.LifoQueue, db_asset_fixture: Database):
     """test_create_table"""
     ### Arrange ###
-    schema: Schema = Schema(database=db_asset_fixture, schema_name="SOME_SCHEMA", comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN"))
-    table = TableAsset(schema, "TEST", [
-        Column("ID", ColumnType.INTEGER, identity=True),
-        Column("SOME_VARCHAR", ColumnType.VARCHAR, primary_key=True)
-    ])
-
+    schema: Schema = Schema(
+        database=db_asset_fixture,
+        schema_name="SOME_SCHEMA",
+        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
+        owner=AssetsRole("SYSADMIN")
+    )
+    columns = [
+        Number("ID", identity=Identity(1,1)),
+        Varchar("SOME_VARCHAR", primary_key=True)
+    ]
+    table = TableAsset(
+        schema=schema,
+        table_name="TEST",
+        columns=columns,
+        owner=AssetsRole("SYSADMIN")
+    )
     try:
         flake.register_asset(db_asset_fixture, assets_queue)
         flake.register_asset(schema, assets_queue)
