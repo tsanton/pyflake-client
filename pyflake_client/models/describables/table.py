@@ -20,6 +20,8 @@ class Table(ISnowflakeDescribable):
     name: str
 
     def get_describe_statement(self) -> str:
+        # TODO formatting with .format
+
         return f"""
 with show_table_description as procedure(db_name varchar, schema_name varchar, table_name varchar)
     returns variant not null

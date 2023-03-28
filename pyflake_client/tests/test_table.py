@@ -33,6 +33,7 @@ def test_create_table(
     table = TableAsset(
         schema=schema, table_name="TEST", columns=columns, owner=AssetsRole("SYSADMIN")
     )
+
     try:
         flake.register_asset(db_asset_fixture, assets_queue)
         flake.register_asset(schema, assets_queue)

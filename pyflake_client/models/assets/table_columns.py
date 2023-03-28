@@ -1,6 +1,6 @@
 from abc import abstractmethod, ABC
 from dataclasses import dataclass, field
-from datetime import date, time
+from datetime import date, time, datetime
 from decimal import Decimal
 from typing import List, Union
 import re
@@ -125,7 +125,7 @@ class Number(Column):
         if self.default_value is not None:
             definition += f" DEFAULT {self.default_value}"
         if self.identity is not None:
-            definition += f" IDENTITY({self.identity.start_number},{self.identity.increment_number})"
+            definition += f" IDENTITY ({self.identity.start_number},{self.identity.increment_number})"
         if self.sequence is not None:
             raise NotImplementedError("Sequences are not supported as of now")
         if self.foreign_key is not None:
@@ -195,7 +195,7 @@ class Bool(Column):
 
 @dataclass
 class Date(Column):
-    default_value: Union[date, str, None] = None
+    default_value: Union[date, None] = None
 
     def post_init(self) -> None:
         return super().post_init()
@@ -207,7 +207,7 @@ class Date(Column):
         if self.unique:
             definition += " UNIQUE"
         if self.default_value is not None:
-            definition += f" DEFAULT {self.default_value}"
+            definition += f" DEFAULT '{self.default_value.strftime('%Y-%m-%d')}'::date"
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
 
@@ -216,7 +216,7 @@ class Date(Column):
 
 @dataclass
 class Time(Column):
-    default_value: Union[time, str, None] = None
+    default_value: Union[time, None] = None
     precision: int = 0
 
     def post_init(self) -> None:
@@ -230,7 +230,7 @@ class Time(Column):
         if self.unique:
             definition += " UNIQUE"
         if self.default_value is not None:
-            definition += f" DEFAULT {self.default_value}"
+            definition += f" DEFAULT {self.default_value.strftime('%H:%M:%S')}"
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
 
@@ -239,12 +239,18 @@ class Time(Column):
 
 @dataclass
 class Timestamp(Column):
-    default_value: Union[float, str, None] = None  # TODO type ??
+    default_value: Union[datetime, None] = None
     precision: int = 0
 
     def post_init(self) -> None:
         if self.precision < 0 or self.precision > 10:
             raise ValueError("TIMESTAMP precision must be between 0 and 9")
+        if self.default_value is not None and (
+            self.default_value.year > 9999 or self.default_value.year < 1582
+        ):
+            raise ValueError(
+                f"TIMESTAMP year must be between 1582 and 9999 (was {self.default_value.year})"
+            )
 
     def get_definition(self) -> str:
         definition = f"{self.name} TIMESTAMP({self.precision})"
@@ -253,7 +259,7 @@ class Timestamp(Column):
         if self.unique:
             definition += " UNIQUE"
         if self.default_value is not None:
-            definition += f" DEFAULT {self.default_value}"
+            definition += f" DEFAULT '{self.default_value.strftime('%Y-%m-%dT%H:%M:%S.%f')}'::TIMESTAMP_NTZ(2)"
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
 
