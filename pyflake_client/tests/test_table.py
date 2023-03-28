@@ -15,24 +15,23 @@ from pyflake_client.models.assets.schema import Schema
 from pyflake_client.client import PyflakeClient
 
 
-def test_create_table(flake: PyflakeClient, assets_queue: queue.LifoQueue, db_asset_fixture: Database):
+def test_create_table(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, db_asset_fixture: Database
+):
     """test_create_table"""
     ### Arrange ###
     schema: Schema = Schema(
         database=db_asset_fixture,
         schema_name="SOME_SCHEMA",
         comment=f"pyflake_client_TEST_{uuid.uuid4()}",
-        owner=AssetsRole("SYSADMIN")
+        owner=AssetsRole("SYSADMIN"),
     )
     columns = [
-        Number("ID", identity=Identity(1,1)),
-        Varchar("SOME_VARCHAR", primary_key=True)
+        Number("ID", identity=Identity(1, 1)),
+        Varchar("SOME_VARCHAR", primary_key=True),
     ]
     table = TableAsset(
-        schema=schema,
-        table_name="TEST",
-        columns=columns,
-        owner=AssetsRole("SYSADMIN")
+        schema=schema, table_name="TEST", columns=columns, owner=AssetsRole("SYSADMIN")
     )
     try:
         flake.register_asset(db_asset_fixture, assets_queue)
@@ -40,7 +39,12 @@ def test_create_table(flake: PyflakeClient, assets_queue: queue.LifoQueue, db_as
         flake.register_asset(table, assets_queue)
 
         ### Act ###
-        t: TableEntity = flake.describe(TableDescribable(db_asset_fixture.db_name, schema.schema_name, table.table_name), TableEntity)
+        t: TableEntity = flake.describe(
+            TableDescribable(
+                db_asset_fixture.db_name, schema.schema_name, table.table_name
+            ),
+            TableEntity,
+        )
 
         ### Assert ###
         assert t.name == table.table_name
