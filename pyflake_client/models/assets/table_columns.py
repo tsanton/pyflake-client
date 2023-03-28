@@ -1,9 +1,10 @@
-
 from abc import abstractmethod, ABC
 from dataclasses import dataclass, field
+from datetime import date, time
 from decimal import Decimal
 from typing import List, Union
 import re
+
 
 @dataclass
 class ClassificationTag:
@@ -44,6 +45,7 @@ class Column(ABC):
     """base class for all snowflake column classes
     if the inheriting class has the @dataclass decorator,
     it must also provide a default value for every field"""
+
     name: str
     primary_key: bool = False
     not_null: bool = False
@@ -56,14 +58,15 @@ class Column(ABC):
         Must begin with a letter or underscore.
         Must be less than the maximum length of 251 characters"""
         if re.match(r"^[a-zA-Z_][a-zA-Z0-9_]{0,250}$", self.name) is None:
-            raise ValueError("Invalid name, column name must match ^[a-zA-Z_][a-zA-Z0-9_]{0,250}$")
-        
-        # TODO : how can we check if the foreign_key is valid? probably not here ...
-        self.check_constraints()
+            raise ValueError(
+                "Invalid name, column name must match ^[a-zA-Z_][a-zA-Z0-9_]{0,250}$"
+            )
 
+        # TODO : how can we check if the foreign_key is valid? probably not here ...
+        self.post_init()
 
     @abstractmethod
-    def check_constraints(self):
+    def post_init(self) -> None:
         ...
 
     @abstractmethod
@@ -77,7 +80,7 @@ class Varchar(Column):
     collation: Union[str, None] = None
     default_value: Union[str, None] = None
 
-    def check_constraints(self):
+    def post_init(self):
         if self.length < 0 or self.length > 16777216:
             raise ValueError("Varchar length must be >= 0 and <= 16777216")
 
@@ -107,12 +110,11 @@ class Number(Column):
     identity: Union[Identity, None] = None
     sequence: Union[Sequence, None] = None
 
-    def check_constraints(self):
+    def post_init(self):
         if self.precision > 38 or self.precision < 0:
             raise ValueError("Precision must be between 1 and 38")
         if self.scale > 37 or self.scale < 0:
             raise ValueError("Scale must be between 0 and 37")
-        
 
     def get_definition(self) -> str:
         definition = f"{self.name} NUMBER({self.precision},{self.scale})"
@@ -128,26 +130,32 @@ class Number(Column):
             raise NotImplementedError("Sequences are not supported as of now")
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
-        
+
         return definition
-    
-class Int:
-    """template for how to implement the other numeric types
+
+
+class Integer:
+    """
+    Integer (and similar classes) are all implemented as NUMBER in snowflake
+    this class does the same by calling the __new__ method and returning
+    a Number with hardcoded values for precision and scale
     NUMBER
     DECIMAL
     INT, INTEGER, BIGINT, SMALLINT
-    are all of type NUMBER in snowflake"""
+    are all of type NUMBER in snowflake
+    """
+
     def __new__(
-            cls,
-            name,
-            primary_key=False,
-            not_null=False,
-            unique=False,
-            tags=[],
-            foreign_key=None,
-            default_value=None,
-            identity=None,
-            sequence=None,
+        cls,
+        name,
+        primary_key=False,
+        not_null=False,
+        unique=False,
+        tags=[],
+        foreign_key=None,
+        default_value=None,
+        identity=None,
+        sequence=None,
     ):
         return Number(
             name=name,
@@ -160,34 +168,114 @@ class Int:
             precision=38,
             scale=0,
             identity=identity,
-            sequence=sequence
+            sequence=sequence,
         )
-    
-if __name__ == "__main__":
-    vc = Varchar(
-        name="my_new_varchar",
-        primary_key=False,
-        not_null=False,
-        unique=True,
-        tags=[],
-        length=1
-    )
-    l: List[Column] = [vc]
-    print(vc.get_definition())
-    i = Int("my_int")
-    print(i.get_definition())
-    try:
-        vc2 = Varchar(name="1_bla", primary_key=False, not_null=False, unique=True, tags=[], length=123)
-    except ValueError as ex:
-        print(ex)
 
-    try:
-        vc2 = Varchar(name="_bla", primary_key=False, not_null=False, unique=True, tags=[], length=9999999999999999999)
-    except ValueError as ex:
-        print(ex)
 
-    print(vc.get_definition())
-    n = Number(name="my_number", primary_key=False, not_null=True, unique=True, precision=25, scale=13, default_value=Decimal(1.00001))
-    print(n.get_definition())
+@dataclass
+class Bool(Column):
+    default_value: Union[bool, None] = None
 
-   
+    def post_init(self) -> None:
+        return super().post_init()
+
+    def get_definition(self) -> str:
+        definition = f"{self.name} BOOLEAN"
+        if self.not_null:
+            definition += " NOT NULL"
+        if self.unique:
+            definition += " UNIQUE"
+        if self.default_value is not None:
+            definition += f" DEFAULT {self.default_value}"
+        if self.foreign_key is not None:
+            raise NotImplementedError("Foreign Keys not supported as of now")
+
+        return definition
+
+
+@dataclass
+class Date(Column):
+    default_value: Union[date, str, None] = None
+
+    def post_init(self) -> None:
+        return super().post_init()
+
+    def get_definition(self) -> str:
+        definition = f"{self.name} DATE"
+        if self.not_null:
+            definition += " NOT NULL"
+        if self.unique:
+            definition += " UNIQUE"
+        if self.default_value is not None:
+            definition += f" DEFAULT {self.default_value}"
+        if self.foreign_key is not None:
+            raise NotImplementedError("Foreign Keys not supported as of now")
+
+        return definition
+
+
+@dataclass
+class Time(Column):
+    default_value: Union[time, str, None] = None
+    precision: int = 0
+
+    def post_init(self) -> None:
+        if self.precision < 0 or self.precision > 10:
+            raise ValueError("TIME precision must be between 0 and 9")
+
+    def get_definition(self) -> str:
+        definition = f"{self.name} TIME({self.precision})"
+        if self.not_null:
+            definition += " NOT NULL"
+        if self.unique:
+            definition += " UNIQUE"
+        if self.default_value is not None:
+            definition += f" DEFAULT {self.default_value}"
+        if self.foreign_key is not None:
+            raise NotImplementedError("Foreign Keys not supported as of now")
+
+        return definition
+
+
+@dataclass
+class Timestamp(Column):
+    default_value: Union[float, str, None] = None  # TODO type ??
+    precision: int = 0
+
+    def post_init(self) -> None:
+        if self.precision < 0 or self.precision > 10:
+            raise ValueError("TIMESTAMP precision must be between 0 and 9")
+
+    def get_definition(self) -> str:
+        definition = f"{self.name} TIMESTAMP({self.precision})"
+        if self.not_null:
+            definition += " NOT NULL"
+        if self.unique:
+            definition += " UNIQUE"
+        if self.default_value is not None:
+            definition += f" DEFAULT {self.default_value}"
+        if self.foreign_key is not None:
+            raise NotImplementedError("Foreign Keys not supported as of now")
+
+        return definition
+
+
+@dataclass
+class Variant(Column):
+    default_value: Union[str, None] = None
+
+    def post_init(self) -> None:
+        return super().post_init()
+
+    def get_definition(self) -> str:
+        definition = f"{self.name} VARIANT"
+        if self.not_null:
+            definition += " NOT NULL"
+        if self.unique:
+            definition += " UNIQUE"
+        if self.default_value is not None:
+            definition += f" DEFAULT {self.default_value}"
+        if self.foreign_key is not None:
+            raise NotImplementedError("Foreign Keys not supported as of now")
+
+        return definition
