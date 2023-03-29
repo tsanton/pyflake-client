@@ -19,7 +19,7 @@ from pyflake_client.models.assets.table_columns import Number, Varchar, Identity
 TABLE_NAME = "merge_table"
 TABLE_COLUMN_DEFINITION = [
     Number("id", identity=Identity(1, 1)),
-    Varchar("the_primary_key", primary_key=True)
+    Varchar("the_primary_key", primary_key=True),
     # TODO once table and columns is complete
     # Column("id", ColumnType.INTEGER, identity=True),
     # Column("the_primary_key", ColumnType.VARCHAR, primary_key=True),

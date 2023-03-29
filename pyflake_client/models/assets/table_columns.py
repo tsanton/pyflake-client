@@ -91,7 +91,7 @@ class Varchar(Column):
         if self.unique:
             definition += " UNIQUE"
         if self.default_value is not None:
-            definition += f" DEFAULT '{self.default_value}'"
+            definition += f" DEFAULT '{self.default_value}"
         if self.collation is not None:
             definition += f" COLLATE '{self.collation}'"
         if self.foreign_key is not None:
