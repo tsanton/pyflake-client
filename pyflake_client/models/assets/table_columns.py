@@ -48,7 +48,7 @@ class Column(ABC):
 
     name: str
     primary_key: bool = False
-    not_null: bool = False
+    nullable: bool = False
     unique: bool = False
     tags: List[ClassificationTag] = field(default_factory=list)
     foreign_key: Union[ForeignKey, None] = None
@@ -86,12 +86,12 @@ class Varchar(Column):
 
     def get_definition(self) -> str:
         definition = f"{self.name} VARCHAR ({self.length})"
-        if self.not_null:
+        if not self.nullable:
             definition += " NOT NULL"
         if self.unique:
             definition += " UNIQUE"
         if self.default_value is not None:
-            definition += f" DEFAULT {self.default_value}"
+            definition += f" DEFAULT '{self.default_value}'"
         if self.collation is not None:
             definition += f" COLLATE '{self.collation}'"
         if self.foreign_key is not None:
@@ -118,7 +118,7 @@ class Number(Column):
 
     def get_definition(self) -> str:
         definition = f"{self.name} NUMBER({self.precision},{self.scale})"
-        if self.not_null:
+        if not self.nullable:
             definition += " NOT NULL"
         if self.unique:
             definition += " UNIQUE"
@@ -160,7 +160,7 @@ class Integer:
         return Number(
             name=name,
             primary_key=primary_key,
-            not_null=not_null,
+            nullable=not_null,
             unique=unique,
             tags=tags,
             foreign_key=foreign_key,
@@ -181,7 +181,7 @@ class Bool(Column):
 
     def get_definition(self) -> str:
         definition = f"{self.name} BOOLEAN"
-        if self.not_null:
+        if not self.nullable:
             definition += " NOT NULL"
         if self.unique:
             definition += " UNIQUE"
@@ -202,7 +202,7 @@ class Date(Column):
 
     def get_definition(self) -> str:
         definition = f"{self.name} DATE"
-        if self.not_null:
+        if not self.nullable:
             definition += " NOT NULL"
         if self.unique:
             definition += " UNIQUE"
@@ -225,7 +225,7 @@ class Time(Column):
 
     def get_definition(self) -> str:
         definition = f"{self.name} TIME({self.precision})"
-        if self.not_null:
+        if not self.nullable:
             definition += " NOT NULL"
         if self.unique:
             definition += " UNIQUE"
@@ -254,12 +254,12 @@ class Timestamp(Column):
 
     def get_definition(self) -> str:
         definition = f"{self.name} TIMESTAMP({self.precision})"
-        if self.not_null:
+        if not self.nullable:
             definition += " NOT NULL"
         if self.unique:
             definition += " UNIQUE"
         if self.default_value is not None:
-            definition += f" DEFAULT '{self.default_value.strftime('%Y-%m-%dT%H:%M:%S.%f')}'::TIMESTAMP_NTZ(2)"
+            definition += f" DEFAULT '{self.default_value.strftime('%Y-%m-%dT%H:%M:%S.%f')}'::TIMESTAMP({self.precision})"
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
 
@@ -275,7 +275,7 @@ class Variant(Column):
 
     def get_definition(self) -> str:
         definition = f"{self.name} VARIANT"
-        if self.not_null:
+        if not self.nullable:
             definition += " NOT NULL"
         if self.unique:
             definition += " UNIQUE"
