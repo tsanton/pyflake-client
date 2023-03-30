@@ -5,10 +5,9 @@ import queue
 import uuid
 
 from pyflake_client.models.assets.table import Table as TableAsset
-from pyflake_client.models.assets.table_columns import Column, Number, Varchar, Identity
+from pyflake_client.models.assets.table_columns import Number, Varchar, Identity
 from pyflake_client.models.entities.table import Table as TableEntity
 from pyflake_client.models.describables.table import Table as TableDescribable
-from pyflake_client.models.enums.column_type import ColumnType
 from pyflake_client.models.assets.database import Database
 from pyflake_client.models.assets.role import Role as AssetsRole
 from pyflake_client.models.assets.schema import Schema
@@ -40,7 +39,7 @@ def test_create_table(
         flake.register_asset(table, assets_queue)
 
         ### Act ###
-        t: TableEntity = flake.describe(
+        t = flake.describe(
             TableDescribable(
                 db_asset_fixture.db_name, schema.schema_name, table.table_name
             ),
@@ -48,6 +47,7 @@ def test_create_table(
         )
 
         ### Assert ###
+        assert t is not None
         assert t.name == table.table_name
         assert t.database_name == db_asset_fixture.db_name
         assert t.schema_name == schema.schema_name

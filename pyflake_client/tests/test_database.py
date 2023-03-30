@@ -25,10 +25,9 @@ def test_create_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         flake.register_asset(database, assets_queue)
 
         ### Act ###
-        sf_db: EntitiesDatabase = flake.describe(
-            DescribablesDatabase(database.db_name), EntitiesDatabase
-        )
+        sf_db = flake.describe(DescribablesDatabase(database.db_name), EntitiesDatabase)
         ### Assert ###
+        assert sf_db is not None
         assert sf_db.name == database.db_name
         assert sf_db.comment == database.comment
         assert sf_db.owner == "SYSADMIN"
@@ -41,11 +40,10 @@ def test_create_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 def test_get_database(flake: PyflakeClient):
     """test_get_database"""
     ### Act ###
-    database: EntitiesDatabase = flake.describe(
-        DescribablesDatabase("SNOWFLAKE"), EntitiesDatabase
-    )
+    database = flake.describe(DescribablesDatabase("SNOWFLAKE"), EntitiesDatabase)
 
     ### Assert ###
+    assert database is not None
     assert database.name == "SNOWFLAKE"
     assert database.origin == "SNOWFLAKE.ACCOUNT_USAGE"
 
@@ -53,9 +51,7 @@ def test_get_database(flake: PyflakeClient):
 def test_get_database_that_does_not_exist(flake: PyflakeClient):
     """test_get_database_does_not_exist"""
     ### Act ###
-    database: EntitiesDatabase = flake.describe(
-        DescribablesDatabase("I_DO_NOT_EXIST"), EntitiesDatabase
-    )
+    database = flake.describe(DescribablesDatabase("I_DO_NOT_EXIST"), EntitiesDatabase)
 
     ### Assert ###
     assert database is None

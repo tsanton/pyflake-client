@@ -5,12 +5,15 @@ from dataclasses import dataclass
 
 from dacite import Config
 
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
 
 
 @dataclass(frozen=True)
 class Procedure(ISnowflakeDescribable):
     """Procedure"""
+
     database_name: str
     schema_name: str
     name: str
@@ -41,7 +44,11 @@ def show_procedure_py(snowpark_session, db_name_py: str, schema_name_py:str, pro
         return {**data, "procedure_args": out}
 $$
 call show_procedures('%(str1)s', '%(str2)s', '%(str3)s');
-        """ % {"str1": self.database_name, "str2": self.schema_name, "str3": self.name}
+        """ % {
+            "str1": self.database_name,
+            "str2": self.schema_name,
+            "str3": self.name,
+        }
 
     def is_procedure(self) -> bool:
         """is_procedure"""

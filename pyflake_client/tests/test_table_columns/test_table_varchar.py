@@ -1,9 +1,10 @@
-"""test_table_bool"""
+"""test_table_varchar"""
 import queue
 import uuid
 
 from pyflake_client.models.assets.table import Table as TableAsset
-from pyflake_client.models.assets.table_columns import Bool
+from pyflake_client.models.assets.table_columns import Varchar
+from pyflake_client.models.entities.column import Varchar as VarcharEntity
 from pyflake_client.models.entities.table import Table as TableEntity
 from pyflake_client.models.describables.table import Table as TableDescribable
 from pyflake_client.models.assets.database import Database
@@ -12,7 +13,7 @@ from pyflake_client.models.assets.schema import Schema
 from pyflake_client.client import PyflakeClient
 
 
-def test_table_bool(
+def test_table_varchar(
     flake: PyflakeClient, assets_queue: queue.LifoQueue, db_asset_fixture: Database
 ):
     schema = Schema(
@@ -22,7 +23,7 @@ def test_table_bool(
         owner=AssetsRole("SYSADMIN"),
     )
     columns = [
-        Bool(name="BOOL_COLUMN"),
+        Varchar(name="VARCHAR_COLUMN"),
     ]
     table = TableAsset(
         schema=schema,
@@ -50,7 +51,9 @@ def test_table_bool(
         assert sf_table.name == table.table_name
         assert len(sf_table.columns) == 1
         c = sf_table.columns[0]
-        assert c.type == "BOOLEAN"
+        assert isinstance(c, VarcharEntity)
+        assert c.type == "VARCHAR(16777216)"
+        assert c.length == 16777216
         assert c.name == columns[0].name
         assert c.primary_key is False
         assert c.unique_key is False
@@ -64,7 +67,7 @@ def test_table_bool(
         flake.delete_assets(assets_queue)
 
 
-def test_table_bool_primary_key(
+def test_table_varchar_primary_key(
     flake: PyflakeClient, assets_queue: queue.LifoQueue, db_asset_fixture: Database
 ):
     schema = Schema(
@@ -74,7 +77,7 @@ def test_table_bool_primary_key(
         owner=AssetsRole("SYSADMIN"),
     )
     columns = [
-        Bool(name="BOOL_COLUMN", primary_key=True),
+        Varchar(name="VARCHAR_COLUMN", primary_key=True),
     ]
     table = TableAsset(
         schema=schema,
@@ -102,7 +105,9 @@ def test_table_bool_primary_key(
         assert sf_table.name == table.table_name
         assert len(sf_table.columns) == 1
         c = sf_table.columns[0]
-        assert c.type == "BOOLEAN"
+        assert isinstance(c, VarcharEntity)
+        assert c.type == "VARCHAR(16777216)"
+        assert c.length == 16777216
         assert c.name == columns[0].name
         assert c.primary_key is True
         assert c.unique_key is False

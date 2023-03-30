@@ -1,15 +1,11 @@
 """test_table"""
-# pylint: disable=invalid-name
-# pylint: disable=line-too-long
 from datetime import date, datetime
 
-from pyflake_client.models.enums.column_type import ColumnType
 from pyflake_client.models.assets.database import Database
 from pyflake_client.models.assets.schema import Schema
-from pyflake_client.models.assets.table import Column, Table as TableAsset
+from pyflake_client.models.assets.table import Table as TableAsset
 from pyflake_client.models.assets.table_columns import (
     Varchar,
-    Number,
     Integer,
     Identity,
     Timestamp,
