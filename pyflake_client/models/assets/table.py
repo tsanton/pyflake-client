@@ -1,7 +1,7 @@
 """table"""
 # pylint: disable=line-too-long
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List
 
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
