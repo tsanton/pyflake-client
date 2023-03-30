@@ -10,7 +10,13 @@ from typing import Union
 from pyflake_client.models.mergeables.snowflake_mergable_interface import (
     ISnowflakeMergable,
 )
-from pyflake_client.models.assets.table_columns import Number, Varchar, Identity
+from pyflake_client.models.assets.table_columns import (
+    Integer,
+    Varchar,
+    Identity,
+    Bool,
+    Timestamp,
+)
 
 # --------------------------------------------------------
 # --- Test dependencies
@@ -18,14 +24,11 @@ from pyflake_client.models.assets.table_columns import Number, Varchar, Identity
 
 TABLE_NAME = "merge_table"
 TABLE_COLUMN_DEFINITION = [
-    Number("id", identity=Identity(1, 1)),
+    Integer("id", identity=Identity(1, 1)),
     Varchar("the_primary_key", primary_key=True),
-    # TODO once table and columns is complete
-    # Column("id", ColumnType.INTEGER, identity=True),
-    # Column("the_primary_key", ColumnType.VARCHAR, primary_key=True),
-    # Column("enabled", ColumnType.BOOLEAN),
-    # Column("valid_from", ColumnType.TIMESTAMP),
-    # Column("valid_to", ColumnType.TIMESTAMP),
+    Bool(name="enabled"),
+    Timestamp(name="valid_from"),
+    Timestamp(name="valid_to"),
 ]
 
 

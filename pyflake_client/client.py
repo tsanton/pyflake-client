@@ -21,6 +21,7 @@ from pyflake_client.models.executables.snowflake_executable_interface import (
 from pyflake_client.models.mergeables.snowflake_mergable_interface import (
     ISnowflakeMergable,
 )
+from pyflake_client.tests.models.mergable_entity import MergableEntity
 
 
 T = TypeVar("T", bound=ISnowflakeEntity)
@@ -126,7 +127,7 @@ class PyflakeClient:
             print(e)
         return False
 
-    def get_mergeable(self, obj: ISnowflakeMergable) -> ISnowflakeMergable:
+    def get_mergeable(self, obj: ISnowflakeMergable) -> MergableEntity:
         """get_mergeable"""
         module = importlib.import_module(obj.__module__)
         class_ = getattr(module, obj.__class__.__name__)
