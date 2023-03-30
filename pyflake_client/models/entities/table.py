@@ -43,4 +43,3 @@ class Table(ISnowflakeEntity):
             retention_time=data["retention_time"],
             created_on=data["created_on"],
         )
-        return dacite.from_dict(data_class=cls, data=data, config=config)

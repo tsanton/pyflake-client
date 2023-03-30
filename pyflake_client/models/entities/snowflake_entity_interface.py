@@ -12,4 +12,4 @@ class ISnowflakeEntity(ABC):
 
     @classmethod
     def load_from_sf(cls, data: Dict[str, Any], config: dacite.Config) -> Type[T]:
-        ...
+        return dacite.from_dict(data_class=cls, data=data, config=config)  # type: ignore

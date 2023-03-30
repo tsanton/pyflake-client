@@ -1,15 +1,20 @@
 """role_grant"""
-# pylint: disable=consider-using-f-string
+from __future__ import annotations
 from dataclasses import dataclass
+from typing import Any, Dict, Union
 
 from dacite import Config
+import dacite
 
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
 
 
 @dataclass(frozen=True)
 class RoleGrant(ISnowflakeDescribable):
     """RoleGrant"""
+
     role_name: str
 
     def get_describe_statement(self) -> str:
@@ -32,7 +37,9 @@ def show_grants_to_role_py(snowpark_session, role_name_py:str):
 	}
 '
 call show_grants_to_role('%(str1)s');
-        """ % {"str1": self.role_name}
+        """ % {
+            "str1": self.role_name
+        }
 
     def is_procedure(self) -> bool:
         """is_procedure"""
@@ -41,3 +48,9 @@ call show_grants_to_role('%(str1)s');
     def get_dacite_config(self) -> Config:
         """get_dacite_config"""
         return None
+
+    @classmethod
+    def load_from_sf(
+        cls, data: Dict[str, Any], config: Union[dacite.Config, None]
+    ) -> RoleGrant:
+        return dacite.from_dict(data_class=cls, data=data, config=config)
