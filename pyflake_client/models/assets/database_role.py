@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Union
 
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.assets.grants.snowflake_principle_interface import (
+from pyflake_client.models.assets.grants.snowflake_principal_interface import (
     ISnowflakePrincipal,
 )
 from pyflake_client.models.assets.role import Role as AccountRole
@@ -32,7 +32,7 @@ class DatabaseRole(ISnowflakeAsset, ISnowflakePrincipal):
                 "Ownership is not implementer for this interface type"
             )
 
-        return f"""CREATE OR REPLACE DATABASE ROLE  {self.database_name}.{self.name} COMMENT = '{self.comment}';
+        return f"""CREATE OR REPLACE DATABASE ROLE {self.database_name}.{self.name} COMMENT = '{self.comment}';
                    GRANT OWNERSHIP ON DATABASE ROLE {self.database_name}.{self.name} TO {role_type} {self.owner.get_identifier()}
                     REVOKE CURRENT GRANTS;"""
 

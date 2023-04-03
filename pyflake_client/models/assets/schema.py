@@ -2,13 +2,16 @@
 # pylint: disable=line-too-long
 from dataclasses import dataclass
 from pyflake_client.models.assets.database import Database
-from pyflake_client.models.assets.grants.snowflake_principle_interface import ISnowflakePrincipal
+from pyflake_client.models.assets.grants.snowflake_principal_interface import (
+    ISnowflakePrincipal,
+)
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 
 
 @dataclass(frozen=True)
 class Schema(ISnowflakeAsset):
     """schema class"""
+
     database: Database
     schema_name: str
     comment: str
@@ -21,4 +24,6 @@ class Schema(ISnowflakeAsset):
 
     def get_delete_statement(self):
         """get_delete_statement"""
-        return f"DROP SCHEMA IF EXISTS {self.database.db_name}.{self.schema_name} CASCADE;"
+        return (
+            f"DROP SCHEMA IF EXISTS {self.database.db_name}.{self.schema_name} CASCADE;"
+        )

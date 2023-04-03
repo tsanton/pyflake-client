@@ -6,7 +6,7 @@ from typing import List
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 from pyflake_client.models.assets.table_columns import Column
-from pyflake_client.models.assets.grants.snowflake_principle_interface import (
+from pyflake_client.models.assets.grants.snowflake_principal_interface import (
     ISnowflakePrincipal,
 )
 

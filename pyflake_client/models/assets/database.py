@@ -2,15 +2,18 @@
 from dataclasses import dataclass
 
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.assets.grants.snowflake_principle_interface import ISnowflakePrincipal
+from pyflake_client.models.assets.grants.snowflake_principal_interface import (
+    ISnowflakePrincipal,
+)
 
 
 @dataclass(frozen=True)
 class Database(ISnowflakeAsset):
     """Database class"""
+
     db_name: str
     comment: str
-    owner: ISnowflakePrincipal 
+    owner: ISnowflakePrincipal
 
     def get_create_statement(self):
         """get_create_statement"""
