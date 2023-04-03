@@ -4,7 +4,7 @@
 import importlib
 import queue
 import json
-from typing import Any, Type, TypeVar, Union
+from typing import Any, List, Type, TypeVar, Union
 
 from dacite import from_dict
 from snowflake.connector import SnowflakeConnection
@@ -115,6 +115,16 @@ class PyflakeClient:
                 data=dict(zip([c[0] for c in cur.description], row)),
                 config=describable.get_dacite_config(),
             )
+
+    def describe_one(
+        self, describable: ISnowflakeDescribable, entity: Type[T]
+    ) -> Union[T, None]:
+        ...
+
+    def describe_many(
+        self, describable: ISnowflakeDescribable, entity: Type[T]
+    ) -> Union[List[T], None]:
+        ...
 
     def merge_into(self, obj: ISnowflakeMergable) -> bool:
         """merge_into"""
