@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import List, TypeVar
 from pyflake_client.models.assets.grants.snowflake_grant_asset import (
     ISnowflakeGrantAsset,
@@ -5,19 +6,24 @@ from pyflake_client.models.assets.grants.snowflake_grant_asset import (
 from pyflake_client.models.assets.grants.snowflake_principal_interface import (
     ISnowflakePrincipal,
 )
-from pyflake_client.models.assets.role import Role as AssetsRole
+from pyflake_client.models.assets.database_role import (
+    DatabaseRole as AssetsDatabaseRole,
+)
 from pyflake_client.models.enums.privilege import Privilege
 
 T = TypeVar("T", bound=ISnowflakePrincipal)
 
 
-class AccountGrant(ISnowflakeGrantAsset):
+@dataclass
+class DatabaseGrant(ISnowflakeGrantAsset):
+    database_name: str
+
     def get_grant_statement(
         self, principal: ISnowflakePrincipal, privileges: List[Privilege]
     ) -> str:
         privs = f"{', '.join(p.value for p in privileges)}"
-        if isinstance(principal, AssetsRole):
-            return f"GRANT {privs} ON ACCOUNT TO ROLE {principal.get_identifier()}"
+        if isinstance(principal, AssetsDatabaseRole):
+            return f"GRANT {privs} ON DATABASE {self.database_name} TO DATABASE ROLE {principal.get_identifier()}"
 
         raise NotImplementedError(
             f"Can't generate grant statement for asset of type {self.__class__}"
@@ -27,8 +33,8 @@ class AccountGrant(ISnowflakeGrantAsset):
         self, principal: ISnowflakePrincipal, privileges: List[Privilege]
     ) -> str:
         privs = f"{', '.join(p.value for p in privileges)}"
-        if isinstance(principal, AssetsRole):
-            return f"GRANT {privs} ON ACCOUNT TO ROLE {principal.get_identifier()}"
+        if isinstance(principal, AssetsDatabaseRole):
+            return f"REVOKE {privs} ON DATABASE {self.database_name} FROM DATABASE ROLE {principal.get_identifier()} CASCADE"
 
         raise NotImplementedError(
             f"Can't generate revoke statement for asset of type {self.__class__}"

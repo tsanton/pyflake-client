@@ -119,12 +119,64 @@ class PyflakeClient:
     def describe_one(
         self, describable: ISnowflakeDescribable, entity: Type[T]
     ) -> Union[T, None]:
-        ...
+        class_ = entity
+        with self._conn.cursor() as cur:
+            try:
+                cur.execute(describable.get_describe_statement())
+            except ProgrammingError:
+                return None  # TODO : this seems unsafe
+
+            row = cur.fetchone()
+            if not row:
+                return None
+
+            if describable.is_procedure():
+                data = json.loads(row[0])
+                if data in ({}, []):
+                    return None
+
+                return class_.load_from_sf(
+                    data=data, config=describable.get_dacite_config()
+                )
+
+            return class_.load_from_sf(
+                data=dict(zip([c[0] for c in cur.description], row)),
+                config=describable.get_dacite_config(),
+            )
 
     def describe_many(
         self, describable: ISnowflakeDescribable, entity: Type[T]
     ) -> Union[List[T], None]:
-        ...
+        class_ = entity
+        with self._conn.cursor() as cur:
+            try:
+                cur.execute(describable.get_describe_statement())
+            except ProgrammingError:
+                return None  # TODO : this seems unsafe
+
+            res = cur.fetchall()
+            if not res:
+                return []
+
+            if describable.is_procedure():
+                data = [
+                    json.loads(r[0]) for r in res
+                ]  # TODO : check formatting of fetchall
+                if data in ({}, []):
+                    return []
+
+                return [
+                    class_.load_from_sf(data=d, config=describable.get_dacite_config())
+                    for d in data
+                ]
+
+            return [
+                class_.load_from_sf(
+                    data=dict(zip([c[0] for c in cur.description], r)),
+                    config=describable.get_dacite_config(),
+                )
+                for r in res
+            ]
 
     def merge_into(self, obj: ISnowflakeMergable) -> bool:
         """merge_into"""
