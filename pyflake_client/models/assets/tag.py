@@ -21,11 +21,12 @@ class Tag(ISnowflakeAsset):
         query += f"CREATE OR REPLACE TAG {self.database_name}.{self.schema_name}.{self.tag_name}"
         if len(self.tag_values) > 0:
             tag_values = ",".join(f"'{t}'" for t in self.tag_values)
-            query += f" ALLOWED VALUES {tag_values}"
+            query += f" ALLOWED_VALUES {tag_values}"
 
-        query += f" COMMENT = {self.comment};"
-        query += f"\nGRANT OWNERSHIP ON TAG {self.database_name}.{self.schema_name}{self.tag_name} TO {self.owner.get_snowflake_type()} {self.owner.get_identifier()}"
-        return super().get_create_statement()
+        query += f" COMMENT = '{self.comment}';"
+        query += f"\nGRANT OWNERSHIP ON TAG {self.database_name}.{self.schema_name}.{self.tag_name} TO {self.owner.get_snowflake_type()} {self.owner.get_identifier()}"
+        return query
 
     def get_delete_statement(self) -> str:
-        return super().get_delete_statement()
+        query = f"DROP TAG {self.database_name}.{self.schema_name}.{self.tag_name}"
+        return query

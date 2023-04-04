@@ -40,3 +40,6 @@ class Role(ISnowflakeAsset, ISnowflakePrincipal, ISnowflakeGrantPrincipal):
 
     def get_identifier(self):
         return self.name
+
+    def get_snowflake_type(self) -> str:
+        return "ROLE"

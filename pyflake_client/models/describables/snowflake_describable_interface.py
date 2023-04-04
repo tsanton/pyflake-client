@@ -2,7 +2,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Union
-from dacite import Config
 import dacite
 
 
@@ -18,7 +17,7 @@ class ISnowflakeDescribable(ABC):
         """is_procedure"""
 
     @abstractmethod
-    def get_dacite_config(self) -> Union[Config, None]:
+    def get_dacite_config(self) -> Union[dacite.Config, None]:
         """get_dacite_config"""
 
     @staticmethod
