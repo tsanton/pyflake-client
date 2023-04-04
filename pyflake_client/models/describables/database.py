@@ -3,12 +3,18 @@ from dataclasses import dataclass
 
 from dacite import Config
 
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
+from pyflake_client.models.describables.snowflake_grant_principal import (
+    ISnowflakeGrantPrincipal,
+)
 
 
 @dataclass(frozen=True)
-class Database(ISnowflakeDescribable):
+class Database(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
     """Database"""
+
     name: str
 
     def get_describe_statement(self) -> str:
