@@ -25,7 +25,9 @@ def test_create_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         flake.register_asset(database, assets_queue)
 
         ### Act ###
-        sf_db = flake.describe(DescribablesDatabase(database.db_name), EntitiesDatabase)
+        sf_db = flake.describe_one(
+            DescribablesDatabase(database.db_name), EntitiesDatabase
+        )
         ### Assert ###
         assert sf_db is not None
         assert sf_db.name == database.db_name
@@ -40,7 +42,7 @@ def test_create_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 def test_get_database(flake: PyflakeClient):
     """test_get_database"""
     ### Act ###
-    database = flake.describe(DescribablesDatabase("SNOWFLAKE"), EntitiesDatabase)
+    database = flake.describe_one(DescribablesDatabase("SNOWFLAKE"), EntitiesDatabase)
 
     ### Assert ###
     assert database is not None
@@ -51,7 +53,9 @@ def test_get_database(flake: PyflakeClient):
 def test_get_database_that_does_not_exist(flake: PyflakeClient):
     """test_get_database_does_not_exist"""
     ### Act ###
-    database = flake.describe(DescribablesDatabase("I_DO_NOT_EXIST"), EntitiesDatabase)
+    database = flake.describe_one(
+        DescribablesDatabase("I_DO_NOT_EXIST"), EntitiesDatabase
+    )
 
     ### Assert ###
     assert database is None

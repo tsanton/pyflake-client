@@ -33,7 +33,7 @@ def test_create_database_role(
         flake.register_asset(role, assets_queue)
 
         ### Act ###
-        sf_role: EntitiesRole = flake.describe(
+        sf_role: EntitiesRole = flake.describe_one(
             DescribablesRole(name=role.name, db_name=db_asset_fixture.db_name),
             EntitiesRole,
         )
@@ -52,7 +52,7 @@ def test_get_database_role(
     existing_database_role: str,
     existing_database: str,
 ):
-    sf_role: EntitiesRole = flake.describe(
+    sf_role: EntitiesRole = flake.describe_one(
         DescribablesRole(name=existing_database_role, db_name=existing_database),
         EntitiesRole,
     )
@@ -65,7 +65,7 @@ def test_get_database_role_from_db_not_exists(
     flake: PyflakeClient,
     existing_database_role: str,
 ):
-    sf_role: EntitiesRole = flake.describe(
+    sf_role: EntitiesRole = flake.describe_one(
         DescribablesRole(
             name=existing_database_role, db_name="I_SURELY_DO_NOT_EXIST_DATABASE"
         ),
@@ -81,7 +81,7 @@ def test_get_database_role_not_exists(
 ):
     try:
         flake.register_asset(db_asset_fixture, assets_queue)
-        sf_role: EntitiesRole = flake.describe(
+        sf_role: EntitiesRole = flake.describe_one(
             DescribablesRole(
                 name="I_SURELY_DO_NOT_EXIST_DATABASE_ROLE",
                 db_name=db_asset_fixture.db_name,

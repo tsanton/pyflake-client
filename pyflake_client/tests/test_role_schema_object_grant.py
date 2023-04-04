@@ -10,12 +10,13 @@ from pyflake_client.models.assets.grants.role_schema_future_grant import (
     RoleSchemaFutureGrant as RoleSchemaFutureGrantAsset,
 )
 from pyflake_client.client import PyflakeClient
+from pyflake_client.models.describables.table import Table as DescribablesTable
 from pyflake_client.tests.utilities import _spawn_without_rwc_privileges, compare
-from pyflake_client.models.describables.grants.role_schema_object_grant import (
-    RoleSchemaObjectGrant,
+from pyflake_client.models.describables.grant import (
+    Grant as DescribablesGrant,
 )
-from pyflake_client.models.entities.grants.role_schema_object_grant import (
-    RoleSchemaObjectGrants,
+from pyflake_client.models.entities.grant import (
+    Grant as EntitiesGrant,
 )
 
 
@@ -49,21 +50,25 @@ def test_get_granted_privileges_r(flake: PyflakeClient, assets_queue: queue.Lifo
         flake.register_asset(t, assets_queue)
 
         ### Act ###
-        showable = RoleSchemaObjectGrant(
-            r.name, d.db_name, s.schema_name, ObjectType.TABLE, t.table_name
+        desc_table = DescribablesTable(
+            database_name=d.db_name, schema_name=s.schema_name, name=t.table_name
         )
-        rp = flake.describe(showable, RoleSchemaObjectGrants)
+        showable = DescribablesGrant(principal=desc_table)
+        grants = flake.describe_many(showable, EntitiesGrant)
 
         ### Assert ###
-        assert rp is not None
-        assert rp.role_name == r.name
-        assert rp.db_name == d.db_name
-        assert rp.schema_name == s.schema_name
-        assert rp.object_name == t.table_name
-        assert rp.object_type == ObjectType.TABLE
-        assert len(rp.inherited_privileges) == 0
-        assert compare(rp.granted_privileges, r_privilege.privileges)
-        assert compare(rp.all_privileges, r_privilege.privileges)
+        assert grants is not None
+        assert len(grants) == 5
+        assert all(
+            x in ("REFERENCES", "SELECT", "INSERT", "UPDATE", "OWNERSHIP")
+            for x in (g.privilege for g in grants)
+        )
+        names = list({g.name for g in grants})
+        assert len(names) == 1
+        assert names[0] == f"{d.db_name}.{s.schema_name}.{t.table_name}"
+        granters = list({g.granted_by for g in grants})
+        assert len(granters) == 1
+        assert granters[0] == rwc.name
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
@@ -99,23 +104,26 @@ def test_get_granted_privileges_rw(flake: PyflakeClient, assets_queue: queue.Lif
         flake.register_asset(t, assets_queue)
 
         ### Act ###
-        showable = RoleSchemaObjectGrant(
-            rw.name, d.db_name, s.schema_name, ObjectType.TABLE, t.table_name
+        desc_table = DescribablesTable(
+            database_name=d.db_name, schema_name=s.schema_name, name=t.table_name
         )
-        rp = flake.describe(showable, RoleSchemaObjectGrants)
+        showable = DescribablesGrant(principal=desc_table)
+        grants = flake.describe_many(showable, EntitiesGrant)
 
         ### Assert ###
-        assert rp is not None
-        assert rp.role_name == rw.name
-        assert rp.db_name == d.db_name
-        assert rp.schema_name == s.schema_name
-        assert rp.object_name == t.table_name
-        assert rp.object_type == ObjectType.TABLE
-        assert len(rp.inherited_privileges) == 1
-        assert compare(rp.granted_privileges, rw_privilege.privileges)
-        assert compare(
-            rp.all_privileges, r_privilege.privileges + rw_privilege.privileges
-        )
+        assert grants is not None
+        # TODO @tobias what do these tests do
+        assert False
+        # assert rp.role_name == rw.name
+        # assert rp.db_name == d.db_name
+        # assert rp.schema_name == s.schema_name
+        # assert rp.object_name == t.table_name
+        # assert rp.object_type == ObjectType.TABLE
+        # assert len(rp.inherited_privileges) == 1
+        # assert compare(rp.granted_privileges, rw_privilege.privileges)
+        # assert compare(
+        #     rp.all_privileges, r_privilege.privileges + rw_privilege.privileges
+        # )
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
@@ -156,7 +164,7 @@ def test_get_granted_privileges_rwc(
         showable = RoleSchemaObjectGrant(
             rwc.name, d.db_name, s.schema_name, ObjectType.TABLE, t.table_name
         )
-        rp = flake.describe(showable, RoleSchemaObjectGrants)
+        rp = flake.describe_one(showable, RoleSchemaObjectGrants)
 
         ### Assert ###
         assert rp is not None
@@ -214,7 +222,7 @@ def test_get_granted_privileges_accountadmin(
         showable = RoleSchemaObjectGrant(
             "ACCOUNTADMIN", d.db_name, s.schema_name, ObjectType.TABLE, t.table_name
         )
-        rp = flake.describe(showable, RoleSchemaObjectGrants)
+        rp = flake.describe_one(showable, RoleSchemaObjectGrants)
 
         ### Assert ###
         assert rp is not None
@@ -273,7 +281,7 @@ def test_get_granted_privileges_useradmin(
         showable = RoleSchemaObjectGrant(
             "USERADMIN", d.db_name, s.schema_name, ObjectType.TABLE, t.table_name
         )
-        rp = flake.describe(showable, RoleSchemaObjectGrants)
+        rp = flake.describe_one(showable, RoleSchemaObjectGrants)
 
         ### Assert ###
         assert rp is not None

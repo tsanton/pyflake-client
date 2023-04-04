@@ -9,10 +9,13 @@ from dacite import Config
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
 )
+from pyflake_client.models.describables.snowflake_grant_principal import (
+    ISnowflakeGrantPrincipal,
+)
 
 
 @dataclass(frozen=True)
-class Table(ISnowflakeDescribable):
+class Table(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
     """Table"""
 
     database_name: str

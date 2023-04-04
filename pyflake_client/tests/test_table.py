@@ -39,7 +39,7 @@ def test_create_table(
         flake.register_asset(table, assets_queue)
 
         ### Act ###
-        t = flake.describe(
+        t = flake.describe_one(
             TableDescribable(
                 db_asset_fixture.db_name, schema.schema_name, table.table_name
             ),

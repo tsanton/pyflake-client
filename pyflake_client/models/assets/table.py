@@ -9,10 +9,13 @@ from pyflake_client.models.assets.table_columns import Column
 from pyflake_client.models.assets.grants.snowflake_principal_interface import (
     ISnowflakePrincipal,
 )
+from pyflake_client.models.describables.snowflake_grant_principal import (
+    ISnowflakeGrantPrincipal,
+)
 
 
 @dataclass(frozen=True)
-class Table(ISnowflakeAsset):
+class Table(ISnowflakeAsset, ISnowflakeGrantPrincipal):
     """Table"""
 
     schema: Schema

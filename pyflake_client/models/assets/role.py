@@ -6,10 +6,13 @@ from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAss
 from pyflake_client.models.assets.grants.snowflake_principal_interface import (
     ISnowflakePrincipal,
 )
+from pyflake_client.models.describables.snowflake_grant_principal import (
+    ISnowflakeGrantPrincipal,
+)
 
 
 @dataclass(frozen=True)
-class Role(ISnowflakeAsset, ISnowflakePrincipal):
+class Role(ISnowflakeAsset, ISnowflakePrincipal, ISnowflakeGrantPrincipal):
     """Role"""
 
     name: str

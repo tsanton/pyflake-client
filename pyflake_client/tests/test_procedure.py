@@ -40,7 +40,7 @@ def test_create_procedure_zero_args(
 
     try:
         flake.register_asset(proc, assets_queue)
-        sf_proc = flake.describe(
+        sf_proc = flake.describe_one(
             ProcedureDescribable(proc.database_name, proc.schema_name, proc.name),
             ProcedureEntity,
         )
@@ -77,7 +77,7 @@ def test_create_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.Lifo
 
     try:
         flake.register_asset(proc, assets_queue)
-        sf_proc = flake.describe(
+        sf_proc = flake.describe_one(
             ProcedureDescribable(proc.database_name, proc.schema_name, proc.name),
             ProcedureEntity,
         )
@@ -120,7 +120,7 @@ def test_create_procedure_multiple_args(
 
     try:
         flake.register_asset(proc, assets_queue)
-        sf_proc = flake.describe(
+        sf_proc = flake.describe_one(
             ProcedureDescribable(proc.database_name, proc.schema_name, proc.name),
             ProcedureEntity,
         )

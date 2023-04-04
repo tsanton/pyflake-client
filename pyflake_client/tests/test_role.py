@@ -23,7 +23,7 @@ def test_create_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         flake.register_asset(role, assets_queue)
 
         ### Act ###
-        sf_role = flake.describe(DescribablesRole(role.name), EntitiesRole)
+        sf_role = flake.describe_one(DescribablesRole(role.name), EntitiesRole)
         ### Assert ###
         assert sf_role is not None
         assert sf_role.name == role.name
@@ -38,7 +38,7 @@ def test_create_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 def test_get_role(flake: PyflakeClient):
     """test_get_role"""
     ### Act ###
-    role = flake.describe(DescribablesRole("ACCOUNTADMIN"), EntitiesRole)
+    role = flake.describe_one(DescribablesRole("ACCOUNTADMIN"), EntitiesRole)
 
     ### Assert ###
     assert role is not None
@@ -51,7 +51,7 @@ def test_get_role(flake: PyflakeClient):
 def test_get_role_that_does_not_exist(flake: PyflakeClient):
     """test_get_role_that_does_not_exist"""
     ### Act ###
-    role = flake.describe(DescribablesRole("I_SURELY_DO_NOT_EXIST"), EntitiesRole)
+    role = flake.describe_one(DescribablesRole("I_SURELY_DO_NOT_EXIST"), EntitiesRole)
 
     ### Assert ###
     assert role is None

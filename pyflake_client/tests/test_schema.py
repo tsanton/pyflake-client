@@ -36,11 +36,11 @@ def test_create_schema(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         flake.register_asset(another_schema, assets_queue)
 
         ### Act ###
-        sch_so = flake.describe(
+        sch_so = flake.describe_one(
             DescribabablesSchema(some_schema.schema_name, some_schema.database.db_name),
             EntitiesSchema,
         )
-        sch_an = flake.describe(
+        sch_an = flake.describe_one(
             DescribabablesSchema(
                 another_schema.schema_name, another_schema.database.db_name
             ),
@@ -69,7 +69,7 @@ def test_create_schema(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 def test_get_schema(flake: PyflakeClient):
     """test_get_schema"""
     ### Act ###
-    schema = flake.describe(
+    schema = flake.describe_one(
         DescribabablesSchema("INFORMATION_SCHEMA", "SNOWFLAKE"), EntitiesSchema
     )
 
@@ -82,7 +82,7 @@ def test_get_schema(flake: PyflakeClient):
 def test_get_schema_when_database_does_not_exist(flake: PyflakeClient):
     """test_get_schema_when_database_does_not_exist"""
     ### Act ###
-    schema = flake.describe(
+    schema = flake.describe_one(
         DescribabablesSchema("INFORMATION_SCHEMA", "THIS_DB_DOES_NOT_EXIST"),
         EntitiesSchema,
     )
@@ -94,7 +94,7 @@ def test_get_schema_when_database_does_not_exist(flake: PyflakeClient):
 def test_get_schema_when_schema_does_not_exist(flake: PyflakeClient):
     """test_get_schema_when_schema_does_not_exist"""
     ### Act ###
-    schema = flake.describe(
+    schema = flake.describe_one(
         DescribabablesSchema("THIS_SCHEMA_DOES_NOT_EXIST", "SNOWFLAKE"), EntitiesSchema
     )
 

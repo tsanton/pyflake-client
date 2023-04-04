@@ -1,4 +1,7 @@
 from dataclasses import dataclass
+from typing import Union
+
+import dacite
 
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
@@ -72,3 +75,9 @@ call show_grants_to_database_role('%(s1)s','%(s2)s');
             )
 
         return query
+
+    def is_procedure(self) -> bool:
+        return False
+
+    def get_dacite_config(self) -> Union[dacite.Config, None]:
+        return None

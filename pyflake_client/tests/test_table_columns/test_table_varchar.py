@@ -38,7 +38,7 @@ def test_table_varchar(
         flake.register_asset(table, assets_queue)
 
         ### Act ###
-        sf_table = flake.describe(
+        sf_table = flake.describe_one(
             TableDescribable(
                 database_name=db_asset_fixture.db_name,
                 schema_name=schema.schema_name,
@@ -92,7 +92,7 @@ def test_table_varchar_primary_key(
         flake.register_asset(table, assets_queue)
 
         ### Act ###
-        sf_table = flake.describe(
+        sf_table = flake.describe_one(
             TableDescribable(
                 database_name=db_asset_fixture.db_name,
                 schema_name=schema.schema_name,

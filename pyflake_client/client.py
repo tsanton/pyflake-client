@@ -85,37 +85,6 @@ class PyflakeClient:
         """delete_asset"""
         self._conn.execute_string(obj.get_delete_statement())
 
-    def describe(
-        self, describable: ISnowflakeDescribable, entity: Type[T]
-    ) -> Union[T, None]:
-        """describe"""
-        class_ = entity
-        with self._conn.cursor() as cur:
-            try:
-                cur.execute(describable.get_describe_statement())
-            # except ProgrammingError as err:  # SHOW SCHEMA LIKE '<SCHEMA_NAME>' in DATABASE <SOME_DB> throws this error when database does not exist
-            #     print(err)
-            except ProgrammingError:
-                return None
-
-            row = cur.fetchone()
-            if not row:
-                return None
-
-            if describable.is_procedure():
-                data = json.loads(row[0])
-                if data in ({}, []):
-                    return None
-
-                return class_.load_from_sf(
-                    data=data, config=describable.get_dacite_config()
-                )
-
-            return class_.load_from_sf(
-                data=dict(zip([c[0] for c in cur.description], row)),
-                config=describable.get_dacite_config(),
-            )
-
     def describe_one(
         self, describable: ISnowflakeDescribable, entity: Type[T]
     ) -> Union[T, None]:
