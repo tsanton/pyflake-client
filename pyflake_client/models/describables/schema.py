@@ -1,6 +1,7 @@
 """schema"""
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Union
 
 from dacite import Config
 
@@ -18,10 +19,10 @@ class Schema(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
 
     name: str
     database_name: str
-    owner: str = None
-    comment: str = None
-    retention_time: str = None
-    created_on: datetime = None
+    owner: Union[str, None] = None
+    comment: Union[str, None] = None
+    retention_time: Union[str, None] = None
+    created_on: Union[datetime, None] = None
 
     def get_describe_statement(self) -> str:
         """get_describe_statement"""
@@ -33,5 +34,5 @@ class Schema(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
         """is_procedure"""
         return False
 
-    def get_dacite_config(self) -> Config:
+    def get_dacite_config(self) -> Union[Config, None]:
         return None

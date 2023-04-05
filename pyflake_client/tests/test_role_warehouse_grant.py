@@ -1,48 +1,67 @@
 """test_role_warehouse_grant"""
 
 
-def test_come_back_to_this_later4():
-    assert False
+import queue
+import uuid
 
 
-# import queue
-# import uuid
+from pyflake_client.client import PyflakeClient
+from pyflake_client.models.assets.role import Role as AssetsRole
+from pyflake_client.models.assets.grant import Grant as GrantAsset
+from pyflake_client.models.assets.grants.role_warehouse_grant import RoleWarehouseGrant
+from pyflake_client.models.describables.grant import Grant as DescribableGrant
+from pyflake_client.models.assets.warehouse import Warehouse as WarehouseAsset
+from pyflake_client.models.entities.grant import Grant as EntitiesGrant
+from pyflake_client.models.describables.warehouse import (
+    Warehouse as DescribableWarehouse,
+)
 
 
-# from pyflake_client.client import PyflakeClient
-# from pyflake_client.models.assets.role import Role as AssetsRole
-# from pyflake_client.models.assets.grant import Grant as GrantAsset
-# from pyflake_client.models.assets.grants.role_warehouse_grant import RoleWarehouseGrant
-# from pyflake_client.models.describables.grants.role_grant import RoleGrant as RoleGrantDescribable
-# from pyflake_client.models.entities.grants.role_grant import RoleGrants as RoleGrantsEntity
+def test_grant_role_warehouse_privileges(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue
+):
+    """test_grant_role_warehouse_privileges"""
+    ### Arrange ###
+    role = AssetsRole(
+        "IGT_CREATE_ROLE",
+        AssetsRole("USERADMIN"),
+        f"pyflake_client_TEST_{uuid.uuid4()}",
+    )
+    warehouse: WarehouseAsset = WarehouseAsset(
+        "IGT_DEMO_WH", f"pyflake_client_TEST_{uuid.uuid4()}"
+    )
+    privilege = GrantAsset(
+        RoleWarehouseGrant(role.name, warehouse.warehouse_name), ["USAGE"]
+    )
 
-# from pyflake_client.models.assets.warehouse import Warehouse as WarehouseAsset
-# from pyflake_client.models.entities.warehouse import Warehouse as WarehouseEntity
-# from pyflake_client.models.describables.warehouse import Warehouse as WarehouseDescribable
+    try:
+        flake.register_asset(role, assets_queue)
+        flake.register_asset(warehouse, assets_queue)
+        flake.register_asset(privilege, assets_queue)
 
-# def test_grant_role_warehouse_privileges(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-#     """test_grant_role_warehouse_privileges"""
-#     ### Arrange ###
-#     role = AssetsRole("IGT_CREATE_ROLE", AssetsRole("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-#     warehouse: WarehouseAsset = WarehouseAsset("IGT_DEMO_WH", f"pyflake_client_TEST_{uuid.uuid4()}")
-#     privilege = GrantAsset(RoleWarehouseGrant(role.name, warehouse.warehouse_name), ["USAGE"])
+        ### Act ###
+        grants = flake.describe_many(
+            describable=DescribableGrant(
+                principal=DescribableWarehouse(name=warehouse.warehouse_name)
+            ),
+            entity=EntitiesGrant,
+        )
 
-#     try:
-#         flake.register_asset(role, assets_queue)
-#         flake.register_asset(warehouse, assets_queue)
-#         flake.register_asset(privilege, assets_queue)
+        ### Assert ###
+        assert grants is not None
+        assert len(grants) == 2
 
-#         ### Act ###
-#         granted: RoleGrantsEntity = flake.describe(RoleGrantDescribable(role.name), RoleGrantsEntity)
-
-#         ### Assert ###
-#         assert granted.role_name == role.name
-#         assert len(granted.grants) == 1
-
-#         wh_grant = next((r for r in granted.grants if r.granted_on == "WAREHOUSE" and r.privilege == "USAGE"), None)
-#         assert wh_grant is not None
-#         assert wh_grant.name == warehouse.warehouse_name
-#         assert wh_grant.granted_by == "SYSADMIN"
-#     finally:
-#         ### Cleanup ###
-#         flake.delete_assets(assets_queue)
+        wh_grant = next(
+            (
+                g
+                for g in grants
+                if g.granted_on == "WAREHOUSE" and g.privilege == "USAGE"
+            ),
+            None,
+        )
+        assert wh_grant is not None
+        assert wh_grant.name == warehouse.warehouse_name
+        assert wh_grant.granted_by == "SYSADMIN"
+    finally:
+        ### Cleanup ###
+        flake.delete_assets(assets_queue)

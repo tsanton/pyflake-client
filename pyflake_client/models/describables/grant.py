@@ -17,6 +17,9 @@ from pyflake_client.models.describables.database_role import (
     DatabaseRole as DescribablesDatabaseRole,
 )
 from pyflake_client.models.describables.database import Database as DescribablesDatabase
+from pyflake_client.models.describables.warehouse import (
+    Warehouse as DescribablesWarehouse,
+)
 
 
 @dataclass
@@ -34,6 +37,8 @@ class Grant(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
             query = f"SHOW GRANTS ON SCHEMA {self.principal.database_name}.{self.principal.name}"
         elif isinstance(self.principal, DescribablesDatabase):
             query = f"SHOW GRANTS ON DATABASE {self.principal.name}"
+        elif isinstance(self.principal, DescribablesWarehouse):
+            query = f"SHOW GRANTS ON WAREHOUSE {self.principal.name}"
         else:
             raise NotImplementedError(
                 f"Grant describe statement for {self.__class__} is not implemented"
