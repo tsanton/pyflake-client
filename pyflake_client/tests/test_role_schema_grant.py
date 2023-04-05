@@ -18,12 +18,14 @@ from pyflake_client.models.describables.schema import Schema as DescribableSchem
 def test_grant_role_schema_privilege(
     flake: PyflakeClient,
     assets_queue: queue.LifoQueue,
-    db_asset_fixture: AssetsDatabase,
 ):
     """test_grant_role_schema_privilege"""
     ### Arrange ###
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
     schema = AssetsSchema(
-        database=db_asset_fixture,
+        database=database,
         schema_name="IGT_SCHEMA",
         comment=f"pyflake_client_TEST_{uuid.uuid4()}",
         owner=AssetsRole("SYSADMIN"),
@@ -34,11 +36,11 @@ def test_grant_role_schema_privilege(
         f"pyflake_client_TEST_{uuid.uuid4()}",
     )
     privilege = AssetsGrant(
-        RoleSchemaGrant(role.name, db_asset_fixture.db_name, schema.schema_name),
+        RoleSchemaGrant(role.name, database.db_name, schema.schema_name),
         ["USAGE"],
     )
     try:
-        flake.register_asset(db_asset_fixture, assets_queue)
+        flake.register_asset(database, assets_queue)
         flake.register_asset(schema, assets_queue)
         flake.register_asset(role, assets_queue)
         flake.register_asset(privilege, assets_queue)
@@ -48,7 +50,7 @@ def test_grant_role_schema_privilege(
         grants = flake.describe_many(
             describable=DescribableGrant(
                 principal=DescribableSchema(
-                    name=schema.schema_name, database_name=db_asset_fixture.db_name
+                    name=schema.schema_name, database_name=database.db_name
                 )
             ),
             entity=EntitiesGrant,
@@ -70,12 +72,14 @@ def test_grant_role_schema_privilege(
 def test_grant_role_schema_privileges(
     flake: PyflakeClient,
     assets_queue: queue.LifoQueue,
-    db_asset_fixture: AssetsDatabase,
 ):
     """test_grant_role_schema_privileges"""
     ### Arrange ###
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
     schema = AssetsSchema(
-        database=db_asset_fixture,
+        database=database,
         schema_name="IGT_SCHEMA",
         comment=f"pyflake_client_TEST_{uuid.uuid4()}",
         owner=AssetsRole("SYSADMIN"),
@@ -86,12 +90,12 @@ def test_grant_role_schema_privileges(
         f"pyflake_client_TEST_{uuid.uuid4()}",
     )
     privilege = AssetsGrant(
-        RoleSchemaGrant(role.name, db_asset_fixture.db_name, schema.schema_name),
+        RoleSchemaGrant(role.name, database.db_name, schema.schema_name),
         ["USAGE", "MONITOR"],
     )
 
     try:
-        flake.register_asset(db_asset_fixture, assets_queue)
+        flake.register_asset(database, assets_queue)
         flake.register_asset(schema, assets_queue)
         flake.register_asset(role, assets_queue)
         flake.register_asset(privilege, assets_queue)
@@ -100,7 +104,7 @@ def test_grant_role_schema_privileges(
         grants = flake.describe_many(
             describable=DescribableGrant(
                 principal=DescribableSchema(
-                    name=schema.schema_name, database_name=db_asset_fixture.db_name
+                    name=schema.schema_name, database_name=database.db_name
                 )
             ),
             entity=EntitiesGrant,

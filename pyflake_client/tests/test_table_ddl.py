@@ -1,7 +1,7 @@
 """test_table"""
 from datetime import date, datetime
+import uuid
 
-from pyflake_client.models.assets.database import Database
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.assets.table import Table as TableAsset
 from pyflake_client.models.assets.table_columns import (
@@ -11,14 +11,18 @@ from pyflake_client.models.assets.table_columns import (
     Timestamp,
     Date,
 )
+from pyflake_client.models.assets.database import Database as AssetsDatabase
 from pyflake_client.models.assets.role import Role as AssetsRole
 
 
-def test_create_simple_table_ddl(db_asset_fixture: Database):
+def test_create_simple_table_ddl():
     """test_create_simple_table_ddl"""
     ### Arrange ###
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
     schema = Schema(
-        database=db_asset_fixture,
+        database=database,
         schema_name="S1",
         comment="SCHEMA",
         owner=AssetsRole("SYSADMIN"),
@@ -39,11 +43,14 @@ def test_create_simple_table_ddl(db_asset_fixture: Database):
     )
 
 
-def test_create_complex_table_ddl(db_asset_fixture: Database):
+def test_create_complex_table_ddl():
     """test_create_complex_table_ddl"""
     ### Arrange ###
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
     schema = Schema(
-        database=db_asset_fixture,
+        database=database,
         schema_name="S1",
         comment="SCHEMA",
         owner=AssetsRole("SYSADMIN"),
@@ -68,11 +75,14 @@ def test_create_complex_table_ddl(db_asset_fixture: Database):
     )
 
 
-def test_create_complex_table_with_primary_key_ddl(db_asset_fixture: Database):
+def test_create_complex_table_with_primary_key_ddl():
     """test_create_complex_table_ddl"""
     ### Arrange ###
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
     schema = Schema(
-        database=db_asset_fixture,
+        database=database,
         schema_name="S1",
         comment="SCHEMA",
         owner=AssetsRole("SYSADMIN"),
@@ -100,13 +110,16 @@ def test_create_complex_table_with_primary_key_ddl(db_asset_fixture: Database):
     )
 
 
-def test_create_simple_table_with_default_date_ddl(db_asset_fixture: Database):
+def test_create_simple_table_with_default_date_ddl():
     """test_create_simple_table_ddl
     insert into <DB>.<SCHEMA>.TEST (SOME_DATE) values(default);
     """
     ### Arrange ###
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
     schema = Schema(
-        database=db_asset_fixture,
+        database=database,
         schema_name="S1",
         comment="SCHEMA",
         owner=AssetsRole("SYSADMIN"),
@@ -130,13 +143,16 @@ def test_create_simple_table_with_default_date_ddl(db_asset_fixture: Database):
     )
 
 
-def test_create_simple_table_with_default_datetime_ddl(db_asset_fixture: Database):
+def test_create_simple_table_with_default_datetime_ddl():
     """test_create_simple_table_ddl
     insert into <DB>.<SCHEMA>.TEST (SOME_DATETIME) values(default);
     """
     ### Arrange ###
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
     schema = Schema(
-        database=db_asset_fixture,
+        database=database,
         schema_name="S1",
         comment="SCHEMA",
         owner=AssetsRole("SYSADMIN"),

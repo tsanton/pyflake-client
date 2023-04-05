@@ -11,6 +11,7 @@ from pyflake_client.models.assets.grant import Grant as AssetsGrant
 from pyflake_client.models.assets.grants.role_schema_future_grant import (
     RoleSchemaFutureGrant,
 )
+from pyflake_client.models.describables.role import Role as DescribablesRole
 from pyflake_client.models.describables.future_grant import (
     FutureGrant as DescribablesFutureGrant,
 )
@@ -23,12 +24,14 @@ from pyflake_client.models.enums.object_type import ObjectType
 def test_grant_role_future_schema_privilege(
     flake: PyflakeClient,
     assets_queue: queue.LifoQueue,
-    db_asset_fixture: AssetsDatabase,
 ):
     """test_grant_role_future_schema_privilege"""
     ### Arrange ###
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
     schema = AssetsSchema(
-        database=db_asset_fixture,
+        database=database,
         schema_name="IGT_SCHEMA",
         comment=f"pyflake_client_TEST_{uuid.uuid4()}",
         owner=AssetsRole("SYSADMIN"),
@@ -40,19 +43,25 @@ def test_grant_role_future_schema_privilege(
     )
     privilege = AssetsGrant(
         RoleSchemaFutureGrant(
-            role.name, db_asset_fixture.db_name, schema.schema_name, ObjectType.TABLE
+            role.name, database.db_name, schema.schema_name, ObjectType.TABLE
         ),
         ["SELECT"],
     )
 
     try:
-        flake.register_asset(db_asset_fixture, assets_queue)
+        flake.register_asset(database, assets_queue)
         flake.register_asset(schema, assets_queue)
         flake.register_asset(role, assets_queue)
         flake.register_asset(privilege, assets_queue)
 
         ### Act ###
-        grants = flake.describe_many(DescribablesFutureGrant(role), EntitiesFutureGrant)
+
+        grants = flake.describe_many(
+            describable=DescribablesFutureGrant(
+                principal=DescribablesRole(name=role.name)
+            ),
+            entity=EntitiesFutureGrant,
+        )
 
         ### Assert ###
         assert grants is not None
@@ -63,7 +72,7 @@ def test_grant_role_future_schema_privilege(
         # assert priv is not None
         # assert (
         #     priv.name
-        #     == f"{db_asset_fixture.db_name}.{schema.schema_name}.<{ObjectType.TABLE}>"
+        #     == f"{database.db_name}.{schema.schema_name}.<{ObjectType.TABLE}>"
         # )
         # assert priv.grant_on == ObjectType.TABLE
 
@@ -75,12 +84,14 @@ def test_grant_role_future_schema_privilege(
 def test_grant_role_schema_privileges(
     flake: PyflakeClient,
     assets_queue: queue.LifoQueue,
-    db_asset_fixture: AssetsDatabase,
 ):
     """test_grant_role_schema_privileges"""
     ### Arrange ###
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
     schema = AssetsSchema(
-        database=db_asset_fixture,
+        database=database,
         schema_name="IGT_SCHEMA",
         comment=f"pyflake_client_TEST_{uuid.uuid4()}",
         owner=AssetsRole("SYSADMIN"),
@@ -92,19 +103,19 @@ def test_grant_role_schema_privileges(
     )
     p1 = AssetsGrant(
         RoleSchemaFutureGrant(
-            role.name, db_asset_fixture.db_name, schema.schema_name, ObjectType.TABLE
+            role.name, database.db_name, schema.schema_name, ObjectType.TABLE
         ),
         ["SELECT", "UPDATE"],
     )
     p2 = AssetsGrant(
         RoleSchemaFutureGrant(
-            role.name, db_asset_fixture.db_name, schema.schema_name, ObjectType.VIEW
+            role.name, database.db_name, schema.schema_name, ObjectType.VIEW
         ),
         ["SELECT", "REFERENCES"],
     )
 
     try:
-        flake.register_asset(db_asset_fixture, assets_queue)
+        flake.register_asset(database, assets_queue)
         flake.register_asset(schema, assets_queue)
         flake.register_asset(role, assets_queue)
         flake.register_asset(p1, assets_queue)
@@ -119,7 +130,7 @@ def test_grant_role_schema_privileges(
         # assert len(granted.grants) == 4
 
         # table_schema_scope = (
-        #     f"{db_asset_fixture.db_name}.{schema.schema_name}.<{ObjectType.TABLE}>"
+        #     f"{database.db_name}.{schema.schema_name}.<{ObjectType.TABLE}>"
         # )
         # found = next(
         #     (
@@ -142,7 +153,7 @@ def test_grant_role_schema_privileges(
         # assert found is not None
 
         # view_schema_scope = (
-        #     f"{db_asset_fixture.db_name}.{schema.schema_name}.<{ObjectType.VIEW}>"
+        #     f"{database.db_name}.{schema.schema_name}.<{ObjectType.VIEW}>"
         # )
         # found = next(
         #     (

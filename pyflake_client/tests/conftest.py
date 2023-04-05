@@ -15,7 +15,7 @@ from pyflake_client.models.assets.role import Role as AssetsRole
 
 
 # https://docs.pytest.org/en/6.2.x/fixture.html#fixture-scopes
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def flake() -> Generator:
     """flake"""
 
@@ -43,8 +43,8 @@ def assets_queue() -> queue.LifoQueue:
 
 
 @pytest.fixture(scope="function")
-def db_asset_fixture() -> AssetsDatabase:
-    database: AssetsDatabase = AssetsDatabase(
+def database() -> AssetsDatabase:
+    database = AssetsDatabase(
         "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
     )
     return database

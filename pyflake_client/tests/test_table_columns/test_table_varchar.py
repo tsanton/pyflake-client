@@ -7,17 +7,18 @@ from pyflake_client.models.assets.table_columns import Varchar
 from pyflake_client.models.entities.column import Varchar as VarcharEntity
 from pyflake_client.models.entities.table import Table as TableEntity
 from pyflake_client.models.describables.table import Table as TableDescribable
-from pyflake_client.models.assets.database import Database
+from pyflake_client.models.assets.database import Database as AssetsDatabase
 from pyflake_client.models.assets.role import Role as AssetsRole
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.client import PyflakeClient
 
 
-def test_table_varchar(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue, db_asset_fixture: Database
-):
+def test_table_varchar(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
     schema = Schema(
-        database=db_asset_fixture,
+        database=database,
         schema_name="TEST_SCHEMA",
         comment=f"pyflake_client_TEST_{uuid.uuid4()}",
         owner=AssetsRole("SYSADMIN"),
@@ -33,14 +34,14 @@ def test_table_varchar(
     )
 
     try:
-        flake.register_asset(db_asset_fixture, assets_queue)
+        flake.register_asset(database, assets_queue)
         flake.register_asset(schema, assets_queue)
         flake.register_asset(table, assets_queue)
 
         ### Act ###
         sf_table = flake.describe_one(
             TableDescribable(
-                database_name=db_asset_fixture.db_name,
+                database_name=database.db_name,
                 schema_name=schema.schema_name,
                 name=table.table_name,
             ),
@@ -67,11 +68,12 @@ def test_table_varchar(
         flake.delete_assets(assets_queue)
 
 
-def test_table_varchar_primary_key(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue, db_asset_fixture: Database
-):
+def test_table_varchar_primary_key(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
     schema = Schema(
-        database=db_asset_fixture,
+        database=database,
         schema_name="TEST_SCHEMA",
         comment=f"pyflake_client_TEST_{uuid.uuid4()}",
         owner=AssetsRole("SYSADMIN"),
@@ -87,14 +89,14 @@ def test_table_varchar_primary_key(
     )
 
     try:
-        flake.register_asset(db_asset_fixture, assets_queue)
+        flake.register_asset(database, assets_queue)
         flake.register_asset(schema, assets_queue)
         flake.register_asset(table, assets_queue)
 
         ### Act ###
         sf_table = flake.describe_one(
             TableDescribable(
-                database_name=db_asset_fixture.db_name,
+                database_name=database.db_name,
                 schema_name=schema.schema_name,
                 name=table.table_name,
             ),
