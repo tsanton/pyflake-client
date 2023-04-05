@@ -7,7 +7,7 @@ from pyflake_client.models.assets.role import Role
 from pyflake_client.models.assets.grants.role_schema_future_grant import (
     RoleSchemaFutureGrant as RoleSchemaFutureGrantAsset,
 )
-from pyflake_client.models.assets.grant import Grant as GrantAsset
+from pyflake_client.models.assets.grant import Grant as AssetsGrant
 from pyflake_client.models.describables.future_grant import (
     FutureGrant as DescribablesFutureGrant,
 )
@@ -29,7 +29,7 @@ def test_create_future_schema_table_privilege(
         Role("USERADMIN"),
         f"pyflake_client_TEST_{uuid.uuid4()}",
     )
-    privilege = GrantAsset(
+    privilege = AssetsGrant(
         RoleSchemaFutureGrantAsset(
             role.name, d.db_name, s1.schema_name, ObjectType.TABLE
         ),
@@ -70,13 +70,13 @@ def test_create_multiple_future_schema_table_privilege(
         Role("USERADMIN"),
         f"pyflake_client_TEST_{uuid.uuid4()}",
     )
-    privilege1 = GrantAsset(
+    privilege1 = AssetsGrant(
         RoleSchemaFutureGrantAsset(
             role1.name, d.db_name, s1.schema_name, ObjectType.TABLE
         ),
         ["SELECT", "REFERENCES"],
     )
-    privilege2 = GrantAsset(
+    privilege2 = AssetsGrant(
         RoleSchemaFutureGrantAsset(
             role1.name, d.db_name, s2.schema_name, ObjectType.TABLE
         ),

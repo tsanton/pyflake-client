@@ -7,7 +7,7 @@ from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.role import Role as AssetsRole
 from pyflake_client.models.assets.database import Database as AssetsDatabase
 from pyflake_client.models.assets.schema import Schema as AssetsSchema
-from pyflake_client.models.assets.grant import Grant as GrantAsset
+from pyflake_client.models.assets.grant import Grant as AssetsGrant
 from pyflake_client.models.assets.grants.role_schema_future_grant import (
     RoleSchemaFutureGrant,
 )
@@ -38,7 +38,7 @@ def test_grant_role_future_schema_privilege(
         AssetsRole("USERADMIN"),
         f"pyflake_client_TEST_{uuid.uuid4()}",
     )
-    privilege = GrantAsset(
+    privilege = AssetsGrant(
         RoleSchemaFutureGrant(
             role.name, db_asset_fixture.db_name, schema.schema_name, ObjectType.TABLE
         ),
@@ -90,13 +90,13 @@ def test_grant_role_schema_privileges(
         AssetsRole("USERADMIN"),
         f"pyflake_client_TEST_{uuid.uuid4()}",
     )
-    p1 = GrantAsset(
+    p1 = AssetsGrant(
         RoleSchemaFutureGrant(
             role.name, db_asset_fixture.db_name, schema.schema_name, ObjectType.TABLE
         ),
         ["SELECT", "UPDATE"],
     )
-    p2 = GrantAsset(
+    p2 = AssetsGrant(
         RoleSchemaFutureGrant(
             role.name, db_asset_fixture.db_name, schema.schema_name, ObjectType.VIEW
         ),

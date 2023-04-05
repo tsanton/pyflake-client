@@ -7,7 +7,7 @@ import uuid
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.role import Role as AssetsRole
 from pyflake_client.models.assets.database import Database as AssetsDatabase
-from pyflake_client.models.assets.grant import Grant as GrantAsset
+from pyflake_client.models.assets.grant import Grant as AssetsGrant
 from pyflake_client.models.assets.grants.role_database_grant import RoleDatabaseGrant
 from pyflake_client.models.describables.grant import Grant as DescribableGrant
 from pyflake_client.models.describables.database import Database as DescribableDatabase
@@ -27,7 +27,7 @@ def test_grant_role_database_privilege(
         AssetsRole("USERADMIN"),
         f"pyflake_client_TEST_{uuid.uuid4()}",
     )
-    privilege = GrantAsset(RoleDatabaseGrant(role.name, database.db_name), ["USAGE"])
+    privilege = AssetsGrant(RoleDatabaseGrant(role.name, database.db_name), ["USAGE"])
 
     try:
         flake.register_asset(database, assets_queue)
@@ -67,7 +67,7 @@ def test_grant_role_database_privileges(
         AssetsRole("USERADMIN"),
         f"pyflake_client_TEST_{uuid.uuid4()}",
     )
-    privilege = GrantAsset(
+    privilege = AssetsGrant(
         RoleDatabaseGrant(role.name, database.db_name), ["USAGE", "MONITOR"]
     )
 

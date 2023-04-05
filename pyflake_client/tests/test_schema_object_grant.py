@@ -2,7 +2,7 @@
 import uuid
 import queue
 
-from pyflake_client.models.assets.grant import Grant as GrantAsset
+from pyflake_client.models.assets.grant import Grant as AssetsGrant
 from pyflake_client.models.assets.grants.role_schema_future_grant import (
     RoleSchemaFutureGrant as RoleSchemaFutureGrantAsset,
 )
@@ -66,7 +66,7 @@ def test_create_table_with_future_privileges(
         f"pyflake_client_TEST_{uuid.uuid4()}",
     )
     role_privileges = ["SELECT", "REFERENCES", "OWNERSHIP"]
-    role_grant = GrantAsset(
+    role_grant = AssetsGrant(
         RoleSchemaFutureGrantAsset(
             role.name, d.db_name, s1.schema_name, ObjectType.TABLE
         ),
