@@ -2,9 +2,7 @@
 # pylint: disable=line-too-long
 from dataclasses import dataclass
 from pyflake_client.models.assets.database import Database
-from pyflake_client.models.assets.grants.snowflake_principal_interface import (
-    ISnowflakePrincipal,
-)
+from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 
 
@@ -19,6 +17,8 @@ class Schema(ISnowflakeAsset):
 
     def get_create_statement(self):
         """get_create_statement"""
+        if self.owner is None:
+            raise ValueError("Create statement not supported for owner-less schemas")
         return f"""CREATE OR REPLACE SCHEMA {self.database.db_name}.{self.schema_name} WITH MANAGED ACCESS COMMENT = '{self.comment}';
                    GRANT OWNERSHIP ON SCHEMA {self.database.db_name}.{self.schema_name} to {self.owner.get_identifier()} REVOKE CURRENT GRANTS;"""
 

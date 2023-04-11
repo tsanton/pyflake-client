@@ -2,9 +2,7 @@
 from dataclasses import dataclass
 
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.assets.grants.snowflake_principal_interface import (
-    ISnowflakePrincipal,
-)
+from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
 
 
 @dataclass(frozen=True)
@@ -17,6 +15,8 @@ class Database(ISnowflakeAsset):
 
     def get_create_statement(self):
         """get_create_statement"""
+        if self.owner is None:
+            raise ValueError("Create statement not supported for owner-less databases")
         return f"""CREATE OR REPLACE DATABASE {self.db_name} COMMENT = '{self.comment}';
                    GRANT OWNERSHIP ON DATABASE {self.db_name} TO {self.owner.get_identifier()};"""
 

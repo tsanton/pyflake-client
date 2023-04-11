@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import List
-from pyflake_client.models.assets.grants.snowflake_principal_interface import (
-    ISnowflakePrincipal,
-)
+from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
 from pyflake_client.models.assets.role import Role
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 
@@ -17,6 +15,8 @@ class Tag(ISnowflakeAsset):
     comment: str = ""
 
     def get_create_statement(self) -> str:
+        if self.owner is None:
+            raise ValueError("Create statement not supported for owner-less tags")
         query = ""
         query += f"CREATE OR REPLACE TAG {self.database_name}.{self.schema_name}.{self.tag_name}"
         if len(self.tag_values) > 0:

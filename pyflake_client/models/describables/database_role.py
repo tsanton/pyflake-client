@@ -28,3 +28,8 @@ class DatabaseRole(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
 
     def get_dacite_config(self) -> Config:
         return None
+
+    @staticmethod
+    def get_snowflake_type() -> str:
+        """get_snowflake_type"""
+        return "DATABASE ROLE"

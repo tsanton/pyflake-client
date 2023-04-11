@@ -1,9 +1,9 @@
-"""snowflake_grant_interface"""
+"""snowflake_principal_interface"""
 from abc import ABC, abstractmethod
 
 
 class ISnowflakePrincipal(ABC):
-    """ISnowflakePrinciple"""
+    """ISnowflakePrincipal"""
 
     @abstractmethod
     def get_identifier(self) -> str:

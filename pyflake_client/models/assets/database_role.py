@@ -3,9 +3,7 @@ from dataclasses import dataclass
 from typing import Union
 
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.assets.grants.snowflake_principal_interface import (
-    ISnowflakePrincipal,
-)
+from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
 from pyflake_client.models.assets.role import Role as AccountRole
 
 

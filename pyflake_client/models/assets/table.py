@@ -6,13 +6,8 @@ from typing import List
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 from pyflake_client.models.assets.table_columns import Column, ClassificationTag
-from pyflake_client.models.assets.grants.snowflake_principal_interface import (
-    ISnowflakePrincipal,
-)
-from pyflake_client.models.describables.snowflake_grant_principal import (
-    ISnowflakeGrantPrincipal,
-)
-
+from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
+from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
 
 @dataclass(frozen=True)
 class Table(ISnowflakeAsset, ISnowflakeGrantPrincipal):
@@ -26,6 +21,9 @@ class Table(ISnowflakeAsset, ISnowflakeGrantPrincipal):
     data_retention_time_days: int = 1
 
     def get_create_statement(self) -> str:
+        if self.owner is None:
+            raise ValueError("Create statement not supported for owner-less tables")
+        
         table_identifier = f"{self.schema.database.db_name}.{self.schema.schema_name}.{self.table_name}"
         primary_keys = [c.name for c in self.columns if c.primary_key]
 

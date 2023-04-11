@@ -1,6 +1,6 @@
 from abc import ABC
 from typing import List
-from pyflake_client.models.assets.grants.snowflake_principal_interface import (
+from pyflake_client.models.assets.snowflake_principal_interface import (
     ISnowflakePrincipal,
 )
 from pyflake_client.models.enums.privilege import Privilege
