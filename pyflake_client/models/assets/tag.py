@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List
 from pyflake_client.models.assets.grants.snowflake_principal_interface import (
     ISnowflakePrincipal,
 )
@@ -9,9 +9,9 @@ from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAss
 
 @dataclass
 class Tag(ISnowflakeAsset):
-    database_name: Union[str, None]
-    schema_name: Union[str, None]
-    tag_name: Union[str, None]
+    database_name: str
+    schema_name: str
+    tag_name: str
     tag_values: List[str]
     owner: ISnowflakePrincipal = Role(name="SYSADMIN")
     comment: str = ""

@@ -20,7 +20,7 @@ class Tag(ISnowflakeEntity):
 
     @classmethod
     def load_from_sf(
-        cls, data: Dict[str, Any], config: Union[dacite.Config, None]
+        cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None
     ) -> Tag:
         return Tag(
             database_name=data["database_name"],

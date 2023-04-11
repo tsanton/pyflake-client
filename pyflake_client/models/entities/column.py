@@ -2,7 +2,9 @@ from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass
 import re
-from typing import Dict, Union
+from typing import Any, Dict, Union
+
+import dacite
 
 
 from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
@@ -33,7 +35,9 @@ class Column(ISnowflakeEntity, ABC):
         }
 
     @classmethod
-    def load_from_sf_data(cls, data) -> Column:
+    def load_from_sf(
+        cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None
+    ) -> Column:
         # TODO ; tags
         for old_key, new_key in cls.map_key_names().items():
             data[new_key] = data.pop(old_key)
