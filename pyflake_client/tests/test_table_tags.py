@@ -37,7 +37,7 @@ def test_create_table_with_tag_without_value(
         Varchar("SOME_VARCHAR", primary_key=True),
     ]
 
-    asset_tag = AssetsTag(
+    tag_asset = AssetsTag(
         database_name=database.db_name,
         schema_name=schema.schema_name,
         tag_name="TEST_TAG",
@@ -47,7 +47,7 @@ def test_create_table_with_tag_without_value(
     classification_tag = ClassificationTag(
         database_name=database.db_name,
         schema_name=schema.schema_name,
-        tag_name=asset_tag.tag_name,
+        tag_name=tag_asset.tag_name,
         tag_value=None,
     )
     table = TableAsset(
@@ -61,7 +61,7 @@ def test_create_table_with_tag_without_value(
     try:
         flake.register_asset(database, assets_queue)
         flake.register_asset(schema, assets_queue)
-        flake.register_asset(asset_tag, assets_queue)
+        flake.register_asset(tag_asset, assets_queue)
         flake.register_asset(table, assets_queue)
 
         ### Act ###
@@ -82,7 +82,164 @@ def test_create_table_with_tag_without_value(
         assert len(t.tags) == 1
         tag = t.tags[0]
         assert tag.tag_value == ""
-        assert tag.tag_name == asset_tag.tag_name
+        assert tag.tag_name == tag_asset.tag_name
+    finally:
+        ### Cleanup ###
+        flake.delete_assets(assets_queue)
+
+
+def test_create_table_with_tag_with_value(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue
+):
+    """test_create_table"""
+    ### Arrange ###
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
+    schema: Schema = Schema(
+        database=database,
+        schema_name="SOME_SCHEMA",
+        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
+        owner=AssetsRole("SYSADMIN"),
+    )
+    columns = [
+        Number("ID", identity=Identity(1, 1)),
+        Varchar("SOME_VARCHAR", primary_key=True),
+    ]
+
+    tag_asset = AssetsTag(
+        database_name=database.db_name,
+        schema_name=schema.schema_name,
+        tag_name="TEST_TAG",
+        tag_values=["FOO", "BAR"],
+        owner=AssetsRole(name="SYSADMIN"),
+    )
+    classification_tag = ClassificationTag(
+        database_name=database.db_name,
+        schema_name=schema.schema_name,
+        tag_name=tag_asset.tag_name,
+        tag_value="FOO",
+    )
+    table = TableAsset(
+        schema=schema,
+        table_name="TEST",
+        columns=columns,
+        owner=AssetsRole("SYSADMIN"),
+        tags=[classification_tag],
+    )
+
+    try:
+        flake.register_asset(database, assets_queue)
+        flake.register_asset(schema, assets_queue)
+        flake.register_asset(tag_asset, assets_queue)
+        flake.register_asset(table, assets_queue)
+
+        ### Act ###
+        t = flake.describe_one(
+            TableDescribable(database.db_name, schema.schema_name, table.table_name),
+            TableEntity,
+        )
+
+        ### Assert ###
+        assert t is not None
+        assert t.name == table.table_name
+        assert t.database_name == database.db_name
+        assert t.schema_name == schema.schema_name
+        assert t.kind == "TABLE"
+        assert t.owner == "ACCOUNTADMIN"
+        assert t.retention_time == "1"
+        assert t.tags is not None
+        assert len(t.tags) == 1
+        tag = t.tags[0]
+        assert tag.tag_value == "FOO"
+        assert tag.tag_name == tag_asset.tag_name
+    finally:
+        ### Cleanup ###
+        flake.delete_assets(assets_queue)
+
+
+def test_create_table_with_multiple_tags(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue
+):
+    """test_create_table"""
+    ### Arrange ###
+    database = AssetsDatabase(
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
+    )
+    schema: Schema = Schema(
+        database=database,
+        schema_name="SOME_SCHEMA",
+        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
+        owner=AssetsRole("SYSADMIN"),
+    )
+    columns = [
+        Number("ID", identity=Identity(1, 1)),
+        Varchar("SOME_VARCHAR", primary_key=True),
+    ]
+
+    tag_asset_1 = AssetsTag(
+        database_name=database.db_name,
+        schema_name=schema.schema_name,
+        tag_name="TEST_TAG_1",
+        tag_values=[],
+        owner=AssetsRole(name="SYSADMIN"),
+    )
+    tag_asset_2 = AssetsTag(
+        database_name=database.db_name,
+        schema_name=schema.schema_name,
+        tag_name="TEST_TAG_2",
+        tag_values=["FOO", "BAR"],
+        owner=AssetsRole(name="SYSADMIN"),
+    )
+    classification_tag_1 = ClassificationTag(
+        database_name=database.db_name,
+        schema_name=schema.schema_name,
+        tag_name=tag_asset_1.tag_name,
+        tag_value=None,
+    )
+    classification_tag_2 = ClassificationTag(
+        database_name=database.db_name,
+        schema_name=schema.schema_name,
+        tag_name=tag_asset_2.tag_name,
+        tag_value="FOO",
+    )
+    table = TableAsset(
+        schema=schema,
+        table_name="TEST",
+        columns=columns,
+        owner=AssetsRole("SYSADMIN"),
+        tags=[classification_tag_1, classification_tag_2],
+    )
+
+    try:
+        flake.register_asset(database, assets_queue)
+        flake.register_asset(schema, assets_queue)
+        flake.register_asset(tag_asset_1, assets_queue)
+        flake.register_asset(tag_asset_2, assets_queue)
+        flake.register_asset(table, assets_queue)
+
+        ### Act ###
+        t = flake.describe_one(
+            TableDescribable(database.db_name, schema.schema_name, table.table_name),
+            TableEntity,
+        )
+
+        ### Assert ###
+        assert t is not None
+        assert t.name == table.table_name
+        assert t.database_name == database.db_name
+        assert t.schema_name == schema.schema_name
+        assert t.kind == "TABLE"
+        assert t.owner == "ACCOUNTADMIN"
+        assert t.retention_time == "1"
+        assert t.tags is not None
+        assert len(t.tags) == 2
+        tag_1 = t.tags[0]
+        assert tag_1.tag_value == ""
+        assert tag_1.tag_name == tag_asset_1.tag_name
+        tag_2 = t.tags[1]
+        assert tag_2.tag_value == "FOO"
+        assert tag_2.tag_name == tag_asset_2.tag_name
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
