@@ -1,6 +1,7 @@
 """role"""
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Union
 
 from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
 
@@ -8,10 +9,11 @@ from pyflake_client.models.entities.snowflake_entity_interface import ISnowflake
 @dataclass(frozen=True)
 class Role(ISnowflakeEntity):
     """Role"""
+
     name: str
-    owner: str = None
-    assigned_to_users: int = None
-    granted_to_roles: int = None
-    granted_roles: int = None
-    comment: str = None
-    created_on: datetime = None
+    owner: Union[str, None] = None
+    assigned_to_users: Union[int, None] = None
+    granted_to_roles: Union[int, None] = None
+    granted_roles: Union[int, None] = None
+    comment: Union[str, None] = None
+    created_on: Union[datetime, None] = None

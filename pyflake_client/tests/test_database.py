@@ -10,20 +10,26 @@ from pyflake_client.models.assets.database import Database as AssetsDatabase
 from pyflake_client.models.entities.database import Database as EntitiesDatabase
 from pyflake_client.models.describables.database import Database as DescribablesDatabase
 
+from pyflake_client.models.assets.role import Role as AssetsRole
+
 
 def test_create_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_database"""
+
     ### Arrange ###
     database: AssetsDatabase = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}"
+        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
     )
 
     try:
         flake.register_asset(database, assets_queue)
 
         ### Act ###
-        sf_db: EntitiesDatabase = flake.describe(DescribablesDatabase(database.db_name), EntitiesDatabase)
+        sf_db = flake.describe_one(
+            DescribablesDatabase(database.db_name), EntitiesDatabase
+        )
         ### Assert ###
+        assert sf_db is not None
         assert sf_db.name == database.db_name
         assert sf_db.comment == database.comment
         assert sf_db.owner == "SYSADMIN"
@@ -36,9 +42,10 @@ def test_create_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 def test_get_database(flake: PyflakeClient):
     """test_get_database"""
     ### Act ###
-    database: EntitiesDatabase = flake.describe(DescribablesDatabase("SNOWFLAKE"), EntitiesDatabase)
+    database = flake.describe_one(DescribablesDatabase("SNOWFLAKE"), EntitiesDatabase)
 
     ### Assert ###
+    assert database is not None
     assert database.name == "SNOWFLAKE"
     assert database.origin == "SNOWFLAKE.ACCOUNT_USAGE"
 
@@ -46,7 +53,9 @@ def test_get_database(flake: PyflakeClient):
 def test_get_database_that_does_not_exist(flake: PyflakeClient):
     """test_get_database_does_not_exist"""
     ### Act ###
-    database: EntitiesDatabase = flake.describe(DescribablesDatabase("I_DO_NOT_EXIST"), EntitiesDatabase)
+    database = flake.describe_one(
+        DescribablesDatabase("I_DO_NOT_EXIST"), EntitiesDatabase
+    )
 
     ### Assert ###
     assert database is None

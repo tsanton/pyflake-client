@@ -5,10 +5,18 @@
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Union
 
-from pyflake_client.models.mergeables.snowflake_mergable_interface import ISnowflakeMergable
-from pyflake_client.models.enums.column_type import ColumnType
-from pyflake_client.models.assets.table import Column
+from pyflake_client.models.mergeables.snowflake_mergable_interface import (
+    ISnowflakeMergable,
+)
+from pyflake_client.models.assets.table_columns import (
+    Integer,
+    Varchar,
+    Identity,
+    Bool,
+    Timestamp,
+)
 
 # --------------------------------------------------------
 # --- Test dependencies
@@ -16,26 +24,27 @@ from pyflake_client.models.assets.table import Column
 
 TABLE_NAME = "merge_table"
 TABLE_COLUMN_DEFINITION = [
-    Column("id", ColumnType.INTEGER, identity=True),
-    Column("the_primary_key", ColumnType.VARCHAR, primary_key=True),
-    Column("enabled", ColumnType.BOOLEAN),
-    Column("valid_from", ColumnType.TIMESTAMP),
-    Column("valid_to", ColumnType.TIMESTAMP),
+    Integer("id", identity=Identity(1, 1)),
+    Varchar("the_primary_key", primary_key=True),
+    Bool(name="enabled"),
+    Timestamp(name="valid_from"),
+    Timestamp(name="valid_to"),
 ]
 
 
 @dataclass
 class MergableEntity(ISnowflakeMergable):
     """RoleRelationshipEntity"""
+
     the_primary_key: str
-    enabled: bool = None
-    valid_from: datetime = None
-    valid_to: datetime = None
-    id: int = None
+    enabled: Union[bool, None] = None
+    valid_from: Union[datetime, None] = None
+    valid_to: Union[datetime, None] = None
+    id: Union[int, None] = None
 
     def merge_into_statement(self, db_name: str, schema_name: str) -> str:
         """merge_into_statement"""
-        now = datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+        now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z")
         return f"""
         merge into {db_name}.{schema_name}.{TABLE_NAME} tar using
         (

@@ -4,26 +4,35 @@
 import importlib
 import queue
 import json
-from typing import Any, Type, TypeVar
+from typing import Any, List, Type, TypeVar, Union
 
 from dacite import from_dict
 from snowflake.connector import SnowflakeConnection
 from snowflake.connector.errors import ProgrammingError
 
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
 from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
-from pyflake_client.models.executables.snowflake_executable_interface import ISnowflakeExecutable
-from pyflake_client.models.mergeables.snowflake_mergable_interface import ISnowflakeMergable
+from pyflake_client.models.executables.snowflake_executable_interface import (
+    ISnowflakeExecutable,
+)
+from pyflake_client.models.mergeables.snowflake_mergable_interface import (
+    ISnowflakeMergable,
+)
+from pyflake_client.tests.models.mergable_entity import MergableEntity
 
 
-T = TypeVar('T', bound=ISnowflakeEntity)
+T = TypeVar("T", bound=ISnowflakeEntity)
 
 
 class PyflakeClient:
     """PyflakeClient"""
 
-    def __init__(self, conn: SnowflakeConnection, gov_db: str = None, mgmt_schema: str = None) -> None:
+    def __init__(
+        self, conn: SnowflakeConnection, gov_db: str = None, mgmt_schema: str = None
+    ) -> None:
         self._conn: SnowflakeConnection = conn
         self.gov_db = gov_db
         self.mgmt_schema = mgmt_schema
@@ -52,10 +61,12 @@ class PyflakeClient:
         """create_asset"""
         self._create_asset(obj)
 
-    def register_asset(self, obj: ISnowflakeAsset, asset_queue: queue.LifoQueue) -> None:
+    def register_asset(
+        self, obj: ISnowflakeAsset, asset_queue: queue.LifoQueue
+    ) -> None:
         """register_asset"""
-        asset_queue.put(obj)
         self._create_asset(obj)
+        asset_queue.put(obj)
 
     def _create_asset(self, obj: ISnowflakeAsset):
         """create_asset"""
@@ -74,40 +85,80 @@ class PyflakeClient:
         """delete_asset"""
         self._conn.execute_string(obj.get_delete_statement())
 
-    def describe(self, describable: ISnowflakeDescribable, entity: Type[T]) -> T:
-        """describe"""
+    def describe_one(
+        self, describable: ISnowflakeDescribable, entity: Type[T]
+    ) -> Union[T, None]:
         class_ = entity
         with self._conn.cursor() as cur:
             try:
                 cur.execute(describable.get_describe_statement())
-            # except ProgrammingError as err:  # SHOW SCHEMA LIKE '<SCHEMA_NAME>' in DATABASE <SOME_DB> throws this error when database does not exist
-            #     print(err)
             except ProgrammingError:
-                return None
+                return None  # TODO : this seems unsafe
+
             row = cur.fetchone()
             if not row:
                 return None
+
             if describable.is_procedure():
                 data = json.loads(row[0])
                 if data in ({}, []):
                     return None
-                return from_dict(data_class=class_, data=data, config=describable.get_dacite_config())
-            return from_dict(
-                data_class=class_,
+
+                return class_.load_from_sf(
+                    data=data, config=describable.get_dacite_config()
+                )
+
+            return class_.load_from_sf(
                 data=dict(zip([c[0] for c in cur.description], row)),
-                config=describable.get_dacite_config()
+                config=describable.get_dacite_config(),
             )
+
+    def describe_many(
+        self, describable: ISnowflakeDescribable, entity: Type[T]
+    ) -> Union[List[T], None]:
+        class_ = entity
+        with self._conn.cursor() as cur:
+            try:
+                cur.execute(describable.get_describe_statement())
+            except ProgrammingError:
+                return None  # TODO : this seems unsafe
+
+            res = cur.fetchall()
+            if not res:
+                return []
+
+            if describable.is_procedure():
+                data = [
+                    json.loads(r[0]) for r in res
+                ]  # TODO : check formatting of fetchall
+                if data in ({}, []):
+                    return []
+
+                return [
+                    class_.load_from_sf(data=d, config=describable.get_dacite_config())
+                    for d in data
+                ]
+
+            return [
+                class_.load_from_sf(
+                    data=dict(zip([c[0] for c in cur.description], r)),
+                    config=describable.get_dacite_config(),
+                )
+                for r in res
+            ]
 
     def merge_into(self, obj: ISnowflakeMergable) -> bool:
         """merge_into"""
         try:
-            self._conn.execute_string(obj.merge_into_statement(self.gov_db, self.mgmt_schema))
+            self._conn.execute_string(
+                obj.merge_into_statement(self.gov_db, self.mgmt_schema)
+            )
             return True
         except Exception as e:
             print(e)
         return False
 
-    def get_mergeable(self, obj: ISnowflakeMergable) -> ISnowflakeMergable:
+    def get_mergeable(self, obj: ISnowflakeMergable) -> MergableEntity:
         """get_mergeable"""
         module = importlib.import_module(obj.__module__)
         class_ = getattr(module, obj.__class__.__name__)
@@ -121,8 +172,4 @@ class PyflakeClient:
                     data[k] = json.loads(v)
                 else:
                     data[k] = v
-            return from_dict(
-                data_class=class_,
-                data=data,
-                config=None
-            )
+            return from_dict(data_class=class_, data=data, config=None)

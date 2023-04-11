@@ -1,19 +1,25 @@
 """test_role_schema_object_grant"""
-# pylint: disable=line-too-long
-# pylint: disable=invalid-name
 import queue
 
-from pyflake_client.models.enums.column_type import ColumnType
+from pyflake_client.models.assets.table_columns import Identity, Integer, Varchar
 from pyflake_client.models.enums.object_type import ObjectType
-
 from pyflake_client.models.assets.grant import Grant
-from pyflake_client.models.assets.table import Column, Table
-from pyflake_client.models.assets.grants.role_schema_future_grant import RoleSchemaFutureGrant as RoleSchemaFutureGrantAsset
+from pyflake_client.models.assets.table import Table
+from pyflake_client.models.assets.role import Role as AssetsRole
+from pyflake_client.models.assets.grants.role_schema_future_grant import (
+    RoleSchemaFutureGrant as RoleSchemaFutureGrantAsset,
+)
 from pyflake_client.client import PyflakeClient
+from pyflake_client.models.describables.table import Table as DescribablesTable
 from pyflake_client.tests.utilities import _spawn_without_rwc_privileges, compare
-
-from pyflake_client.models.describables.grants.role_schema_object_grant import RoleSchemaObjectGrant
-from pyflake_client.models.entities.grants.role_schema_object_grant import RoleSchemaObjectGrants
+from pyflake_client.models.describables.grant import (
+    Grant as DescribablesGrant,
+)
+from pyflake_client.models.entities.grant import (
+    Grant as EntitiesGrant,
+)
+from pyflake_client.models.describables.role import Role as DescribablesRole
+from pyflake_client.models.describables.grant import Grant as DescribableGrant
 
 
 def test_get_granted_privileges_r(flake: PyflakeClient, assets_queue: queue.LifoQueue):
@@ -21,14 +27,23 @@ def test_get_granted_privileges_r(flake: PyflakeClient, assets_queue: queue.Lifo
     ### Arrange ###
     d, s, r, rw, rwc = _spawn_without_rwc_privileges(flake, assets_queue)
     table = ObjectType.TABLE
-    r_privilege = Grant(RoleSchemaFutureGrantAsset(r.name, d.db_name, s.schema_name, table), ["SELECT", "REFERENCES"])
-    rw_privilege = Grant(RoleSchemaFutureGrantAsset(rw.name, d.db_name, s.schema_name, table), ["INSERT", "UPDATE"])
-    rwc_privilege = Grant(RoleSchemaFutureGrantAsset(rwc.name, d.db_name, s.schema_name, table), ["OWNERSHIP"])
+    r_privilege = Grant(
+        RoleSchemaFutureGrantAsset(r.name, d.db_name, s.schema_name, table),
+        ["SELECT", "REFERENCES"],
+    )
+    rw_privilege = Grant(
+        RoleSchemaFutureGrantAsset(rw.name, d.db_name, s.schema_name, table),
+        ["INSERT", "UPDATE"],
+    )
+    rwc_privilege = Grant(
+        RoleSchemaFutureGrantAsset(rwc.name, d.db_name, s.schema_name, table),
+        ["OWNERSHIP"],
+    )
     table_columns = [
-        Column("ID", ColumnType.INTEGER, identity=True),
-        Column("SOME_VARCHAR", ColumnType.VARCHAR, primary_key=True)
+        Integer(name="ID", identity=Identity(1, 1)),
+        Varchar(name="SOME_VARCHAR", primary_key=True),
     ]
-    t = Table(s, "TEST", table_columns)
+    t = Table(s, "TEST", table_columns, owner=AssetsRole("SYSADMIN"))
 
     try:
         flake.register_asset(r_privilege, assets_queue)
@@ -37,18 +52,25 @@ def test_get_granted_privileges_r(flake: PyflakeClient, assets_queue: queue.Lifo
         flake.register_asset(t, assets_queue)
 
         ### Act ###
-        showable = RoleSchemaObjectGrant(r.name, d.db_name, s.schema_name, ObjectType.TABLE, t.table_name)
-        rp: RoleSchemaObjectGrants = flake.describe(showable, RoleSchemaObjectGrants)
+        desc_table = DescribablesTable(
+            database_name=d.db_name, schema_name=s.schema_name, name=t.table_name
+        )
+        showable = DescribablesGrant(principal=desc_table)
+        grants = flake.describe_many(showable, EntitiesGrant)
 
         ### Assert ###
-        assert rp.role_name == r.name
-        assert rp.db_name == d.db_name
-        assert rp.schema_name == s.schema_name
-        assert rp.object_name == t.table_name
-        assert rp.object_type == ObjectType.TABLE
-        assert len(rp.inherited_privileges) == 0
-        assert compare(rp.granted_privileges, r_privilege.privileges)
-        assert compare(rp.all_privileges, r_privilege.privileges)
+        assert grants is not None
+        assert len(grants) == 5
+        assert all(
+            x in ("REFERENCES", "SELECT", "INSERT", "UPDATE", "OWNERSHIP")
+            for x in (g.privilege for g in grants)
+        )
+        names = list({g.name for g in grants})
+        assert len(names) == 1
+        assert names[0] == f"{d.db_name}.{s.schema_name}.{t.table_name}"
+        granters = list({g.granted_by for g in grants})
+        assert len(granters) == 1
+        assert granters[0] == rwc.name
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
@@ -59,14 +81,23 @@ def test_get_granted_privileges_rw(flake: PyflakeClient, assets_queue: queue.Lif
     ### Arrange ###
     d, s, r, rw, rwc = _spawn_without_rwc_privileges(flake, assets_queue)
     table = ObjectType.TABLE
-    r_privilege = Grant(RoleSchemaFutureGrantAsset(r.name, d.db_name, s.schema_name, table), ["SELECT", "REFERENCES"])
-    rw_privilege = Grant(RoleSchemaFutureGrantAsset(rw.name, d.db_name, s.schema_name, table), ["INSERT", "UPDATE"])
-    rwc_privilege = Grant(RoleSchemaFutureGrantAsset(rwc.name, d.db_name, s.schema_name, table), ["OWNERSHIP"])
+    r_privilege = Grant(
+        RoleSchemaFutureGrantAsset(r.name, d.db_name, s.schema_name, table),
+        ["SELECT", "REFERENCES"],
+    )
+    rw_privilege = Grant(
+        RoleSchemaFutureGrantAsset(rw.name, d.db_name, s.schema_name, table),
+        ["INSERT", "UPDATE"],
+    )
+    rwc_privilege = Grant(
+        RoleSchemaFutureGrantAsset(rwc.name, d.db_name, s.schema_name, table),
+        ["OWNERSHIP"],
+    )
     table_columns = [
-        Column("ID", ColumnType.INTEGER, identity=True),
-        Column("SOME_VARCHAR", ColumnType.VARCHAR, primary_key=True)
+        Integer(name="ID", identity=Identity(1, 1)),
+        Varchar(name="SOME_VARCHAR", primary_key=True),
     ]
-    t = Table(s, "TEST", table_columns)
+    t = Table(s, "TEST", table_columns, owner=AssetsRole("SYSADMIN"))
 
     try:
         flake.register_asset(r_privilege, assets_queue)
@@ -75,36 +106,58 @@ def test_get_granted_privileges_rw(flake: PyflakeClient, assets_queue: queue.Lif
         flake.register_asset(t, assets_queue)
 
         ### Act ###
-        showable = RoleSchemaObjectGrant(rw.name, d.db_name, s.schema_name, ObjectType.TABLE, t.table_name)
-        rp: RoleSchemaObjectGrants = flake.describe(showable, RoleSchemaObjectGrants)
+        desc_table = DescribablesTable(
+            database_name=d.db_name, schema_name=s.schema_name, name=t.table_name
+        )
+        assert desc_table is not None
 
+        grants = flake.describe_many(
+            describable=DescribableGrant(principal=DescribablesRole(name=r.name)),
+            entity=EntitiesGrant,
+        )
         ### Assert ###
-        assert rp.role_name == rw.name
-        assert rp.db_name == d.db_name
-        assert rp.schema_name == s.schema_name
-        assert rp.object_name == t.table_name
-        assert rp.object_type == ObjectType.TABLE
-        assert len(rp.inherited_privileges) == 1
-        assert compare(rp.granted_privileges, rw_privilege.privileges)
-        assert compare(rp.all_privileges, r_privilege.privileges + rw_privilege.privileges)
+        assert grants is not None
+        # TODO @tobias what do these tests do
+        assert False
+        # assert rp.role_name == rw.name
+        # assert rp.db_name == d.db_name
+        # assert rp.schema_name == s.schema_name
+        # assert rp.object_name == t.table_name
+        # assert rp.object_type == ObjectType.TABLE
+        # assert len(rp.inherited_privileges) == 1
+        # assert compare(rp.granted_privileges, rw_privilege.privileges)
+        # assert compare(
+        #     rp.all_privileges, r_privilege.privileges + rw_privilege.privileges
+        # )
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
 
 
-def test_get_granted_privileges_rwc(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+def test_get_granted_privileges_rwc(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue
+):
     """test_get_granted_privileges_rwc"""
     ### Arrange ###
     d, s, r, rw, rwc = _spawn_without_rwc_privileges(flake, assets_queue)
     table = ObjectType.TABLE
-    r_privilege = Grant(RoleSchemaFutureGrantAsset(r.name, d.db_name, s.schema_name, table), ["SELECT", "REFERENCES"])
-    rw_privilege = Grant(RoleSchemaFutureGrantAsset(rw.name, d.db_name, s.schema_name, table), ["INSERT", "UPDATE"])
-    rwc_privilege = Grant(RoleSchemaFutureGrantAsset(rwc.name, d.db_name, s.schema_name, table), ["OWNERSHIP"])
+    r_privilege = Grant(
+        RoleSchemaFutureGrantAsset(r.name, d.db_name, s.schema_name, table),
+        ["SELECT", "REFERENCES"],
+    )
+    rw_privilege = Grant(
+        RoleSchemaFutureGrantAsset(rw.name, d.db_name, s.schema_name, table),
+        ["INSERT", "UPDATE"],
+    )
+    rwc_privilege = Grant(
+        RoleSchemaFutureGrantAsset(rwc.name, d.db_name, s.schema_name, table),
+        ["OWNERSHIP"],
+    )
     table_columns = [
-        Column("ID", ColumnType.INTEGER, identity=True),
-        Column("SOME_VARCHAR", ColumnType.VARCHAR, primary_key=True)
+        Integer(name="ID", identity=Identity(1, 1)),
+        Varchar(name="SOME_VARCHAR", primary_key=True),
     ]
-    t = Table(s, "TEST", table_columns)
+    t = Table(s, "TEST", table_columns, owner=AssetsRole("SYSADMIN"))
 
     try:
         flake.register_asset(r_privilege, assets_queue)
@@ -113,10 +166,13 @@ def test_get_granted_privileges_rwc(flake: PyflakeClient, assets_queue: queue.Li
         flake.register_asset(t, assets_queue)
 
         ### Act ###
-        showable = RoleSchemaObjectGrant(rwc.name, d.db_name, s.schema_name, ObjectType.TABLE, t.table_name)
-        rp: RoleSchemaObjectGrants = flake.describe(showable, RoleSchemaObjectGrants)
+        showable = RoleSchemaObjectGrant(
+            rwc.name, d.db_name, s.schema_name, ObjectType.TABLE, t.table_name
+        )
+        rp = flake.describe_one(showable, RoleSchemaObjectGrants)
 
         ### Assert ###
+        assert rp is not None
         assert rp.role_name == rwc.name
         assert rp.db_name == d.db_name
         assert rp.schema_name == s.schema_name
@@ -124,13 +180,18 @@ def test_get_granted_privileges_rwc(flake: PyflakeClient, assets_queue: queue.Li
         assert rp.object_type == ObjectType.TABLE
         assert len(rp.inherited_privileges) == 2
         assert compare(rp.granted_privileges, rwc_privilege.privileges)
-        assert compare(rp.all_privileges, r_privilege.privileges + rw_privilege.privileges + rwc_privilege.privileges)
+        assert compare(
+            rp.all_privileges,
+            r_privilege.privileges + rw_privilege.privileges + rwc_privilege.privileges,
+        )
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
 
 
-def test_get_granted_privileges_accountadmin(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+def test_get_granted_privileges_accountadmin(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue
+):
     """
     test_get_granted_privileges_accountadmin:
     from _spawn_without_rwc_privileges() we get the following role hierarchy: r >> rw >> rwc >> db_sys_admin >> SYSADMIN >> ACCOUNTADMIN
@@ -138,14 +199,23 @@ def test_get_granted_privileges_accountadmin(flake: PyflakeClient, assets_queue:
     ### Arrange ###
     d, s, r, rw, rwc = _spawn_without_rwc_privileges(flake, assets_queue)
     table = ObjectType.TABLE
-    r_privilege = Grant(RoleSchemaFutureGrantAsset(r.name, d.db_name, s.schema_name, table), ["SELECT", "REFERENCES"])
-    rw_privilege = Grant(RoleSchemaFutureGrantAsset(rw.name, d.db_name, s.schema_name, table), ["INSERT", "UPDATE"])
-    rwc_privilege = Grant(RoleSchemaFutureGrantAsset(rwc.name, d.db_name, s.schema_name, table), ["OWNERSHIP"])
+    r_privilege = Grant(
+        RoleSchemaFutureGrantAsset(r.name, d.db_name, s.schema_name, table),
+        ["SELECT", "REFERENCES"],
+    )
+    rw_privilege = Grant(
+        RoleSchemaFutureGrantAsset(rw.name, d.db_name, s.schema_name, table),
+        ["INSERT", "UPDATE"],
+    )
+    rwc_privilege = Grant(
+        RoleSchemaFutureGrantAsset(rwc.name, d.db_name, s.schema_name, table),
+        ["OWNERSHIP"],
+    )
     table_columns = [
-        Column("ID", ColumnType.INTEGER, identity=True),
-        Column("SOME_VARCHAR", ColumnType.VARCHAR, primary_key=True)
+        Integer(name="ID", identity=Identity(1, 1)),
+        Varchar(name="SOME_VARCHAR", primary_key=True),
     ]
-    t = Table(s, "TEST", table_columns)
+    t = Table(s, "TEST", table_columns, owner=AssetsRole("SYSADMIN"))
 
     try:
         flake.register_asset(r_privilege, assets_queue)
@@ -154,10 +224,13 @@ def test_get_granted_privileges_accountadmin(flake: PyflakeClient, assets_queue:
         flake.register_asset(t, assets_queue)
 
         ### Act ###
-        showable = RoleSchemaObjectGrant("ACCOUNTADMIN", d.db_name, s.schema_name, ObjectType.TABLE, t.table_name)
-        rp: RoleSchemaObjectGrants = flake.describe(showable, RoleSchemaObjectGrants)
+        showable = RoleSchemaObjectGrant(
+            "ACCOUNTADMIN", d.db_name, s.schema_name, ObjectType.TABLE, t.table_name
+        )
+        rp = flake.describe_one(showable, RoleSchemaObjectGrants)
 
         ### Assert ###
+        assert rp is not None
         assert rp.role_name == "ACCOUNTADMIN"
         assert rp.db_name == d.db_name
         assert rp.schema_name == s.schema_name
@@ -165,13 +238,18 @@ def test_get_granted_privileges_accountadmin(flake: PyflakeClient, assets_queue:
         assert rp.object_type == ObjectType.TABLE
         assert len(rp.granted_privileges) == 0
         assert len(rp.inherited_privileges) == 3
-        assert compare(rp.all_privileges, r_privilege.privileges + rw_privilege.privileges + rwc_privilege.privileges)
+        assert compare(
+            rp.all_privileges,
+            r_privilege.privileges + rw_privilege.privileges + rwc_privilege.privileges,
+        )
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
 
 
-def test_get_granted_privileges_useradmin(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+def test_get_granted_privileges_useradmin(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue
+):
     """
     test_get_granted_privileges_useradmin:
     from _spawn() we get the following role hierarchy: r >> rw >> rwc >> db_sys_admin >> SYSADMIN >> ACCOUNTADMIN
@@ -180,14 +258,23 @@ def test_get_granted_privileges_useradmin(flake: PyflakeClient, assets_queue: qu
     ### Arrange ###
     d, s, r, rw, rwc = _spawn_without_rwc_privileges(flake, assets_queue)
     table = ObjectType.TABLE
-    r_privilege = Grant(RoleSchemaFutureGrantAsset(r.name, d.db_name, s.schema_name, table), ["SELECT", "REFERENCES"])
-    rw_privilege = Grant(RoleSchemaFutureGrantAsset(rw.name, d.db_name, s.schema_name, table), ["INSERT", "UPDATE"])
-    rwc_privilege = Grant(RoleSchemaFutureGrantAsset(rwc.name, d.db_name, s.schema_name, table), ["OWNERSHIP"])
+    r_privilege = Grant(
+        RoleSchemaFutureGrantAsset(r.name, d.db_name, s.schema_name, table),
+        ["SELECT", "REFERENCES"],
+    )
+    rw_privilege = Grant(
+        RoleSchemaFutureGrantAsset(rw.name, d.db_name, s.schema_name, table),
+        ["INSERT", "UPDATE"],
+    )
+    rwc_privilege = Grant(
+        RoleSchemaFutureGrantAsset(rwc.name, d.db_name, s.schema_name, table),
+        ["OWNERSHIP"],
+    )
     table_columns = [
-        Column("ID", ColumnType.INTEGER, identity=True),
-        Column("SOME_VARCHAR", ColumnType.VARCHAR, primary_key=True)
+        Integer(name="ID", identity=Identity(1, 1)),
+        Varchar(name="SOME_VARCHAR", primary_key=True),
     ]
-    t = Table(s, "TEST", table_columns)
+    t = Table(s, "TEST", table_columns, owner=AssetsRole("SYSADMIN"))
 
     try:
         flake.register_asset(r_privilege, assets_queue)
@@ -196,10 +283,13 @@ def test_get_granted_privileges_useradmin(flake: PyflakeClient, assets_queue: qu
         flake.register_asset(t, assets_queue)
 
         ### Act ###
-        showable = RoleSchemaObjectGrant("USERADMIN", d.db_name, s.schema_name, ObjectType.TABLE, t.table_name)
-        rp: RoleSchemaObjectGrants = flake.describe(showable, RoleSchemaObjectGrants)
+        showable = RoleSchemaObjectGrant(
+            "USERADMIN", d.db_name, s.schema_name, ObjectType.TABLE, t.table_name
+        )
+        rp = flake.describe_one(showable, RoleSchemaObjectGrants)
 
         ### Assert ###
+        assert rp is not None
         assert rp.role_name == "USERADMIN"
         assert rp.db_name == d.db_name
         assert rp.schema_name == s.schema_name

@@ -1,12 +1,11 @@
 """role_relative"""
-
-
 from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
 class RoleRelative:
     """RoleRelative"""
+
     role_name: str
     parent_role_name: str
     distance_from_source: int

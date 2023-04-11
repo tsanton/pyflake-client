@@ -1,14 +1,18 @@
 """role_descendants"""
 # pylint: disable=consider-using-f-string
 from dataclasses import dataclass
-from dacite import Config
+from typing import Union
+import dacite
 
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
 
 
 @dataclass(frozen=True)
 class RoleDescendants(ISnowflakeDescribable):
     """RoleDescendants: all roles that are one step lower in the hierarchy that the queried role"""
+
     role_name: str
 
     def get_describe_statement(self) -> str:
@@ -41,11 +45,14 @@ def main_py(snowpark_session, base_role_name_py:str):
     show_grants_to_role_py(snowpark_session, base_role_name_py, 0, res)
     return {"name": base_role_name_py, "descendant_roles": res}
 '
-call show_all_roles_directly_inherited_by_source('%(s1)s');""" % {"s1": self.role_name}
+call show_all_roles_directly_inherited_by_source('%(s1)s');""" % {
+            "s1": self.role_name
+        }
 
     def is_procedure(self) -> bool:
         """is_procedure"""
         return True
 
-    def get_dacite_config(self) -> Config:
+    def get_dacite_config(self) -> Union[dacite.Config, None]:
+        """get_dacite_config"""
         return None

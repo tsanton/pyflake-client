@@ -1,5 +1,6 @@
 """test_role_warehouse_grant"""
-# pylint: disable=line-too-long
+
+
 import queue
 import uuid
 
@@ -8,19 +9,28 @@ from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.role import Role as AssetsRole
 from pyflake_client.models.assets.grant import Grant as GrantAsset
 from pyflake_client.models.assets.grants.role_warehouse_grant import RoleWarehouseGrant
-from pyflake_client.models.describables.grants.role_grant import RoleGrant as RoleGrantDescribable
-from pyflake_client.models.entities.grants.role_grant import RoleGrants as RoleGrantsEntity
-
+from pyflake_client.models.describables.grant import Grant as DescribableGrant
 from pyflake_client.models.assets.warehouse import Warehouse as WarehouseAsset
-from pyflake_client.models.entities.warehouse import Warehouse as WarehouseEntity
-from pyflake_client.models.describables.warehouse import Warehouse as WarehouseDescribable
+from pyflake_client.models.entities.grant import Grant as EntitiesGrant
+from pyflake_client.models.describables.role import Role as DescribablesRole
 
-def test_grant_role_warehouse_privileges(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+
+def test_grant_role_warehouse_privileges(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue
+):
     """test_grant_role_warehouse_privileges"""
     ### Arrange ###
-    role = AssetsRole("IGT_CREATE_ROLE", "USERADMIN", f"pyflake_client_TEST_{uuid.uuid4()}")
-    warehouse: WarehouseAsset = WarehouseAsset("IGT_DEMO_WH", f"pyflake_client_TEST_{uuid.uuid4()}")
-    privilege = GrantAsset(RoleWarehouseGrant(role.name, warehouse.warehouse_name), ["USAGE"])
+    role = AssetsRole(
+        "IGT_CREATE_ROLE",
+        AssetsRole("USERADMIN"),
+        f"pyflake_client_TEST_{uuid.uuid4()}",
+    )
+    warehouse: WarehouseAsset = WarehouseAsset(
+        "IGT_DEMO_WH", f"pyflake_client_TEST_{uuid.uuid4()}"
+    )
+    privilege = GrantAsset(
+        RoleWarehouseGrant(role.name, warehouse.warehouse_name), ["USAGE"]
+    )
 
     try:
         flake.register_asset(role, assets_queue)
@@ -28,13 +38,23 @@ def test_grant_role_warehouse_privileges(flake: PyflakeClient, assets_queue: que
         flake.register_asset(privilege, assets_queue)
 
         ### Act ###
-        granted: RoleGrantsEntity = flake.describe(RoleGrantDescribable(role.name), RoleGrantsEntity)
+        grants = flake.describe_many(
+            describable=DescribableGrant(principal=DescribablesRole(name=role.name)),
+            entity=EntitiesGrant,
+        )
 
         ### Assert ###
-        assert granted.role_name == role.name
-        assert len(granted.grants) == 1
+        assert grants is not None
+        assert len(grants) == 1
 
-        wh_grant = next((r for r in granted.grants if r.granted_on == "WAREHOUSE" and r.privilege == "USAGE"), None)
+        wh_grant = next(
+            (
+                g
+                for g in grants
+                if g.granted_on == "WAREHOUSE" and g.privilege == "USAGE"
+            ),
+            None,
+        )
         assert wh_grant is not None
         assert wh_grant.name == warehouse.warehouse_name
         assert wh_grant.granted_by == "SYSADMIN"

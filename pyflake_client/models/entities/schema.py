@@ -8,6 +8,7 @@ from pyflake_client.models.entities.snowflake_entity_interface import ISnowflake
 @dataclass(frozen=True)
 class Schema(ISnowflakeEntity):
     """Schema"""
+
     name: str
     database_name: str
     owner: str
