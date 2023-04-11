@@ -12,9 +12,7 @@ from pyflake_client.models.assets.grants.role_warehouse_grant import RoleWarehou
 from pyflake_client.models.describables.grant import Grant as DescribableGrant
 from pyflake_client.models.assets.warehouse import Warehouse as WarehouseAsset
 from pyflake_client.models.entities.grant import Grant as EntitiesGrant
-from pyflake_client.models.describables.warehouse import (
-    Warehouse as DescribableWarehouse,
-)
+from pyflake_client.models.describables.role import Role as DescribablesRole
 
 
 def test_grant_role_warehouse_privileges(
@@ -41,15 +39,13 @@ def test_grant_role_warehouse_privileges(
 
         ### Act ###
         grants = flake.describe_many(
-            describable=DescribableGrant(
-                principal=DescribableWarehouse(name=warehouse.warehouse_name)
-            ),
+            describable=DescribableGrant(principal=DescribablesRole(name=role.name)),
             entity=EntitiesGrant,
         )
 
         ### Assert ###
         assert grants is not None
-        assert len(grants) == 2
+        assert len(grants) == 1
 
         wh_grant = next(
             (

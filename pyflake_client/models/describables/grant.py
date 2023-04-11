@@ -11,14 +11,8 @@ from pyflake_client.models.describables.snowflake_grant_principal import (
 )
 
 from pyflake_client.models.describables.role import Role as DescribablesRole
-from pyflake_client.models.describables.table import Table as DescribablesTable
-from pyflake_client.models.describables.schema import Schema as DescribablesSchema
 from pyflake_client.models.describables.database_role import (
     DatabaseRole as DescribablesDatabaseRole,
-)
-from pyflake_client.models.describables.database import Database as DescribablesDatabase
-from pyflake_client.models.describables.warehouse import (
-    Warehouse as DescribablesWarehouse,
 )
 
 
@@ -31,14 +25,6 @@ class Grant(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
             query = f"SHOW GRANTS TO ROLE {self.principal.name}"
         elif isinstance(self.principal, DescribablesDatabaseRole):
             query = f"SHOW GRANTS TO DATABASE ROLE {self.principal.db_name}.{self.principal.name}"
-        elif isinstance(self.principal, DescribablesTable):
-            query = f"SHOW GRANTS ON TABLE {self.principal.database_name}.{self.principal.schema_name}.{self.principal.name}"
-        elif isinstance(self.principal, DescribablesSchema):
-            query = f"SHOW GRANTS ON SCHEMA {self.principal.database_name}.{self.principal.name}"
-        elif isinstance(self.principal, DescribablesDatabase):
-            query = f"SHOW GRANTS ON DATABASE {self.principal.name}"
-        elif isinstance(self.principal, DescribablesWarehouse):
-            query = f"SHOW GRANTS ON WAREHOUSE {self.principal.name}"
         else:
             raise NotImplementedError(
                 f"Grant describe statement for {self.__class__} is not implemented"

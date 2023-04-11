@@ -8,13 +8,10 @@ from dacite import Config
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
 )
-from pyflake_client.models.describables.snowflake_grant_principal import (
-    ISnowflakeGrantPrincipal,
-)
 
 
 @dataclass(frozen=True)
-class Schema(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
+class Schema(ISnowflakeDescribable):
     """Schema"""
 
     name: str

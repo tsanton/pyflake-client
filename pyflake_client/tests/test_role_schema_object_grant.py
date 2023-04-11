@@ -18,6 +18,8 @@ from pyflake_client.models.describables.grant import (
 from pyflake_client.models.entities.grant import (
     Grant as EntitiesGrant,
 )
+from pyflake_client.models.describables.role import Role as DescribablesRole
+from pyflake_client.models.describables.grant import Grant as DescribableGrant
 
 
 def test_get_granted_privileges_r(flake: PyflakeClient, assets_queue: queue.LifoQueue):
@@ -107,9 +109,12 @@ def test_get_granted_privileges_rw(flake: PyflakeClient, assets_queue: queue.Lif
         desc_table = DescribablesTable(
             database_name=d.db_name, schema_name=s.schema_name, name=t.table_name
         )
-        showable = DescribablesGrant(principal=desc_table)
-        grants = flake.describe_many(showable, EntitiesGrant)
+        assert desc_table is not None
 
+        grants = flake.describe_many(
+            describable=DescribableGrant(principal=DescribablesRole(name=r.name)),
+            entity=EntitiesGrant,
+        )
         ### Assert ###
         assert grants is not None
         # TODO @tobias what do these tests do

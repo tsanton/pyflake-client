@@ -2,8 +2,9 @@
 # pylint: disable=line-too-long
 
 from dataclasses import dataclass
+from typing import Union
 
-from dacite import Config
+import dacite
 
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
@@ -54,6 +55,6 @@ call show_procedures('%(str1)s', '%(str2)s', '%(str3)s');
         """is_procedure"""
         return True
 
-    def get_dacite_config(self) -> Config:
+    def get_dacite_config(self) -> Union[dacite.Config, None]:
         """get_dacite_config"""
         return None

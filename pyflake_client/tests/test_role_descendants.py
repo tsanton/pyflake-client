@@ -15,10 +15,11 @@ from pyflake_client.models.describables.role_descendants import (
 def test_get_descendant_roles(flake: PyflakeClient):
     """test_get_descendant_roles: we know that ACCOUNTADMIN is the parent of both SECURITYADMIN and SYSADMIN"""
     ### Act ###
-    hierarchy: RoleDescendantsEntity = flake.describe_one(
+    hierarchy = flake.describe_one(
         RoleDescendantsDescribable("ACCOUNTADMIN"), RoleDescendantsEntity
     )
 
+    assert hierarchy is not None
     sec_admin = next(
         (r for r in hierarchy.descendant_roles if r.role_name == "SECURITYADMIN"), None
     )

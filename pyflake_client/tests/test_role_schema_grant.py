@@ -12,7 +12,7 @@ from pyflake_client.models.assets.grant import Grant as AssetsGrant
 from pyflake_client.models.assets.grants.role_schema_grant import RoleSchemaGrant
 from pyflake_client.models.describables.grant import Grant as DescribableGrant
 from pyflake_client.models.entities.grant import Grant as EntitiesGrant
-from pyflake_client.models.describables.schema import Schema as DescribableSchema
+from pyflake_client.models.describables.role import Role as DescribablesRole
 
 
 def test_grant_role_schema_privilege(
@@ -46,19 +46,14 @@ def test_grant_role_schema_privilege(
         flake.register_asset(privilege, assets_queue)
 
         ### Act ###
-
         grants = flake.describe_many(
-            describable=DescribableGrant(
-                principal=DescribableSchema(
-                    name=schema.schema_name, database_name=database.db_name
-                )
-            ),
+            describable=DescribableGrant(principal=DescribablesRole(name=role.name)),
             entity=EntitiesGrant,
         )
 
         ### Assert ###
         assert grants is not None
-        assert len(grants) == 2
+        assert len(grants) == 1
         priv = next((g for g in grants if g.privilege == "USAGE"), None)
         assert priv is not None
         assert priv.granted_on == "SCHEMA"
@@ -102,16 +97,12 @@ def test_grant_role_schema_privileges(
 
         ### Act ###
         grants = flake.describe_many(
-            describable=DescribableGrant(
-                principal=DescribableSchema(
-                    name=schema.schema_name, database_name=database.db_name
-                )
-            ),
+            describable=DescribableGrant(principal=DescribablesRole(name=role.name)),
             entity=EntitiesGrant,
         )
         ### Assert ###
         assert grants is not None
-        assert len(grants) == 3
+        assert len(grants) == 2
 
         priv_usage = next((g for g in grants if g.privilege == "USAGE"), None)
         assert priv_usage is not None

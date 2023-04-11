@@ -1,15 +1,19 @@
 """role_relationship"""
 # pylint: disable=line-too-long
 from dataclasses import dataclass
+from typing import Union
 
-from dacite import Config
+import dacite
 
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
 
 
 @dataclass(frozen=True)
 class RoleRelationship(ISnowflakeDescribable):
     """RoleRelationship"""
+
     child_role_name: str
     parent_role_name: str
 
@@ -30,11 +34,15 @@ def show_role_inheritance_relationship_py(snowpark_session, child_role_py: str, 
                 return {**row.as_dict(), **{"child_role_name": child_role_py.upper(), "parent_role_name": parent_role_py.upper()}}
     return res
 '
-call show_role_inheritance_relationship('%(str1)s', '%(str2)s');""" % {"str1": self.child_role_name, "str2": self.parent_role_name}
+call show_role_inheritance_relationship('%(str1)s', '%(str2)s');""" % {
+            "str1": self.child_role_name,
+            "str2": self.parent_role_name,
+        }
 
     def is_procedure(self) -> bool:
         """is_procedure"""
         return True
 
-    def get_dacite_config(self) -> Config:
+    def get_dacite_config(self) -> Union[dacite.Config, None]:
+        """get_dacite_config"""
         return None
