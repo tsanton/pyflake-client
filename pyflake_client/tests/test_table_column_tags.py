@@ -18,7 +18,7 @@ from pyflake_client.models.assets.schema import Schema
 from pyflake_client.client import PyflakeClient
 
 
-def test_create_table_with_tag_without_value(
+def test_create_column_with_tag_without_value(
     flake: PyflakeClient, assets_queue: queue.LifoQueue
 ):
     """test_create_table"""
@@ -32,10 +32,6 @@ def test_create_table_with_tag_without_value(
         comment=f"pyflake_client_TEST_{uuid.uuid4()}",
         owner=AssetsRole("SYSADMIN"),
     )
-    columns = [
-        Number("ID", identity=Identity(1, 1)),
-        Varchar("SOME_VARCHAR", primary_key=True),
-    ]
 
     tag_asset = AssetsTag(
         database_name=database.db_name,
@@ -50,12 +46,15 @@ def test_create_table_with_tag_without_value(
         tag_name=tag_asset.tag_name,
         tag_value=None,
     )
+    columns = [
+        Number("ID", identity=Identity(1, 1)),
+        Varchar("SOME_VARCHAR", primary_key=True, tags=[classification_tag]),
+    ]
     table = TableAsset(
         schema=schema,
         table_name="TEST",
         columns=columns,
         owner=AssetsRole("SYSADMIN"),
-        tags=[classification_tag],
     )
 
     try:
@@ -73,22 +72,21 @@ def test_create_table_with_tag_without_value(
         ### Assert ###
         assert t is not None
         assert t.name == table.table_name
-        assert t.database_name == database.db_name
-        assert t.schema_name == schema.schema_name
-        assert t.kind == "TABLE"
-        assert t.owner == "ACCOUNTADMIN"
-        assert t.retention_time == "1"
-        assert t.tags is not None
-        assert len(t.tags) == 1
-        tag = t.tags[0]
-        assert tag.tag_value == None
+        assert t.columns is not None
+        assert len(t.columns) == 2
+        tagged_col = next(c for c in t.columns if c.name == "SOME_VARCHAR")
+        assert tagged_col is not None
+        assert tagged_col.tags is not None
+        assert len(tagged_col.tags) == 1
+        tag = tagged_col.tags[0]
         assert tag.tag_name == tag_asset.tag_name
+        assert tag.tag_value is None
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
 
 
-def test_create_table_with_tag_with_value(
+def test_create_column_with_tag_with_value(
     flake: PyflakeClient, assets_queue: queue.LifoQueue
 ):
     """test_create_table"""
@@ -102,11 +100,6 @@ def test_create_table_with_tag_with_value(
         comment=f"pyflake_client_TEST_{uuid.uuid4()}",
         owner=AssetsRole("SYSADMIN"),
     )
-    columns = [
-        Number("ID", identity=Identity(1, 1)),
-        Varchar("SOME_VARCHAR", primary_key=True),
-    ]
-
     tag_asset = AssetsTag(
         database_name=database.db_name,
         schema_name=schema.schema_name,
@@ -120,12 +113,12 @@ def test_create_table_with_tag_with_value(
         tag_name=tag_asset.tag_name,
         tag_value="FOO",
     )
+    columns = [
+        Number("ID", identity=Identity(1, 1)),
+        Varchar("SOME_VARCHAR", primary_key=True, tags=[classification_tag]),
+    ]
     table = TableAsset(
-        schema=schema,
-        table_name="TEST",
-        columns=columns,
-        owner=AssetsRole("SYSADMIN"),
-        tags=[classification_tag],
+        schema=schema, table_name="TEST", columns=columns, owner=AssetsRole("SYSADMIN")
     )
 
     try:
@@ -143,16 +136,15 @@ def test_create_table_with_tag_with_value(
         ### Assert ###
         assert t is not None
         assert t.name == table.table_name
-        assert t.database_name == database.db_name
-        assert t.schema_name == schema.schema_name
-        assert t.kind == "TABLE"
-        assert t.owner == "ACCOUNTADMIN"
-        assert t.retention_time == "1"
-        assert t.tags is not None
-        assert len(t.tags) == 1
-        tag = t.tags[0]
-        assert tag.tag_value == "FOO"
+        assert t.columns is not None
+        assert len(t.columns) == 2
+        tagged_col = next(c for c in t.columns if c.name == "SOME_VARCHAR")
+        assert tagged_col is not None
+        assert tagged_col.tags is not None
+        assert len(tagged_col.tags) == 1
+        tag = tagged_col.tags[0]
         assert tag.tag_name == tag_asset.tag_name
+        assert tag.tag_value == "FOO"
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
@@ -172,11 +164,6 @@ def test_create_table_with_multiple_tags(
         comment=f"pyflake_client_TEST_{uuid.uuid4()}",
         owner=AssetsRole("SYSADMIN"),
     )
-    columns = [
-        Number("ID", identity=Identity(1, 1)),
-        Varchar("SOME_VARCHAR", primary_key=True),
-    ]
-
     tag_asset_1 = AssetsTag(
         database_name=database.db_name,
         schema_name=schema.schema_name,
@@ -203,12 +190,16 @@ def test_create_table_with_multiple_tags(
         tag_name=tag_asset_2.tag_name,
         tag_value="FOO",
     )
+    columns = [
+        Number("ID", identity=Identity(1, 1)),
+        Varchar(
+            "SOME_VARCHAR",
+            primary_key=True,
+            tags=[classification_tag_1, classification_tag_2],
+        ),
+    ]
     table = TableAsset(
-        schema=schema,
-        table_name="TEST",
-        columns=columns,
-        owner=AssetsRole("SYSADMIN"),
-        tags=[classification_tag_1, classification_tag_2],
+        schema=schema, table_name="TEST", columns=columns, owner=AssetsRole("SYSADMIN")
     )
 
     try:
@@ -227,17 +218,18 @@ def test_create_table_with_multiple_tags(
         ### Assert ###
         assert t is not None
         assert t.name == table.table_name
-        assert t.database_name == database.db_name
-        assert t.schema_name == schema.schema_name
-        assert t.kind == "TABLE"
-        assert t.owner == "ACCOUNTADMIN"
-        assert t.retention_time == "1"
-        assert t.tags is not None
-        assert len(t.tags) == 2
-        tag_1 = next(t for t in t.tags if t.tag_name == tag_asset_1.tag_name)
+        assert t.columns is not None
+        assert len(t.columns) == 2
+        tagged_col = next(c for c in t.columns if c.name == "SOME_VARCHAR")
+        assert tagged_col is not None
+        assert tagged_col.tags is not None
+        assert len(tagged_col.tags) == 2
+        tag_1 = next(t for t in tagged_col.tags if t.tag_name == tag_asset_1.tag_name)
+        assert tag_1 is not None
         assert tag_1.tag_value is None
         assert tag_1.tag_name == tag_asset_1.tag_name
-        tag_2 = next(t for t in t.tags if t.tag_name == tag_asset_2.tag_name)
+        tag_2 = next(t for t in tagged_col.tags if t.tag_name == tag_asset_2.tag_name)
+        assert tag_2 is not None
         assert tag_2.tag_value == "FOO"
         assert tag_2.tag_name == tag_asset_2.tag_name
     finally:

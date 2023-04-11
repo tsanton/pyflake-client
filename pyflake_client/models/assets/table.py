@@ -42,12 +42,11 @@ class Table(ISnowflakeAsset, ISnowflakeGrantPrincipal):
         for c in self.columns:
             if len(c.tags) > 0:
                 for ct in c.tags:
+                    value = ct.tag_value or ""
                     table_definition += (
                         f" ALTER TABLE {table_identifier} ALTER COLUMN {c.name}"
                     )
-                    table_definition += (
-                        f" SET TAG {ct.get_identifier()} = '{ct.tag_value}';"
-                    )
+                    table_definition += f" SET TAG {ct.get_identifier()} = '{value}';"
 
         return table_definition
 

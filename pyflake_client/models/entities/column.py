@@ -2,12 +2,13 @@ from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass
 import re
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Union
 
 import dacite
 
 
 from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
+from pyflake_client.models.entities.classification_tag import ClassificationTag
 
 
 @dataclass
@@ -19,6 +20,7 @@ class Column(ISnowflakeEntity, ABC):
     comment: Union[str, None]
     default: Union[str, None]
     expression: Union[str, None]
+    tags: List[ClassificationTag]
     kind: str
     nullable: bool
     policy_name: Union[str, None]
@@ -38,10 +40,10 @@ class Column(ISnowflakeEntity, ABC):
     def load_from_sf(
         cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None
     ) -> Column:
-        # TODO ; tags
         for old_key, new_key in cls.map_key_names().items():
             data[new_key] = data.pop(old_key)
 
+        data["tags"] = [ClassificationTag.load_from_sf(tag) for tag in data["tags"]]
         data["primary_key"] = data["primary_key"] == "Y"
         data["unique_key"] = data["unique_key"] == "Y"
         data["nullable"] = data["nullable"] == "Y"
