@@ -4,7 +4,7 @@ from typing import Union
 
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
-from pyflake_client.models.assets.role import Role as AccountRole
+from pyflake_client.models.assets.role import Role
 
 
 @dataclass(frozen=True)
@@ -23,7 +23,7 @@ class DatabaseRole(ISnowflakeAsset, ISnowflakePrincipal):
 
         if isinstance(self.owner, DatabaseRole):
             role_type = "DATABASE ROLE"
-        elif isinstance(self.owner, AccountRole):
+        elif isinstance(self.owner, Role):
             role_type = "ROLE"
         else:
             raise NotImplementedError(

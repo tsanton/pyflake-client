@@ -17,9 +17,7 @@ def test_create_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_database"""
 
     ### Arrange ###
-    database: AssetsDatabase = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+    database: AssetsDatabase = AssetsDatabase("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN"))
 
     try:
         flake.register_asset(database, assets_queue)
