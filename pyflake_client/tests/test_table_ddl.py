@@ -44,7 +44,7 @@ def test_create_simple_table_ddl():
 def test_create_complex_table_ddl():
     """test_create_complex_table_ddl"""
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleDescribable("SYSADMIN"))
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         database=database,
         schema_name="S1",
@@ -74,7 +74,7 @@ def test_create_complex_table_ddl():
 def test_create_complex_table_with_primary_key_ddl():
     """test_create_complex_table_ddl"""
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleDescribable("SYSADMIN"))
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         database=database,
         schema_name="S1",
@@ -109,7 +109,7 @@ def test_create_simple_table_with_default_date_ddl():
     insert into <DB>.<SCHEMA>.TEST (SOME_DATE) values(default);
     """
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleDescribable("SYSADMIN"))
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         database=database,
         schema_name="S1",
