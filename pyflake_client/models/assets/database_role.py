@@ -39,7 +39,7 @@ class DatabaseRole(ISnowflakeAsset, ISnowflakePrincipal):
         return f"DROP DATABASE ROLE IF EXISTS {self.database_name}.{self.name}"
 
     def get_identifier(self) -> str:
-        return self.name
+        return f"{self.database_name}.{self.name}"
 
     def get_snowflake_type(self) -> str:
         return "DATABASE_ROLE"

@@ -6,9 +6,7 @@ from datetime import date
 
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database_role import DatabaseRole
-from pyflake_client.models.describables.database_role import (
-    DatabaseRole as DescribablesRole,
-)
+from pyflake_client.models.describables.database_role import DatabaseRole as DescribablesRole
 from pyflake_client.models.entities.role import Role as EntitiesRole
 from pyflake_client.models.assets.role import Role as AssetsRole
 from pyflake_client.models.assets.database import Database as AssetsDatabase
@@ -20,9 +18,7 @@ def test_create_database_role(
 ):
     """test_create_role"""
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+    database = AssetsDatabase("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN"))
     role: DatabaseRole = DatabaseRole(
         name="IGT_CREATE_ROLE",
         database_name=database.db_name,
