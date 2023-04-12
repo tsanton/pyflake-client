@@ -3,17 +3,11 @@ from typing import Union
 
 import dacite
 
-from pyflake_client.models.describables.snowflake_describable_interface import (
-    ISnowflakeDescribable,
-)
-from pyflake_client.models.describables.snowflake_grant_principal import (
-    ISnowflakeGrantPrincipal,
-)
+from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
+from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
 
-from pyflake_client.models.assets.database_role import (
-    DatabaseRole as AssetsDatabaseRole,
-)
-from pyflake_client.models.assets.role import Role as AssetsRole
+from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
+from pyflake_client.models.describables.role import Role as RoleDescribable
 
 
 @dataclass
@@ -21,7 +15,7 @@ class FutureGrant(ISnowflakeDescribable):
     principal: ISnowflakeGrantPrincipal
 
     def get_describe_statement(self) -> str:
-        if isinstance(self.principal, AssetsRole):
+        if isinstance(self.principal, RoleDescribable):
             query = """
 with show_grants_to_role as procedure(role_name varchar)
     returns variant not null
@@ -41,7 +35,7 @@ call show_grants_to_role('%(s1)s');
                 "s1": self.principal.name
             }
 
-        elif isinstance(self.principal, AssetsDatabaseRole):
+        elif isinstance(self.principal, DatabaseRoleDescribable):
             query = """
 with show_grants_to_database_role as procedure(database_name varchar, database_role_name varchar)
     returns variant not null
@@ -77,7 +71,7 @@ call show_grants_to_database_role('%(s1)s','%(s2)s');
         return query
 
     def is_procedure(self) -> bool:
-        return False
+        return True
 
     def get_dacite_config(self) -> Union[dacite.Config, None]:
         return None
