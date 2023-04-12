@@ -9,10 +9,12 @@ from typing import Tuple
 import uuid
 from pyflake_client.models.assets.database import Database
 from pyflake_client.models.assets.role import Role
-from pyflake_client.models.assets.role_relationship import RoleRelationship
+from pyflake_client.models.assets.role_inheritance import RoleInheritance
 from pyflake_client.models.assets.schema import Schema
-from pyflake_client.models.assets.grant import Grant
-from pyflake_client.models.assets.grants.role_schema_future_grant import RoleSchemaFutureGrant
+from pyflake_client.models.assets.grant_action import GrantAction
+from pyflake_client.models.assets.grants.schema_object_future_grant import SchemaObjectFutureGrant
+
+from pyflake_client.models.enums.privilege import Privilege
 from pyflake_client.models.enums.object_type import ObjectType
 
 from pyflake_client.client import PyflakeClient
@@ -32,30 +34,33 @@ def _spawn_with_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQue
     """bootstrap utility function"""
     db_name = "IGT_DEMO"
     schema_name = "MGMT"
-    db_sys_admin = Role(f"{db_name}_SYS_ADMIN", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    db_usr_admin = Role(f"{db_name}_USER_ADMIN", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    r1 = RoleRelationship(db_sys_admin.name, "SYSADMIN")
-    d: Database = Database("IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=Role(db_sys_admin.name))
-    r = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_R", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    rw = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RW", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    rwc = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RWC", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    r2 = RoleRelationship(r.name, rw.name)
-    r3 = RoleRelationship(rw.name, rwc.name)
-    r4 = RoleRelationship(rwc.name, "SYSADMIN")
-    s: Schema = Schema(database=d, schema_name=schema_name, comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=Role(rwc.name))
+    user_admin_role = Role("USERADMIN")
+    sys_admin_role = Role("SYSADMIN")
+    db_sys_admin = Role(f"{db_name}_SYS_ADMIN", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    db_usr_admin = Role(f"{db_name}_USER_ADMIN", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    r1 = RoleInheritance(db_sys_admin, sys_admin_role)
+    d: Database = Database("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=Role(db_sys_admin.name))
+    r = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_R", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    rw = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RW", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    rwc = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RWC", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    r2 = RoleInheritance(r, rw)
+    r3 = RoleInheritance(rw, rwc)
+    r4 = RoleInheritance(rwc, sys_admin_role)
+    s: Schema = Schema(database=d, schema_name=schema_name, comment=f"pyflake_client_test_{uuid.uuid4()}", owner=Role(rwc.name))
 
-    r_table = ["SELECT", "REFERENCES"]
-    r_procedure = ["USAGE"]
-    rw_table = ["INSERT", "UPDATE", "DELETE", "TRUNCATE"]
+    r_table =  [Privilege.SELECT, Privilege.REFERENCES]
+    rw_table = [Privilege.INSERT, Privilege.UPDATE, Privilege.DELETE, Privilege.TRUNCATE]
+    r_procedure = [Privilege.USAGE]
+    
     # rw_procedure = []
-    rwcp = ["OWNERSHIP"]
-    table_privilege_r = Grant(RoleSchemaFutureGrant(r.name, d.db_name, s.schema_name, ObjectType.TABLE), r_table)
-    table_privilege_rw = Grant(RoleSchemaFutureGrant(rw.name, d.db_name, s.schema_name, ObjectType.TABLE), rw_table)
-    table_privilege_rwc = Grant(RoleSchemaFutureGrant(rwc.name, d.db_name, s.schema_name, ObjectType.TABLE), rwcp)
+    rwcp = [Privilege.OWNERSHIP]
+    table_privilege_r = GrantAction(r, SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.TABLE), r_table)
+    table_privilege_rw = GrantAction(rw, SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.TABLE), rw_table)
+    table_privilege_rwc = GrantAction(rwc, SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.TABLE), rwcp)
 
-    procedure_privilege_r = Grant(RoleSchemaFutureGrant(r.name, d.db_name, s.schema_name, ObjectType.PROCEDURE), r_procedure)
-    # procedure_privilege_rw = Grant(RoleSchemaFutureGrant(rw.name, d.db_name, s.schema_name, ObjectType.PROCEDURE), rw_procedure)
-    procedure_privilege_rwc = Grant(RoleSchemaFutureGrant(rwc.name, d.db_name, s.schema_name, ObjectType.PROCEDURE), rwcp)
+    procedure_privilege_r = GrantAction(r, SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.PROCEDURE), r_procedure)
+    # procedure_privilege_rw = GrantAction(rw, SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.PROCEDURE), rw_procedure)
+    procedure_privilege_rwc = GrantAction(rwc, SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.PROCEDURE), rwcp)
     try:
         flake.register_asset(db_sys_admin, assets_queue)
         flake.register_asset(db_usr_admin, assets_queue)
@@ -84,10 +89,12 @@ def _spawn_with_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQue
 def _spawn_database_and_schema(flake: PyflakeClient, assets_queue: queue.LifoQueue) -> Tuple[Database, Schema, Schema]:
     """_spawn_database_and_schema"""
     db_name = "IGT_DEMO"
-    db_sys_admin = Role(f"{db_name}_SYS_ADMIN", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    database: Database = Database(db_name=db_name, comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=Role("SYSADMIN"))
-    schema1: Schema = Schema(database=database, schema_name="SCHEMA1", comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=Role("SYSADMIN"))
-    schema2: Schema = Schema(database=database, schema_name="SCHEMA2", comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=Role("SYSADMIN"))
+    user_admin_role = Role("SYSADMIN")
+    sys_admin_role = Role("USERADMIN")
+    db_sys_admin = Role(f"{db_name}_SYS_ADMIN", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    database: Database = Database(db_name=db_name, comment=f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin_role)
+    schema1: Schema = Schema(database=database, schema_name="SCHEMA1", comment=f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin_role)
+    schema2: Schema = Schema(database=database, schema_name="SCHEMA2", comment=f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin_role)
 
     try:
         flake.register_asset(db_sys_admin, assets_queue)
@@ -104,17 +111,19 @@ def _spawn_database_and_schema(flake: PyflakeClient, assets_queue: queue.LifoQue
 def _spawn_without_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQueue) -> Tuple[Database, Schema, Role, Role, Role]:
     db_name = "IGT_DEMO"
     schema_name = "SCHEMA1"
-    db_sys_admin = Role(f"{db_name}_SYS_ADMIN", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    db_usr_admin = Role(f"{db_name}_USER_ADMIN", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    r1 = RoleRelationship(db_sys_admin.name, "SYSADMIN")
-    d: Database = Database("IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=Role(db_sys_admin.name))
-    r = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_R", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    rw = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RW", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    rwc = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RWC", Role("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    r2 = RoleRelationship(r.name, rw.name)
-    r3 = RoleRelationship(rw.name, rwc.name)
-    r4 = RoleRelationship(rwc.name, "SYSADMIN")
-    s: Schema = Schema(database=d, schema_name=schema_name, comment=f"pyflake_client_TEST_{uuid.uuid4()}", owner=Role(rwc.name))
+    user_admin_role = Role("SYSADMIN")
+    sys_admin_role = Role("USERADMIN")
+    db_sys_admin = Role(f"{db_name}_SYS_ADMIN", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    db_usr_admin = Role(f"{db_name}_USER_ADMIN", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    r1 = RoleInheritance(db_sys_admin, sys_admin_role)
+    d: Database = Database("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=Role(db_sys_admin.name))
+    r = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_R", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    rw = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RW", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    rwc = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RWC", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    r2 = RoleInheritance(r, rw)
+    r3 = RoleInheritance(rw, rwc)
+    r4 = RoleInheritance(rwc, sys_admin_role)
+    s: Schema = Schema(database=d, schema_name=schema_name, comment=f"pyflake_client_test_{uuid.uuid4()}", owner=Role(rwc.name))
 
     try:
         flake.register_asset(db_sys_admin, assets_queue)

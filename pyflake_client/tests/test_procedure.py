@@ -17,9 +17,7 @@ from pyflake_client.client import PyflakeClient
 from pyflake_client.tests.utilities import _spawn_with_rwc_privileges, compare
 
 
-def test_create_procedure_zero_args(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue
-):
+def test_create_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_procedure_zero_args"""
     ### Arrange ###
     db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
@@ -93,9 +91,7 @@ def test_create_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.Lifo
         flake.delete_assets(assets_queue)
 
 
-def test_create_procedure_multiple_args(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue
-):
+def test_create_procedure_multiple_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_procedure_multiple_args"""
     ### Arrange ###
     db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)

@@ -9,7 +9,7 @@ import queue
 
 from pyflake_client.models.assets.table import Table
 from pyflake_client.client import PyflakeClient
-from pyflake_client.models.assets.role import Role as AssetsRole
+from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.tests.models.mergable_entity import (
     TABLE_NAME,
     TABLE_COLUMN_DEFINITION,
@@ -23,7 +23,7 @@ def test_merge_into(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_merge_into"""
     ### Arrange ###
     _, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
-    t = Table(s, TABLE_NAME, TABLE_COLUMN_DEFINITION, owner=AssetsRole("SYSADMIN"))
+    t = Table(s, TABLE_NAME, TABLE_COLUMN_DEFINITION, owner=RoleAsset("SYSADMIN"))
 
     try:
         flake.register_asset(t, assets_queue)
@@ -54,7 +54,7 @@ def test_merge_into_and_update(flake: PyflakeClient, assets_queue: queue.LifoQue
     """test_merge_into_and_update"""
     ### Arrange ###
     _, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
-    t = Table(s, TABLE_NAME, TABLE_COLUMN_DEFINITION, owner=AssetsRole("SYSADMIN"))
+    t = Table(s, TABLE_NAME, TABLE_COLUMN_DEFINITION, owner=RoleAsset("SYSADMIN"))
 
     try:
         flake.register_asset(t, assets_queue)

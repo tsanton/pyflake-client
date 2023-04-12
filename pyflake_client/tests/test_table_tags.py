@@ -153,7 +153,7 @@ def test_create_table_with_tag_with_value(flake: PyflakeClient, assets_queue: qu
 def test_create_table_with_multiple_tags(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_table"""
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleDescribable("SYSADMIN"))
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema: Schema = Schema(
         database=database,
         schema_name="SOME_SCHEMA",
