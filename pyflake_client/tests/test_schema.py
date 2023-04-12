@@ -4,30 +4,28 @@ import uuid
 from datetime import date
 
 from pyflake_client.client import PyflakeClient
-from pyflake_client.models.assets.role import Role as AssetsRole
-from pyflake_client.models.assets.database import Database as AssetsDatabase
-from pyflake_client.models.assets.schema import Schema as AssetsSchema
-from pyflake_client.models.entities.schema import Schema as EntitiesSchema
-from pyflake_client.models.describables.schema import Schema as DescribabablesSchema
+from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.database import Database as DatabaseAsset
+from pyflake_client.models.assets.schema import Schema as SchemaAsset
+from pyflake_client.models.entities.schema import Schema as SchemaEntity
+from pyflake_client.models.describables.schema import Schema as SchemaDescribable
 
 
 def test_create_schema(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_schema"""
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
-    some_schema = AssetsSchema(
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    some_schema = SchemaAsset(
         database=database,
         schema_name="SOME_SCHEMA",
-        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
-        owner=AssetsRole("SYSADMIN"),
+        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        owner=RoleAsset("SYSADMIN"),
     )
-    another_schema = AssetsSchema(
+    another_schema = SchemaAsset(
         database=database,
         schema_name="ANOTHER_SCHEMA",
-        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
-        owner=AssetsRole("SYSADMIN"),
+        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        owner=RoleAsset("SYSADMIN"),
     )
 
     try:
@@ -37,14 +35,14 @@ def test_create_schema(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 
         ### Act ###
         sch_so = flake.describe_one(
-            DescribabablesSchema(some_schema.schema_name, some_schema.database.db_name),
-            EntitiesSchema,
+            SchemaDescribable(some_schema.schema_name, some_schema.database.db_name),
+            SchemaEntity,
         )
         sch_an = flake.describe_one(
-            DescribabablesSchema(
+            SchemaDescribable(
                 another_schema.schema_name, another_schema.database.db_name
             ),
-            EntitiesSchema,
+            SchemaEntity,
         )
 
         ### Assert ###
@@ -70,7 +68,7 @@ def test_get_schema(flake: PyflakeClient):
     """test_get_schema"""
     ### Act ###
     schema = flake.describe_one(
-        DescribabablesSchema("INFORMATION_SCHEMA", "SNOWFLAKE"), EntitiesSchema
+        SchemaDescribable("INFORMATION_SCHEMA", "SNOWFLAKE"), SchemaEntity
     )
 
     ### Assert ###
@@ -83,8 +81,8 @@ def test_get_schema_when_database_does_not_exist(flake: PyflakeClient):
     """test_get_schema_when_database_does_not_exist"""
     ### Act ###
     schema = flake.describe_one(
-        DescribabablesSchema("INFORMATION_SCHEMA", "THIS_DB_DOES_NOT_EXIST"),
-        EntitiesSchema,
+        SchemaDescribable("INFORMATION_SCHEMA", "THIS_DB_DOES_NOT_EXIST"),
+        SchemaEntity,
     )
 
     ### Assert ###
@@ -95,7 +93,7 @@ def test_get_schema_when_schema_does_not_exist(flake: PyflakeClient):
     """test_get_schema_when_schema_does_not_exist"""
     ### Act ###
     schema = flake.describe_one(
-        DescribabablesSchema("THIS_SCHEMA_DOES_NOT_EXIST", "SNOWFLAKE"), EntitiesSchema
+        SchemaDescribable("THIS_SCHEMA_DOES_NOT_EXIST", "SNOWFLAKE"), SchemaEntity
     )
 
     ### Assert ###

@@ -5,7 +5,7 @@ from datetime import date
 
 
 from pyflake_client.client import PyflakeClient
-from pyflake_client.models.assets.role import Role as AssetsRole
+from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.describables.role import Role as DescribablesRole
 from pyflake_client.models.entities.role import Role as EntitiesRole
 
@@ -13,10 +13,10 @@ from pyflake_client.models.entities.role import Role as EntitiesRole
 def test_create_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role"""
     ### Arrange ###
-    role: AssetsRole = AssetsRole(
+    role: RoleAsset = RoleAsset(
         name="IGT_CREATE_ROLE",
-        owner=AssetsRole("USERADMIN"),
-        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
+        owner=RoleAsset("USERADMIN"),
+        comment=f"pyflake_client_test_{uuid.uuid4()}",
     )
 
     try:
@@ -43,9 +43,7 @@ def test_get_role(flake: PyflakeClient):
     ### Assert ###
     assert role is not None
     assert role.name == "ACCOUNTADMIN"
-    assert (
-        role.comment == "Account administrator can manage all aspects of the account."
-    )
+    assert role.comment == "Account administrator can manage all aspects of the account."
 
 
 def test_get_role_that_does_not_exist(flake: PyflakeClient):

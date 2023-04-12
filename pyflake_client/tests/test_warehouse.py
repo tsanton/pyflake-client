@@ -17,15 +17,14 @@ from pyflake_client.models.describables.warehouse import Warehouse as WarehouseD
 def test_create_warehouse(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_warehouse"""
     ### Arrange ###
-    warehouse: WarehouseAsset = WarehouseAsset("IGT_DEMO_WH", f"pyflake_client_TEST_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN")    )
+    warehouse: WarehouseAsset = WarehouseAsset("IGT_DEMO_WH", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN")    )
 
     try:
         flake.register_asset(warehouse, assets_queue)
 
         ### Act ###
-        sf_wh: WarehouseEntity = flake.describe_one(
-            WarehouseDescribable(warehouse.warehouse_name), WarehouseEntity
-        )
+        sf_wh: WarehouseEntity = flake.describe_one(WarehouseDescribable(warehouse.warehouse_name), WarehouseEntity)
+        
         ### Assert ###
         assert sf_wh.name == warehouse.warehouse_name
         assert sf_wh.comment == warehouse.comment

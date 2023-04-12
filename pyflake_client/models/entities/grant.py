@@ -6,6 +6,7 @@ from typing import Any, Dict, Union
 import dacite
 
 from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
+from pyflake_client.models.enums.privilege import Privilege
 
 
 @dataclass(frozen=True)
@@ -15,7 +16,7 @@ class Grant(ISnowflakeEntity):
     grantee_type: str
     granted_on: str
     granted_identifier: str
-    privilege: str
+    privilege: Privilege
     grant_option: str #TODO: Bool
     granted_by: str
     created_on: str  # TODO: datetime, not string.

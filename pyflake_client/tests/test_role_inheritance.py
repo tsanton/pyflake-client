@@ -38,8 +38,8 @@ def test_get_role_inheritance(flake: PyflakeClient):
 def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role_inheritance"""
     ### Arrange ###
-    child_role = RoleAsset("IGT_CHILD_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    parent_role = RoleAsset("IGT_PARENT_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
+    child_role = RoleAsset("IGT_CHILD_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
+    parent_role = RoleAsset("IGT_PARENT_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
     try:
         flake.register_asset(child_role, assets_queue)
         flake.register_asset(parent_role, assets_queue)
@@ -66,8 +66,8 @@ def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQ
 def test_delete_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role_inheritance"""
     ### Arrange ###
-    child_role = RoleAsset("IGT_CHILD_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
-    parent_role = RoleAsset("IGT_PARENT_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_TEST_{uuid.uuid4()}")
+    child_role = RoleAsset("IGT_CHILD_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
+    parent_role = RoleAsset("IGT_PARENT_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
     relationship = RoleInheritanceAsset(child_role, parent_role)
 
     relationship_describable = RoleInheritanceDescribable(RoleDescribable(child_role.name), RoleDescribable(parent_role.name))

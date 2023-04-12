@@ -7,7 +7,7 @@ import uuid
 
 from pyflake_client.client import PyflakeClient
 
-from pyflake_client.models.assets.database import Database as AssetsDatabase
+from pyflake_client.models.assets.database import Database as DatabaseAsset
 from pyflake_client.models.assets.role import Role
 from pyflake_client.models.assets.database_role import DatabaseRole
 from pyflake_client.models.assets.role_inheritance import RoleInheritance
@@ -52,16 +52,16 @@ def test_create_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
     ### Arrange ###
     user_admin_role = Role("USERADMIN")
     sys_admin_role = Role("SYSADMIN")
-    child1_role = Role("IGT_CHILD1_ROLE", user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
-    child2_role = Role("IGT_CHILD2_ROLE", user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
-    parent_role = Role("IGT_PARENT_ROLE", user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
+    child1_role = Role("IGT_CHILD1_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    child2_role = Role("IGT_CHILD2_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    parent_role = Role("IGT_PARENT_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
     parent_child1_relationship = RoleInheritance(child1_role, parent_role)
     parent_child2_relationship = RoleInheritance(child2_role, parent_role)
-    grandparent1_role = Role("IGT_GRANDPARENT1_ROLE", user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
-    grandparent2_role = Role("IGT_GRANDPARENT2_ROLE", user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
+    grandparent1_role = Role("IGT_GRANDPARENT1_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    grandparent2_role = Role("IGT_GRANDPARENT2_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
     grandparent1_parent_relationship = RoleInheritance(parent_role, grandparent1_role)
     grandparent2_parent_relationship = RoleInheritance(parent_role, grandparent2_role)
-    great_grandparent_role = Role("IGT_GREAT_GRANDPARENT_ROLE", user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
+    great_grandparent_role = Role("IGT_GREAT_GRANDPARENT_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
     great_grandparent_grandparent_relationship = RoleInheritance(child_principal=grandparent1_role, parent_principal=great_grandparent_role)
     sysadmin_great_grandparent_relationship = RoleInheritance(child_principal=great_grandparent_role, parent_principal=sys_admin_role )
     try:
@@ -126,17 +126,17 @@ def test_broken_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
     ### Arrange ###
     user_admin_role = Role("USERADMIN")
     sys_admin_role = Role("SYSADMIN")
-    child1_role = Role("IGT_CHILD1_ROLE", user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
-    child2_role = Role("IGT_CHILD2_ROLE", user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
-    parent_role = Role("IGT_PARENT_ROLE", user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
+    child1_role = Role("IGT_CHILD1_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    child2_role = Role("IGT_CHILD2_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    parent_role = Role("IGT_PARENT_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
     parent_child1_relationship = RoleInheritance(child1_role, parent_role)
     parent_child2_relationship = RoleInheritance(child2_role, parent_role)
-    grandparent_role = Role("IGT_GRANDPARENT_ROLE", user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
+    grandparent_role = Role("IGT_GRANDPARENT_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
     grandparent_parent_relationship = RoleInheritance(
         child_principal=parent_role, 
         parent_principal=grandparent_role
     )
-    great_grandparent_role = Role("IGT_GREAT_GRANDPARENT_ROLE", user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
+    great_grandparent_role = Role("IGT_GREAT_GRANDPARENT_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
     # Removing the link between great grandparent and grandparent #great_grandparent_grandparent_relationship = RoleRelationship(grandparent_role.name, great_grandparent_role.name)
     sysadmin_great_grandparent_relationship = RoleInheritance(
         child_principal=great_grandparent_role,
@@ -191,11 +191,11 @@ def test_ascendants_with_database_roles(flake: PyflakeClient, assets_queue: queu
     ### Arrange ###
     user_admin_role = Role("USERADMIN")
     sys_admin_role = Role("SYSADMIN")
-    database = AssetsDatabase("IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=sys_admin_role)
-    dr_sys = DatabaseRole("IGT_DEMO_DB_SYS_ADMIN", database.db_name, user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
-    dr_rwc = DatabaseRole("IGT_DEMO_RWC", database.db_name, user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
-    dr_rw = DatabaseRole("IGT_DEMO_RW", database.db_name, user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
-    dr_r = DatabaseRole("IGT_DEMO_R", database.db_name, user_admin_role, f"pyflake_client_TEST_{uuid.uuid4()}")
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin_role)
+    dr_sys = DatabaseRole("IGT_DEMO_DB_SYS_ADMIN", database.db_name, user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    dr_rwc = DatabaseRole("IGT_DEMO_RWC", database.db_name, user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    dr_rw = DatabaseRole("IGT_DEMO_RW", database.db_name, user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    dr_r = DatabaseRole("IGT_DEMO_R", database.db_name, user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
     
     rel1 = RoleInheritance(dr_sys, sys_admin_role)
     rel2 = RoleInheritance(dr_rwc, dr_sys)

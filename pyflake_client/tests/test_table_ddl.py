@@ -11,27 +11,25 @@ from pyflake_client.models.assets.table_columns import (
     Timestamp,
     Date,
 )
-from pyflake_client.models.assets.database import Database as AssetsDatabase
-from pyflake_client.models.assets.role import Role as AssetsRole
+from pyflake_client.models.assets.database import Database as DatabaseAsset
+from pyflake_client.models.assets.role import Role as RoleAsset
 
 
 def test_create_simple_table_ddl():
     """test_create_simple_table_ddl"""
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         database=database,
         schema_name="S1",
         comment="SCHEMA",
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
     )
     table = TableAsset(
         schema,
         "TEST",
         [Integer(name="ID", identity=Identity(1, 1))],
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
     )
 
     ### Act ###
@@ -46,14 +44,12 @@ def test_create_simple_table_ddl():
 def test_create_complex_table_ddl():
     """test_create_complex_table_ddl"""
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleDescribable("SYSADMIN"))
     schema = Schema(
         database=database,
         schema_name="S1",
         comment="SCHEMA",
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
     )
     table = TableAsset(
         schema,
@@ -63,7 +59,7 @@ def test_create_complex_table_ddl():
             Varchar(name="VARCHAR_NO_DEFAULT"),
             Varchar(name="VARCHAR_DEFAULT", default_value="YES"),
         ],
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
     )
 
     ### Act ###
@@ -78,14 +74,12 @@ def test_create_complex_table_ddl():
 def test_create_complex_table_with_primary_key_ddl():
     """test_create_complex_table_ddl"""
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleDescribable("SYSADMIN"))
     schema = Schema(
         database=database,
         schema_name="S1",
         comment="SCHEMA",
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
     )
     table = TableAsset(
         schema,
@@ -98,7 +92,7 @@ def test_create_complex_table_with_primary_key_ddl():
                 primary_key=True,
             ),
         ],
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
     )
 
     ### Act ###
@@ -115,14 +109,12 @@ def test_create_simple_table_with_default_date_ddl():
     insert into <DB>.<SCHEMA>.TEST (SOME_DATE) values(default);
     """
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleDescribable("SYSADMIN"))
     schema = Schema(
         database=database,
         schema_name="S1",
         comment="SCHEMA",
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
     )
     table = TableAsset(
         schema,
@@ -131,7 +123,7 @@ def test_create_simple_table_with_default_date_ddl():
             Integer(name="ID", identity=Identity(1, 1)),
             Date(name="SOME_DATE", default_value=date(2000, 1, 1)),
         ],
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
     )
 
     ### Act ###
@@ -148,14 +140,12 @@ def test_create_simple_table_with_default_datetime_ddl():
     insert into <DB>.<SCHEMA>.TEST (SOME_DATETIME) values(default);
     """
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         database=database,
         schema_name="S1",
         comment="SCHEMA",
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
     )
     table = TableAsset(
         schema,
@@ -168,7 +158,7 @@ def test_create_simple_table_with_default_datetime_ddl():
                 nullable=True,
             ),
         ],
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
     )
 
     ### Act ###

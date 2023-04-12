@@ -2,24 +2,22 @@ import queue
 import uuid
 
 from pyflake_client.client import PyflakeClient
-from pyflake_client.models.assets.database import Database as AssetsDatabase
-from pyflake_client.models.assets.schema import Schema as AssetsSchema
+from pyflake_client.models.assets.database import Database as DatabaseAsset
+from pyflake_client.models.assets.schema import Schema as SchemaAsset
 from pyflake_client.models.assets.tag import Tag as AssetsTag
-from pyflake_client.models.assets.role import Role as AssetsRole
+from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.describables.tag import Tag as DescribablesTag
 from pyflake_client.models.entities.tag import Tag as EntitiesTag
 
 
 def test_describe_non_existing_tag(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
-    schema = AssetsSchema(
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    schema = SchemaAsset(
         database=database,
         schema_name="TEST_SCHEMA",
-        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
-        owner=AssetsRole("SYSADMIN"),
+        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        owner=RoleAsset("SYSADMIN"),
     )
     try:
         flake.register_asset(database, asset_queue=assets_queue)
@@ -41,25 +39,21 @@ def test_describe_non_existing_tag(flake: PyflakeClient, assets_queue: queue.Lif
         flake.delete_assets(asset_queue=assets_queue)
 
 
-def test_create_tag_without_tag_values(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue
-):
+def test_create_tag_without_tag_values(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
-    schema = AssetsSchema(
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    schema = SchemaAsset(
         database=database,
         schema_name="TEST_SCHEMA",
-        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
-        owner=AssetsRole("SYSADMIN"),
+        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        owner=RoleAsset("SYSADMIN"),
     )
     tag = AssetsTag(
         database_name=database.db_name,
         schema_name=schema.schema_name,
         tag_name="TEST_TAG",
         tag_values=[],
-        owner=AssetsRole(name="SYSADMIN"),
+        owner=RoleAsset(name="SYSADMIN"),
         comment="TEST TAG",
     )
     try:
@@ -84,25 +78,21 @@ def test_create_tag_without_tag_values(
         flake.delete_assets(asset_queue=assets_queue)
 
 
-def test_create_tag_with_tag_values(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue
-):
+def test_create_tag_with_tag_values(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
-    schema = AssetsSchema(
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    schema = SchemaAsset(
         database=database,
         schema_name="TEST_SCHEMA",
-        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
-        owner=AssetsRole("SYSADMIN"),
+        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        owner=RoleAsset("SYSADMIN"),
     )
     tag = AssetsTag(
         database_name=database.db_name,
         schema_name=schema.schema_name,
         tag_name="TEST_TAG",
         tag_values=["FOO", "BAR"],
-        owner=AssetsRole(name="SYSADMIN"),
+        owner=RoleAsset(name="SYSADMIN"),
         comment="TEST TAG",
     )
     try:

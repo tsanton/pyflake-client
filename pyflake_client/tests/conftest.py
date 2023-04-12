@@ -10,8 +10,8 @@ import snowflake.connector
 from snowflake.connector import SnowflakeConnection
 
 from pyflake_client.client import PyflakeClient
-from pyflake_client.models.assets.database import Database as AssetsDatabase
-from pyflake_client.models.assets.role import Role as AssetsRole
+from pyflake_client.models.assets.database import Database as DatabaseAsset
+from pyflake_client.models.assets.role import Role as RoleAsset
 
 
 # https://docs.pytest.org/en/6.2.x/fixture.html#fixture-scopes
@@ -43,10 +43,8 @@ def assets_queue() -> queue.LifoQueue:
 
 
 @pytest.fixture(scope="function")
-def database() -> AssetsDatabase:
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+def database() -> DatabaseAsset:
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     return database
 
 

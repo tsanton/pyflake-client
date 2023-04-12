@@ -7,21 +7,19 @@ from pyflake_client.models.assets.table_columns import Date
 from pyflake_client.models.entities.column import Date as DateEntity
 from pyflake_client.models.entities.table import Table as TableEntity
 from pyflake_client.models.describables.table import Table as TableDescribable
-from pyflake_client.models.assets.database import Database as AssetsDatabase
-from pyflake_client.models.assets.role import Role as AssetsRole
+from pyflake_client.models.assets.database import Database as DatabaseAsset
+from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.client import PyflakeClient
 
 
 def test_table_date(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         database=database,
         schema_name="TEST_SCHEMA",
-        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
-        owner=AssetsRole("SYSADMIN"),
+        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        owner=RoleAsset("SYSADMIN"),
     )
     columns = [
         Date(name="DATE_COLUMN"),
@@ -30,7 +28,7 @@ def test_table_date(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         schema=schema,
         table_name="TEST_TABLE",
         columns=columns,
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
     )
 
     try:
@@ -68,14 +66,12 @@ def test_table_date(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 
 
 def test_table_date_primary_key(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         database=database,
         schema_name="TEST_SCHEMA",
-        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
-        owner=AssetsRole("SYSADMIN"),
+        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        owner=RoleAsset("SYSADMIN"),
     )
     columns = [
         Date(name="DATE_COLUMN", primary_key=True),
@@ -84,7 +80,7 @@ def test_table_date_primary_key(flake: PyflakeClient, assets_queue: queue.LifoQu
         schema=schema,
         table_name="TEST_TABLE",
         columns=columns,  # type: ignore
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
     )
 
     try:

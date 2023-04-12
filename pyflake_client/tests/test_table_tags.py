@@ -11,26 +11,22 @@ from pyflake_client.models.assets.table_columns import (
 )
 from pyflake_client.models.entities.table import Table as TableEntity
 from pyflake_client.models.describables.table import Table as TableDescribable
-from pyflake_client.models.assets.role import Role as AssetsRole
+from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.tag import Tag as AssetsTag
-from pyflake_client.models.assets.database import Database as AssetsDatabase
+from pyflake_client.models.assets.database import Database as DatabaseAsset
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.client import PyflakeClient
 
 
-def test_create_table_with_tag_without_value(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue
-):
+def test_create_table_with_tag_without_value(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_table"""
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema: Schema = Schema(
         database=database,
         schema_name="SOME_SCHEMA",
-        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
-        owner=AssetsRole("SYSADMIN"),
+        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        owner=RoleAsset("SYSADMIN"),
     )
     columns = [
         Number("ID", identity=Identity(1, 1)),
@@ -42,7 +38,7 @@ def test_create_table_with_tag_without_value(
         schema_name=schema.schema_name,
         tag_name="TEST_TAG",
         tag_values=[],
-        owner=AssetsRole(name="SYSADMIN"),
+        owner=RoleAsset(name="SYSADMIN"),
     )
     classification_tag = ClassificationTag(
         database_name=database.db_name,
@@ -54,7 +50,7 @@ def test_create_table_with_tag_without_value(
         schema=schema,
         table_name="TEST",
         columns=columns,
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
         tags=[classification_tag],
     )
 
@@ -88,19 +84,15 @@ def test_create_table_with_tag_without_value(
         flake.delete_assets(assets_queue)
 
 
-def test_create_table_with_tag_with_value(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue
-):
+def test_create_table_with_tag_with_value(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_table"""
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema: Schema = Schema(
         database=database,
         schema_name="SOME_SCHEMA",
-        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
-        owner=AssetsRole("SYSADMIN"),
+        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        owner=RoleAsset("SYSADMIN"),
     )
     columns = [
         Number("ID", identity=Identity(1, 1)),
@@ -112,7 +104,7 @@ def test_create_table_with_tag_with_value(
         schema_name=schema.schema_name,
         tag_name="TEST_TAG",
         tag_values=["FOO", "BAR"],
-        owner=AssetsRole(name="SYSADMIN"),
+        owner=RoleAsset(name="SYSADMIN"),
     )
     classification_tag = ClassificationTag(
         database_name=database.db_name,
@@ -124,7 +116,7 @@ def test_create_table_with_tag_with_value(
         schema=schema,
         table_name="TEST",
         columns=columns,
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
         tags=[classification_tag],
     )
 
@@ -158,19 +150,15 @@ def test_create_table_with_tag_with_value(
         flake.delete_assets(assets_queue)
 
 
-def test_create_table_with_multiple_tags(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue
-):
+def test_create_table_with_multiple_tags(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_table"""
     ### Arrange ###
-    database = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}", owner=AssetsRole("SYSADMIN")
-    )
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleDescribable("SYSADMIN"))
     schema: Schema = Schema(
         database=database,
         schema_name="SOME_SCHEMA",
-        comment=f"pyflake_client_TEST_{uuid.uuid4()}",
-        owner=AssetsRole("SYSADMIN"),
+        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        owner=RoleAsset("SYSADMIN"),
     )
     columns = [
         Number("ID", identity=Identity(1, 1)),
@@ -182,14 +170,14 @@ def test_create_table_with_multiple_tags(
         schema_name=schema.schema_name,
         tag_name="TEST_TAG_1",
         tag_values=[],
-        owner=AssetsRole(name="SYSADMIN"),
+        owner=RoleAsset(name="SYSADMIN"),
     )
     tag_asset_2 = AssetsTag(
         database_name=database.db_name,
         schema_name=schema.schema_name,
         tag_name="TEST_TAG_2",
         tag_values=["FOO", "BAR"],
-        owner=AssetsRole(name="SYSADMIN"),
+        owner=RoleAsset(name="SYSADMIN"),
     )
     classification_tag_1 = ClassificationTag(
         database_name=database.db_name,
@@ -207,7 +195,7 @@ def test_create_table_with_multiple_tags(
         schema=schema,
         table_name="TEST",
         columns=columns,
-        owner=AssetsRole("SYSADMIN"),
+        owner=RoleAsset("SYSADMIN"),
         tags=[classification_tag_1, classification_tag_2],
     )
 
