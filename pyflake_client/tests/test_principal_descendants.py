@@ -17,6 +17,7 @@ from pyflake_client.models.describables.principal_descendants import PrincipalDe
 
 from pyflake_client.models.entities.principal_descendants import PrincipalDescendants as RoleDescendantsEntity
 from pyflake_client.models.entities.grant import Grant as GrantEntity
+from pyflake_client.models.enums.role_type import RoleType
 
 def test_get_descendant_roles(flake: PyflakeClient):
     """test_get_descendant_roles: we know that ACCOUNTADMIN is the parent of both SECURITYADMIN and SYSADMIN"""
@@ -59,7 +60,7 @@ def test_role_to_role_descendants(flake: PyflakeClient, assets_queue: queue.Lifo
         child:GrantEntity = next((r for r in hierarchy.descendants if r.granted_identifier == child_role.name), None)
         assert child is not None
         assert child.grantee_identifier == parent_role.name
-        assert child.grantee_type == "ROLE"
+        assert child.grantee_type == RoleType.ROLE
         assert child.granted_by == "USERADMIN"
 
 
@@ -94,15 +95,15 @@ def test_role_to_roles_descendants(flake: PyflakeClient, assets_queue: queue.Lif
 
         assert child_1 is not None
         assert child_1.grantee_identifier == parent_role.name
-        assert child_1.grantee_type == "ROLE"
+        assert child_1.grantee_type == RoleType.ROLE
         assert child_1.granted_by == "USERADMIN"
-        assert child_1.granted_on == "ROLE"
+        assert child_1.granted_on == RoleType.ROLE
 
         assert child_2 is not None
         assert child_2.grantee_identifier == parent_role.name
-        assert child_2.grantee_type == "ROLE"
+        assert child_2.grantee_type == RoleType.ROLE
         assert child_2.granted_by == "USERADMIN"
-        assert child_2.granted_on == "ROLE"
+        assert child_2.granted_on == RoleType.ROLE
 
 
     finally:
@@ -137,15 +138,15 @@ def test_role_to_role_and_database_role_descendants(flake: PyflakeClient, assets
 
         assert child_1 is not None
         assert child_1.grantee_identifier == parent_role.name
-        assert child_1.grantee_type == "ROLE"
+        assert child_1.grantee_type == RoleType.ROLE
         assert child_1.granted_by == "USERADMIN"
-        assert child_1.granted_on == "ROLE"
+        assert child_1.granted_on == RoleType.ROLE
 
         assert child_2 is not None
         assert child_2.grantee_identifier == parent_role.name
-        assert child_2.grantee_type == "ROLE"
+        assert child_2.grantee_type == RoleType.ROLE
         assert child_2.granted_by == "USERADMIN"
-        assert child_2.granted_on == "DATABASE_ROLE"
+        assert child_2.granted_on == RoleType.DATABASE_ROLE
 
     finally:
         ### Cleanup ###
@@ -179,15 +180,15 @@ def test_database_role_to_database_roles_descendants(flake: PyflakeClient, asset
 
         assert child_1 is not None
         assert child_1.grantee_identifier == parent_role.name
-        assert child_1.grantee_type == "DATABASE_ROLE"
+        assert child_1.grantee_type == RoleType.DATABASE_ROLE
         assert child_1.granted_by == "USERADMIN"
-        assert child_1.granted_on == "DATABASE_ROLE"
+        assert child_1.granted_on == RoleType.DATABASE_ROLE
 
         assert child_2 is not None
         assert child_2.grantee_identifier == parent_role.name
-        assert child_2.grantee_type == "DATABASE_ROLE"
+        assert child_2.grantee_type == RoleType.DATABASE_ROLE
         assert child_2.granted_by == "USERADMIN"
-        assert child_2.granted_on == "DATABASE_ROLE"
+        assert child_2.granted_on == RoleType.DATABASE_ROLE
 
     finally:
         ### Cleanup ###

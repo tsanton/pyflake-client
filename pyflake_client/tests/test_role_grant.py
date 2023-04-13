@@ -21,6 +21,8 @@ from pyflake_client.models.describables.grant import Grant as GrantDescribable
 from pyflake_client.models.entities.grant import Grant as GrantEntity
 
 from pyflake_client.models.enums.privilege import Privilege
+from pyflake_client.models.enums.role_type import RoleType
+from pyflake_client.models.enums.object_type import ObjectType
 
 def test_describe_grant_for_non_existing_role(flake: PyflakeClient):
     """test_describe_grant_for_non_existing_role"""
@@ -51,17 +53,17 @@ def test_role_account_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue
 
         cdb = next((r for r in grants if r.privilege == Privilege.CREATE_DATABASE), None)
         assert cdb is not None
-        assert cdb.granted_on == "ACCOUNT"
+        assert cdb.granted_on == ObjectType.ACCOUNT
         assert cdb.granted_by == "SYSADMIN"
         assert cdb.grantee_identifier == role.name
-        assert cdb.grantee_type == "ROLE"
+        assert cdb.grantee_type == RoleType.ROLE
 
         cu = next((r for r in grants if r.privilege == Privilege.CREATE_USER), None)
         assert cu is not None
-        assert cu.granted_on == "ACCOUNT"
+        assert cu.granted_on == ObjectType.ACCOUNT
         assert cu.granted_by == "USERADMIN"
         assert cu.grantee_identifier == role.name
-        assert cu.grantee_type == "ROLE"
+        assert cu.grantee_type == RoleType.ROLE
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
@@ -89,17 +91,17 @@ def test_role_database_grants(flake: PyflakeClient, assets_queue: queue.LifoQueu
 
         cdr = next((r for r in grants if r.privilege == Privilege.CREATE_DATABASE_ROLE), None)
         assert cdr is not None
-        assert cdr.granted_on == "DATABASE"
+        assert cdr.granted_on == ObjectType.DATABASE
         assert cdr.granted_by == "SYSADMIN"
         assert cdr.grantee_identifier == role.name
-        assert cdr.grantee_type == "ROLE"
+        assert cdr.grantee_type == RoleType.ROLE
 
         cs = next((r for r in grants if r.privilege == Privilege.CREATE_SCHEMA), None)
         assert cs is not None
-        assert cs.granted_on == "DATABASE"
+        assert cs.granted_on == ObjectType.DATABASE
         assert cs.granted_by == "SYSADMIN"
         assert cs.grantee_identifier == role.name
-        assert cs.grantee_type == "ROLE"
+        assert cs.grantee_type == RoleType.ROLE
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
@@ -133,17 +135,17 @@ def test_role_schema_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue)
 
         m = next((r for r in grants if r.privilege == Privilege.MONITOR), None)
         assert m is not None
-        assert m.granted_on == "SCHEMA"
+        assert m.granted_on == ObjectType.SCHEMA
         assert m.granted_by == "SYSADMIN"
         assert m.grantee_identifier == role.name
-        assert m.grantee_type == "ROLE"
+        assert m.grantee_type == RoleType.ROLE
 
         u = next((r for r in grants if r.privilege == Privilege.USAGE), None)
         assert u is not None
-        assert u.granted_on == "SCHEMA"
+        assert u.granted_on == ObjectType.SCHEMA
         assert u.granted_by == "SYSADMIN"
         assert u.grantee_identifier == role.name
-        assert u.grantee_type == "ROLE"
+        assert u.grantee_type == RoleType.ROLE
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
@@ -173,17 +175,17 @@ def test_role_warehouse_grant(flake: PyflakeClient, assets_queue: queue.LifoQueu
 
         m = next((r for r in grants if r.privilege == Privilege.MONITOR), None)
         assert m is not None
-        assert m.granted_on == "WAREHOUSE"
+        assert m.granted_on == ObjectType.WAREHOUSE
         assert m.granted_by == "SYSADMIN"
         assert m.grantee_identifier == role.name
-        assert m.grantee_type == "ROLE"
+        assert m.grantee_type == RoleType.ROLE
 
         u = next((r for r in grants if r.privilege == Privilege.USAGE), None)
         assert u is not None
-        assert u.granted_on == "WAREHOUSE"
+        assert u.granted_on == ObjectType.WAREHOUSE
         assert u.granted_by == "SYSADMIN"
         assert u.grantee_identifier == role.name
-        assert u.grantee_type == "ROLE"
+        assert u.grantee_type == RoleType.ROLE
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)

@@ -19,6 +19,7 @@ from pyflake_client.models.entities.future_grant import FutureGrant as FutureGra
 
 from pyflake_client.models.enums.privilege import Privilege
 from pyflake_client.models.enums.object_type import ObjectType
+from pyflake_client.models.enums.role_type import RoleType
 
 def test_describe_future_grant_for_non_existing_role(flake: PyflakeClient):
     """test_describe_grant_for_non_existing_role"""
@@ -52,13 +53,13 @@ def test_role_database_object_future_grant(flake: PyflakeClient, assets_queue: q
         assert select is not None
         assert select.grant_on == ObjectType.TABLE
         assert select.grantee_identifier == role.name
-        assert select.grantee_type == "ROLE"
+        assert select.grantee_type == RoleType.ROLE
 
         references = next((r for r in grants if r.privilege == Privilege.REFERENCES), None)
         assert references is not None
         assert references.grant_on == ObjectType.TABLE
         assert references.grantee_identifier == role.name
-        assert references.grantee_type == "ROLE"
+        assert references.grantee_type == RoleType.ROLE
 
     finally:
         ### Cleanup ###
@@ -89,13 +90,13 @@ def test_role_schema_object_future_grant(flake: PyflakeClient, assets_queue: que
         assert select is not None
         assert select.grant_on == ObjectType.TABLE
         assert select.grantee_identifier == role.name
-        assert select.grantee_type == "ROLE"
+        assert select.grantee_type == RoleType.ROLE
 
         references = next((r for r in grants if r.privilege == Privilege.REFERENCES), None)
         assert references is not None
         assert references.grant_on == ObjectType.TABLE
         assert references.grantee_identifier == role.name
-        assert references.grantee_type == "ROLE"
+        assert references.grantee_type == RoleType.ROLE
 
     finally:
         ### Cleanup ###

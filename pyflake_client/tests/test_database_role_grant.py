@@ -19,6 +19,7 @@ from pyflake_client.models.describables.grant import Grant as GrantDescribable
 from pyflake_client.models.entities.grant import Grant as GrantEntity
 
 from pyflake_client.models.enums.privilege import Privilege
+from pyflake_client.models.enums.role_type import RoleType
 
 #TODO: test_describe_grant_for_non_existing_database_role
 
@@ -65,7 +66,7 @@ def test_database_role_database_grant(flake: PyflakeClient, assets_queue: queue.
         assert usg is not None
         assert usg.granted_by == "" #Implisit usage grant on databases for database roles
         assert usg.grantee_identifier == db_role.name
-        assert usg.grantee_type == "DATABASE_ROLE"
+        assert usg.grantee_type == RoleType.DATABASE_ROLE
         assert usg.granted_identifier == database.db_name
 
         cdr = next((r for r in grants if r.privilege == Privilege.CREATE_DATABASE_ROLE and r.granted_on == "DATABASE"), None)
@@ -73,7 +74,7 @@ def test_database_role_database_grant(flake: PyflakeClient, assets_queue: queue.
         assert cdr.granted_on == "DATABASE"
         assert cdr.granted_by == "SYSADMIN"
         assert cdr.grantee_identifier == db_role.name
-        assert cdr.grantee_type == "DATABASE_ROLE"
+        assert cdr.grantee_type == RoleType.DATABASE_ROLE
         assert cdr.granted_identifier == database.db_name
 
         cs = next((r for r in grants if r.privilege == Privilege.CREATE_SCHEMA and r.granted_on == "DATABASE"), None)
@@ -81,7 +82,7 @@ def test_database_role_database_grant(flake: PyflakeClient, assets_queue: queue.
         assert cs.granted_on == "DATABASE"
         assert cs.granted_by == "SYSADMIN"
         assert cs.grantee_identifier == db_role.name
-        assert cs.grantee_type == "DATABASE_ROLE"
+        assert cs.grantee_type == RoleType.DATABASE_ROLE
         assert cs.granted_identifier == database.db_name
     finally:
         ### Cleanup ###
@@ -115,21 +116,21 @@ def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.Li
         assert usg is not None
         assert usg.granted_by == "" #Implisit usage grant on databases for database roles
         assert usg.grantee_identifier == db_role.name
-        assert usg.grantee_type == "DATABASE_ROLE"
+        assert usg.grantee_type == RoleType.DATABASE_ROLE
         assert usg.granted_identifier == database.db_name
 
         susg = next((r for r in grants if r.privilege == Privilege.USAGE and r.granted_on == "SCHEMA"), None)
         assert susg is not None
         assert susg.granted_by == "SYSADMIN"
         assert susg.grantee_identifier == db_role.name
-        assert susg.grantee_type == "DATABASE_ROLE"
+        assert susg.grantee_type == RoleType.DATABASE_ROLE
         assert susg.granted_identifier == f"{database.db_name}.{schema.schema_name}"
 
         ct = next((r for r in grants if r.privilege == Privilege.CREATE_TABLE and r.granted_on == "SCHEMA"), None)
         assert ct is not None
         assert ct.granted_by == "SYSADMIN"
         assert ct.grantee_identifier == db_role.name
-        assert ct.grantee_type == "DATABASE_ROLE"
+        assert ct.grantee_type == RoleType.DATABASE_ROLE
         assert ct.granted_identifier == f"{database.db_name}.{schema.schema_name}"
     
     finally:

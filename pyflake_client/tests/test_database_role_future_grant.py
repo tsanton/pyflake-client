@@ -5,7 +5,6 @@ import uuid
 from pyflake_client.client import PyflakeClient
 
 from pyflake_client.models.assets.database import Database as DatabaseAsset
-from pyflake_client.models.assets.grants.schema_grant import SchemaGrant
 from pyflake_client.models.assets.schema import Schema as SchemaAsset
 from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.database_role import DatabaseRole as DatabaseRoleAsset
@@ -20,6 +19,7 @@ from pyflake_client.models.entities.future_grant import FutureGrant as FutureGra
 
 from pyflake_client.models.enums.privilege import Privilege
 from pyflake_client.models.enums.object_type import ObjectType
+from pyflake_client.models.enums.role_type import RoleType
 
 
 def test_describe_future_grant_for_non_existing_database_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
@@ -78,14 +78,14 @@ def test_database_role_future_database_object_grant(flake: PyflakeClient, assets
         assert select.grant_on == ObjectType.TABLE
         assert select.grant_identifier == f"{database.db_name}.<{ObjectType.TABLE}>"
         assert select.grantee_identifier == db_role.name
-        assert select.grantee_type == "DATABASE_ROLE"
+        assert select.grantee_type == RoleType.DATABASE_ROLE
 
         references = next((r for r in grants if r.privilege == Privilege.REFERENCES), None)
         assert references is not None
         assert references.grant_on == ObjectType.TABLE
         assert select.grant_identifier == f"{database.db_name}.<{ObjectType.TABLE}>"
         assert references.grantee_identifier == db_role.name
-        assert references.grantee_type == "DATABASE_ROLE"
+        assert references.grantee_type == RoleType.DATABASE_ROLE
 
     finally:
         ### Cleanup ###
@@ -120,14 +120,14 @@ def test_database_role_schema_object_future_grant(flake: PyflakeClient, assets_q
         assert select.grant_on == ObjectType.TABLE
         assert select.grant_identifier == f"{database.db_name}.{schema.schema_name}.<{ObjectType.TABLE}>"
         assert select.grantee_identifier == db_role.name
-        assert select.grantee_type == "DATABASE_ROLE"
+        assert select.grantee_type == RoleType.DATABASE_ROLE
 
         references = next((r for r in grants if r.privilege == Privilege.REFERENCES), None)
         assert references is not None
         assert references.grant_on == ObjectType.TABLE
         assert select.grant_identifier == f"{database.db_name}.{schema.schema_name}.<{ObjectType.TABLE}>"
         assert references.grantee_identifier == db_role.name
-        assert references.grantee_type == "DATABASE_ROLE"
+        assert references.grantee_type == RoleType.DATABASE_ROLE
 
     finally:
         ### Cleanup ###

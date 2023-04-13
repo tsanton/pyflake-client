@@ -4,6 +4,9 @@ from enum import Enum
 
 class ObjectType(str, Enum):
     """ObjectType"""
+    WAREHOUSE = "WAREHOUSE"
+    DATABASE = "DATABASE"
+    SCHEMA = "SCHEMA"
     TABLE = "TABLE"
     VIEW = "VIEW"
     MATVIEW = "MATVIEW"

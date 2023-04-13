@@ -14,7 +14,7 @@ from pyflake_client.models.describables.role import Role as DescribablesRole
 from pyflake_client.models.describables.database_role import (
     DatabaseRole as DescribablesDatabaseRole,
 )
-
+from pyflake_client.models.enums.role_type import RoleType
 
 @dataclass
 class Grant(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
@@ -22,9 +22,9 @@ class Grant(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
 
     def get_describe_statement(self) -> str:
         if isinstance(self.principal, DescribablesRole):
-            query = f"SHOW GRANTS TO ROLE {self.principal.name}"
+            query = f"SHOW GRANTS TO {RoleType.ROLE} {self.principal.name}"
         elif isinstance(self.principal, DescribablesDatabaseRole):
-            query = f"SHOW GRANTS TO DATABASE ROLE {self.principal.db_name}.{self.principal.name}"
+            query = f"SHOW GRANTS TO {RoleType.DATABASE_ROLE} {self.principal.db_name}.{self.principal.name}"
         else:
             raise NotImplementedError(
                 f"Grant describe statement for {self.__class__} is not implemented"

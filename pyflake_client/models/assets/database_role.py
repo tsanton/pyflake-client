@@ -5,7 +5,7 @@ from typing import Union
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
 from pyflake_client.models.assets.role import Role
-
+from pyflake_client.models.enums.role_type import RoleType
 
 @dataclass(frozen=True)
 class DatabaseRole(ISnowflakeAsset, ISnowflakePrincipal):
@@ -22,21 +22,21 @@ class DatabaseRole(ISnowflakeAsset, ISnowflakePrincipal):
             raise ValueError("Create statement not supported for owner-less roles")
 
         if isinstance(self.owner, DatabaseRole):
-            role_type = "DATABASE ROLE"
+            owner_role_type = RoleType.DATABASE_ROLE
         elif isinstance(self.owner, Role):
-            role_type = "ROLE"
+            owner_role_type = RoleType.ROLE
         else:
             raise NotImplementedError(
                 "Ownership is not implementer for this interface type"
             )
 
-        return f"""CREATE OR REPLACE DATABASE ROLE {self.database_name}.{self.name} COMMENT = '{self.comment}';
-                   GRANT OWNERSHIP ON DATABASE ROLE {self.database_name}.{self.name} TO {role_type} {self.owner.get_identifier()}
+        return f"""CREATE OR REPLACE {RoleType.DATABASE_ROLE} {self.database_name}.{self.name} COMMENT = '{self.comment}';
+                   GRANT OWNERSHIP ON {RoleType.DATABASE_ROLE} {self.database_name}.{self.name} TO {owner_role_type} {self.owner.get_identifier()}
                     REVOKE CURRENT GRANTS;"""
 
     def get_delete_statement(self) -> str:
         """get_delete_statement"""
-        return f"DROP DATABASE ROLE IF EXISTS {self.database_name}.{self.name}"
+        return f"DROP {RoleType.DATABASE_ROLE} IF EXISTS {self.database_name}.{self.name}"
 
     def get_identifier(self) -> str:
         return f"{self.database_name}.{self.name}"

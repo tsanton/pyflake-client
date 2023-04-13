@@ -9,7 +9,7 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 from pyflake_client.models.describables.snowflake_grant_principal import (
     ISnowflakeGrantPrincipal,
 )
-
+from pyflake_client.models.enums.role_type import RoleType
 
 @dataclass(frozen=True)
 class DatabaseRole(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
@@ -20,7 +20,7 @@ class DatabaseRole(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
 
     def get_describe_statement(self) -> str:
         """get_describe_statement"""
-        return f"SHOW DATABASE ROLES LIKE '{self.name}' IN DATABASE {self.db_name};".upper()
+        return f"SHOW {RoleType.DATABASE_ROLE.pluralize()} LIKE '{self.name}' IN DATABASE {self.db_name};".upper()
 
     def is_procedure(self) -> bool:
         """is_procedure"""

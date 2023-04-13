@@ -6,6 +6,7 @@ from pyflake_client.models.assets.snowflake_principal_interface import ISnowflak
 from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.database_role import DatabaseRole as DatabaseRoleAsset
 from pyflake_client.models.enums.object_type import ObjectType
+from pyflake_client.models.enums.role_type import RoleType
 from pyflake_client.models.enums.privilege import Privilege
 
 T = TypeVar("T", bound=ISnowflakePrincipal)
@@ -20,9 +21,9 @@ class SchemaObjectFutureGrant(ISnowflakeGrantAsset):
     def get_grant_statement(self, principal: ISnowflakePrincipal, privileges: List[Privilege]) -> str:
         privs = f"{', '.join(p.value for p in privileges)}"
         if isinstance(principal, RoleAsset):
-            return f"GRANT {privs} ON FUTURE {self.grant_target.pluralize()} IN SCHEMA {self.database_name}.{self.schema_name} TO ROLE {principal.get_identifier()}"
+            return f"GRANT {privs} ON FUTURE {self.grant_target.pluralize()} IN SCHEMA {self.database_name}.{self.schema_name} TO {RoleType.ROLE} {principal.get_identifier()}"
         if isinstance(principal, DatabaseRoleAsset):
-            return f"GRANT {privs} ON FUTURE {self.grant_target.pluralize()} IN SCHEMA {self.database_name}.{self.schema_name} TO DATABASE ROLE {principal.get_identifier()}"
+            return f"GRANT {privs} ON FUTURE {self.grant_target.pluralize()} IN SCHEMA {self.database_name}.{self.schema_name} TO {RoleType.DATABASE_ROLE} {principal.get_identifier()}"
 
         raise NotImplementedError(
             f"Can't generate grant statement for asset of type {self.__class__}"
@@ -31,9 +32,9 @@ class SchemaObjectFutureGrant(ISnowflakeGrantAsset):
     def get_revoke_statement(self, principal: ISnowflakePrincipal, privileges: List[Privilege]) -> str:
         privs = f"{', '.join(p.value for p in privileges)}"
         if isinstance(principal, RoleAsset):
-            return f"REVOKE {privs} ON FUTURE {self.grant_target.pluralize()} IN SCHEMA {self.database_name}.{self.schema_name} FROM ROLE {principal.get_identifier()} CASCADE"
+            return f"REVOKE {privs} ON FUTURE {self.grant_target.pluralize()} IN SCHEMA {self.database_name}.{self.schema_name} FROM {RoleType.ROLE} {principal.get_identifier()} CASCADE"
         if isinstance(principal, DatabaseRoleAsset):
-            return f"REVOKE {privs} ON FUTURE {self.grant_target.pluralize()} IN SCHEMA {self.database_name}.{self.schema_name} FROM DATABASE ROLE {principal.get_identifier()} CASCADE"
+            return f"REVOKE {privs} ON FUTURE {self.grant_target.pluralize()} IN SCHEMA {self.database_name}.{self.schema_name} FROM {RoleType.DATABASE_ROLE} {principal.get_identifier()} CASCADE"
 
         raise NotImplementedError(
             f"Can't generate revoke statement for asset of type {self.__class__}"

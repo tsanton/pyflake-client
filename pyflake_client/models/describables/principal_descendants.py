@@ -7,10 +7,9 @@ import dacite
 
 from pyflake_client.models.describables.role import Role as RoleDescribable
 from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
-
 from pyflake_client.models.describables.snowflake_describable_interface import  ISnowflakeDescribable
 from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
-
+from pyflake_client.models.enums.role_type import RoleType
 
 @dataclass(frozen=True)
 class PrincipalDescendants(ISnowflakeDescribable):
@@ -22,10 +21,10 @@ class PrincipalDescendants(ISnowflakeDescribable):
         """get_describe_statement"""
         """get_describe_statement"""
         if isinstance(self.principal, RoleDescribable):
-            principal_type = "ROLE"
+            principal_type = RoleType.ROLE
             principal_identifier = self.principal.name
         elif isinstance(self.principal, DatabaseRoleDescribable):
-            principal_type = "DATABASE ROLE"
+            principal_type = RoleType.DATABASE_ROLE
             principal_identifier = f"{self.principal.db_name}.{self.principal.name}"
         else:
             raise NotImplementedError()

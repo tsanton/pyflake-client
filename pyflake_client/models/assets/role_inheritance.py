@@ -6,6 +6,7 @@ from pyflake_client.models.assets.snowflake_principal_interface import ISnowflak
 from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.database_role import  DatabaseRole as DatabaseRoleAssets
 
+from pyflake_client.models.enums.role_type import RoleType
 
 @dataclass(frozen=True)
 class RoleInheritance(ISnowflakeAsset):
@@ -21,19 +22,19 @@ class RoleInheritance(ISnowflakeAsset):
         grant_statement = "GRANT"
         if isinstance(self.child_principal, RoleAsset):
             child_principal_type = RoleAsset
-            grant_statement += f" ROLE {self.child_principal.get_identifier()} TO";
+            grant_statement += f" {RoleType.ROLE} {self.child_principal.get_identifier()} TO";
         elif isinstance(self.child_principal, DatabaseRoleAssets):
             child_principal_type = DatabaseRoleAssets
-            grant_statement += f" DATABASE ROLE {self.child_principal.get_identifier()} TO";
+            grant_statement += f" {RoleType.DATABASE_ROLE} {self.child_principal.get_identifier()} TO";
         else:
             raise NotImplementedError(f"Can't generate grant statement for asset of type {self.child_principal.__class__}")
 
         if isinstance(self.parent_principal, RoleAsset):
             parent_principal_type = RoleAsset
-            grant_statement += f" ROLE {self.parent_principal.get_identifier()};";
+            grant_statement += f" {RoleType.ROLE} {self.parent_principal.get_identifier()};";
         elif isinstance(self.parent_principal, DatabaseRoleAssets):
             parent_principal_type = DatabaseRoleAssets
-            grant_statement += f" DATABASE ROLE {self.parent_principal.get_identifier()};";
+            grant_statement += f" {RoleType.DATABASE_ROLE} {self.parent_principal.get_identifier()};";
         else:
             raise NotImplementedError(f"Can't generate grant statement for asset of type {self.parent_principal.__class__}")
 
@@ -48,15 +49,15 @@ class RoleInheritance(ISnowflakeAsset):
         """get_delete_statement"""
         revoke_statement = "REVOKE"
         if isinstance(self.child_principal, RoleAsset):
-            revoke_statement += f" ROLE {self.child_principal.get_identifier()} FROM"
+            revoke_statement += f" {RoleType.ROLE} {self.child_principal.get_identifier()} FROM"
         elif isinstance(self.child_principal, DatabaseRoleAssets):
-            revoke_statement += f" DATABASE ROLE {self.child_principal.get_identifier()} FROM"
+            revoke_statement += f" {RoleType.DATABASE_ROLE} {self.child_principal.get_identifier()} FROM"
         else:
             raise NotImplementedError("get_identifier is not implemented for this interface type")
         if isinstance(self.parent_principal, RoleAsset):
-            revoke_statement += f" ROLE {self.parent_principal.get_identifier()};"
+            revoke_statement += f" {RoleType.ROLE} {self.parent_principal.get_identifier()};"
         elif isinstance(self.parent_principal, DatabaseRoleAssets):
-            revoke_statement += f" DATABASE ROLE {self.parent_principal.get_identifier()};"
+            revoke_statement += f" {RoleType.DATABASE_ROLE} {self.parent_principal.get_identifier()};"
         else:
             raise NotImplementedError("get_identifier is not implemented for this interface type")
         return revoke_statement
