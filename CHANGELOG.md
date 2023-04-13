@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.2](https://github.com/Tsanton/pyflake-client/compare/v0.5.1...v0.5.2) (2023-04-13)
+
+
+### Bug Fixes
+
+* database role schema owner fix ([483eab7](https://github.com/Tsanton/pyflake-client/commit/483eab79e79743abfcc8ab035a0427e13f74bb0a))
+* database role tag and warehouse owner fix ([2abd38a](https://github.com/Tsanton/pyflake-client/commit/2abd38a7450fbc0ed7fbcf082772257bd0615a7d))
+* databasse role database owners denial ([51b9e33](https://github.com/Tsanton/pyflake-client/commit/51b9e33111c72f6c4c97bcf6859abf97d35a7ade))
+
 ## [0.5.1](https://github.com/Tsanton/pyflake-client/compare/v0.5.0...v0.5.1) (2023-04-13)
 
 
