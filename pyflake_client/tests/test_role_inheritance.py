@@ -38,8 +38,9 @@ def test_get_role_inheritance(flake: PyflakeClient):
 def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role_inheritance"""
     ### Arrange ###
-    child_role = RoleAsset("IGT_CHILD_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
-    parent_role = RoleAsset("IGT_PARENT_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
+    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    child_role = RoleAsset("IGT_CHILD_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
+    parent_role = RoleAsset("IGT_PARENT_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
     try:
         flake.register_asset(child_role, assets_queue)
         flake.register_asset(parent_role, assets_queue)
@@ -66,8 +67,9 @@ def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQ
 def test_delete_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role_inheritance"""
     ### Arrange ###
-    child_role = RoleAsset("IGT_CHILD_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
-    parent_role = RoleAsset("IGT_PARENT_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
+    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    child_role = RoleAsset("IGT_CHILD_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
+    parent_role = RoleAsset("IGT_PARENT_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
     relationship = RoleInheritanceAsset(child_role, parent_role)
 
     relationship_describable = RoleInheritanceDescribable(RoleDescribable(child_role.name), RoleDescribable(parent_role.name))
@@ -147,7 +149,8 @@ def test_get_role_inheritance_non_existing_parent_role(flake: PyflakeClient):
 
 def test_show_role_to_database_role_inheritance_in_non_existing_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_show_role_to_database_role_inheritance_in_non_existing_database"""
-    r1 = RoleAsset("TEST_SNOWPLOW_ROLE_1", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
+    r1 = RoleAsset("TEST_SNOWPLOW_ROLE_1", snowflake_comment, RoleAsset("USERADMIN"))
     relationship_describable = RoleInheritanceDescribable(DatabaseRoleDescribable("I_DONT_EXIST_ROLE", "I_DONT_EXIST_EITHER_DATABASE"), RoleDescribable(r1.name))
     try:
         flake.register_asset(r1, assets_queue)
@@ -161,13 +164,14 @@ def test_show_role_to_database_role_inheritance_in_non_existing_database(flake: 
 def test_show_role_to_database_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_show_role_to_database_role_inheritance"""
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
-    r1 = RoleAsset("TEST_SNOWPLOW_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
+    database = DatabaseAsset("IGT_DEMO", snowflake_comment, RoleAsset("SYSADMIN"))
+    r1 = RoleAsset("TEST_SNOWPLOW_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
     dr1 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE",
         database_name=database.db_name,
+        comment=snowflake_comment,
         owner=RoleAsset("USERADMIN"),
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
     )
     rel = RoleInheritanceAsset(r1, dr1)
 
@@ -183,13 +187,14 @@ def test_show_role_to_database_role_inheritance(flake: PyflakeClient, assets_que
 def test_show_database_role_to_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_show_database_role_to_role_inheritance"""
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
-    r1 = RoleAsset("TEST_SNOWPLOW_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
+    database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
+    r1 = RoleAsset("TEST_SNOWPLOW_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
     dr1 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE",
         database_name=database.db_name,
         owner=RoleAsset("USERADMIN"),
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        comment=snowflake_comment,
     )
     rel = RoleInheritanceAsset(child_principal=dr1, parent_principal=r1)
 
@@ -220,18 +225,19 @@ def test_show_database_role_to_role_inheritance(flake: PyflakeClient, assets_que
 def test_show_database_role_to_database_role_same_database_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_show_database_role_to_database_role_inheritance"""
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
+    database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     dr1 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE_1",
         database_name=database.db_name,
+        comment=snowflake_comment,
         owner=RoleAsset("USERADMIN"),
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
     )
     dr2 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE_2",
         database_name=database.db_name,
+        comment=snowflake_comment,
         owner=RoleAsset("USERADMIN"),
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
     )
     rel = RoleInheritanceAsset(child_principal=dr1, parent_principal=dr2)
 
@@ -257,19 +263,20 @@ def test_show_database_role_to_database_role_same_database_inheritance(flake: Py
 def test_show_database_role_to_database_role_cross_database_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_show_database_role_to_database_role_inheritance"""
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO_1", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
-    database2 = DatabaseAsset("IGT_DEMO_2", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
+    database = DatabaseAsset("IGT_DEMO_1", snowflake_comment, owner=RoleAsset("SYSADMIN"))
+    database2 = DatabaseAsset("IGT_DEMO_2", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     dr1 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE_1",
         database_name=database.db_name,
+        comment=snowflake_comment,
         owner=RoleAsset("USERADMIN"),
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
     )
     dr2 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE_2",
         database_name=database2.db_name,
+        comment=snowflake_comment,
         owner=RoleAsset("USERADMIN"),
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
     )
     rel = RoleInheritanceAsset(child_principal=dr1, parent_principal=dr2)
 

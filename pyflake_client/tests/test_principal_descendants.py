@@ -40,9 +40,11 @@ def test_get_descendant_roles(flake: PyflakeClient):
 
 
 def test_role_to_role_descendants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    """test_role_to_role_descendants"""
+    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
     user_admin_role = RoleAsset("USERADMIN")
-    child_role = RoleAsset("IGT_CHILD_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    parent_role = RoleAsset("IGT_PARENT_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    child_role = RoleAsset("IGT_CHILD_ROLE", snowflake_comment, user_admin_role)
+    parent_role = RoleAsset("IGT_PARENT_ROLE", snowflake_comment, user_admin_role)
     rel = RoleInheritance(child_role, parent_role)
 
     try:
@@ -67,10 +69,12 @@ def test_role_to_role_descendants(flake: PyflakeClient, assets_queue: queue.Lifo
 
 
 def test_role_to_roles_descendants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    """"test_role_to_roles_descendants"""
+    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
     user_admin_role = RoleAsset("USERADMIN")
-    child_role_1 = RoleAsset("IGT_CHILD_ROLE_1", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    child_role_2 = RoleAsset("IGT_CHILD_ROLE_2", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    parent_role = RoleAsset("IGT_PARENT_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    child_role_1 = RoleAsset("IGT_CHILD_ROLE_1", snowflake_comment, user_admin_role)
+    child_role_2 = RoleAsset("IGT_CHILD_ROLE_2", snowflake_comment, user_admin_role)
+    parent_role = RoleAsset("IGT_PARENT_ROLE", snowflake_comment, user_admin_role)
     rel_1 = RoleInheritance(child_role_1, parent_role)
     rel_2 = RoleInheritance(child_role_2, parent_role)
 
@@ -107,11 +111,12 @@ def test_role_to_roles_descendants(flake: PyflakeClient, assets_queue: queue.Lif
 
 
 def test_role_to_role_and_database_role_descendants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    user_admin_role = RoleAsset("USERADMIN")
-    db = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
-    child_role_1 = RoleAsset("IGT_CHILD_ROLE_1", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    child_role_2 = DatabaseRoleAsset("IGT_CHILD_ROLE_2", db.db_name, user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    parent_role = RoleAsset("IGT_PARENT_ROLE", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    user_admin = RoleAsset("USERADMIN")
+    db = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
+    child_role_1 = RoleAsset("IGT_CHILD_ROLE_1", snowflake_comment, user_admin)
+    child_role_2 = DatabaseRoleAsset("IGT_CHILD_ROLE_2", db.db_name, snowflake_comment, user_admin)
+    parent_role = RoleAsset("IGT_PARENT_ROLE", snowflake_comment, user_admin)
     rel_1 = RoleInheritance(child_role_1, parent_role)
     rel_2 = RoleInheritance(child_role_2, parent_role)
 
@@ -148,11 +153,12 @@ def test_role_to_role_and_database_role_descendants(flake: PyflakeClient, assets
 
 
 def test_database_role_to_database_roles_descendants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
     user_admin_role = RoleAsset("USERADMIN")
-    db = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
-    child_role_1 = DatabaseRoleAsset("IGT_CHILD_ROLE_1", db.db_name, user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    child_role_2 = DatabaseRoleAsset("IGT_CHILD_ROLE_2", db.db_name, user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    parent_role = DatabaseRoleAsset("IGT_PARENT_ROLE", db.db_name, user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    db = DatabaseAsset("IGT_DEMO", snowflake_comment, RoleAsset("SYSADMIN"))
+    child_role_1 = DatabaseRoleAsset("IGT_CHILD_ROLE_1", db.db_name, snowflake_comment, user_admin_role)
+    child_role_2 = DatabaseRoleAsset("IGT_CHILD_ROLE_2", db.db_name, snowflake_comment, user_admin_role)
+    parent_role = DatabaseRoleAsset("IGT_PARENT_ROLE", db.db_name, snowflake_comment, user_admin_role)
     rel_1 = RoleInheritance(child_role_1, parent_role)
     rel_2 = RoleInheritance(child_role_2, parent_role)
 

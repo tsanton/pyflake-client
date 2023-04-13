@@ -32,21 +32,22 @@ def compare(x, y) -> bool:
 
 def _spawn_with_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQueue) -> Tuple[Database, Schema, Role, Role, Role]:
     """bootstrap utility function"""
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     db_name = "IGT_DEMO"
     schema_name = "MGMT"
     user_admin_role = Role("USERADMIN")
     sys_admin_role = Role("SYSADMIN")
-    db_sys_admin = Role(f"{db_name}_SYS_ADMIN", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    db_usr_admin = Role(f"{db_name}_USER_ADMIN", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    db_sys_admin = Role(f"{db_name}_SYS_ADMIN", snowflake_comment, user_admin_role)
+    db_usr_admin = Role(f"{db_name}_USER_ADMIN", snowflake_comment, user_admin_role)
     r1 = RoleInheritance(db_sys_admin, sys_admin_role)
-    d: Database = Database("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=Role(db_sys_admin.name))
-    r = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_R", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    rw = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RW", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    rwc = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RWC", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
+    d: Database = Database("IGT_DEMO", snowflake_comment, Role(db_sys_admin.name))
+    r = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_R", snowflake_comment, user_admin_role)
+    rw = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RW", snowflake_comment, user_admin_role)
+    rwc = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RWC", snowflake_comment, user_admin_role)
     r2 = RoleInheritance(r, rw)
     r3 = RoleInheritance(rw, rwc)
     r4 = RoleInheritance(rwc, sys_admin_role)
-    s: Schema = Schema(database=d, schema_name=schema_name, comment=f"pyflake_client_test_{uuid.uuid4()}", owner=Role(rwc.name))
+    s: Schema = Schema(database=d, schema_name=schema_name, comment=snowflake_comment, owner=Role(rwc.name))
 
     r_table =  [Privilege.SELECT, Privilege.REFERENCES]
     rw_table = [Privilege.INSERT, Privilege.UPDATE, Privilege.DELETE, Privilege.TRUNCATE]
@@ -86,59 +87,61 @@ def _spawn_with_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQue
     return d, s, r, rw, rwc
 
 
-def _spawn_database_and_schema(flake: PyflakeClient, assets_queue: queue.LifoQueue) -> Tuple[Database, Schema, Schema]:
-    """_spawn_database_and_schema"""
-    db_name = "IGT_DEMO"
-    user_admin_role = Role("SYSADMIN")
-    sys_admin_role = Role("USERADMIN")
-    db_sys_admin = Role(f"{db_name}_SYS_ADMIN", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    database: Database = Database(db_name=db_name, comment=f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin_role)
-    schema1: Schema = Schema(database=database, schema_name="SCHEMA1", comment=f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin_role)
-    schema2: Schema = Schema(database=database, schema_name="SCHEMA2", comment=f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin_role)
+# def _spawn_database_and_schema(flake: PyflakeClient, assets_queue: queue.LifoQueue) -> Tuple[Database, Schema, Schema]:
+#     """_spawn_database_and_schema"""
+#     snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
+#     db_name = "IGT_DEMO"
+#     user_admin_role = Role("SYSADMIN")
+#     sys_admin_role = Role("USERADMIN")
+#     db_sys_admin = Role(f"{db_name}_SYS_ADMIN", snowflake_comment, user_admin_role)
+#     database: Database = Database(db_name=db_name, comment=snowflake_comment, owner=sys_admin_role)
+#     schema1: Schema = Schema(database=database, schema_name="SCHEMA1", comment=snowflake_comment, owner=sys_admin_role)
+#     schema2: Schema = Schema(database=database, schema_name="SCHEMA2", comment=snowflake_comment, owner=sys_admin_role)
 
-    try:
-        flake.register_asset(db_sys_admin, assets_queue)
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(schema1, assets_queue)
-        flake.register_asset(schema2, assets_queue)
-    except Exception as err:
-        flake.delete_assets(assets_queue)
-        raise err
+#     try:
+#         flake.register_asset(db_sys_admin, assets_queue)
+#         flake.register_asset(database, assets_queue)
+#         flake.register_asset(schema1, assets_queue)
+#         flake.register_asset(schema2, assets_queue)
+#     except Exception as err:
+#         flake.delete_assets(assets_queue)
+#         raise err
 
-    return database, schema1, schema2
+#     return database, schema1, schema2
 
 
-def _spawn_without_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQueue) -> Tuple[Database, Schema, Role, Role, Role]:
-    db_name = "IGT_DEMO"
-    schema_name = "SCHEMA1"
-    user_admin_role = Role("SYSADMIN")
-    sys_admin_role = Role("USERADMIN")
-    db_sys_admin = Role(f"{db_name}_SYS_ADMIN", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    db_usr_admin = Role(f"{db_name}_USER_ADMIN", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    r1 = RoleInheritance(db_sys_admin, sys_admin_role)
-    d: Database = Database("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=Role(db_sys_admin.name))
-    r = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_R", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    rw = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RW", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    rwc = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RWC", user_admin_role, f"pyflake_client_test_{uuid.uuid4()}")
-    r2 = RoleInheritance(r, rw)
-    r3 = RoleInheritance(rw, rwc)
-    r4 = RoleInheritance(rwc, sys_admin_role)
-    s: Schema = Schema(database=d, schema_name=schema_name, comment=f"pyflake_client_test_{uuid.uuid4()}", owner=Role(rwc.name))
+# def _spawn_without_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQueue) -> Tuple[Database, Schema, Role, Role, Role]:
+#     snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
+#     db_name = "IGT_DEMO"
+#     schema_name = "SCHEMA1"
+#     user_admin_role = Role("SYSADMIN")
+#     sys_admin_role = Role("USERADMIN")
+#     db_sys_admin = Role(f"{db_name}_SYS_ADMIN", snowflake_comment, user_admin_role)
+#     db_usr_admin = Role(f"{db_name}_USER_ADMIN", snowflake_comment, user_admin_role)
+#     r1 = RoleInheritance(db_sys_admin, sys_admin_role)
+#     d: Database = Database("IGT_DEMO", snowflake_comment, owner=Role(db_sys_admin.name))
+#     r = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_R", snowflake_comment, user_admin_role)
+#     rw = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RW", snowflake_comment, user_admin_role)
+#     rwc = Role(f"{d.db_name}_{schema_name}_ACCESS_ROLE_RWC", snowflake_comment, user_admin_role)
+#     r2 = RoleInheritance(r, rw)
+#     r3 = RoleInheritance(rw, rwc)
+#     r4 = RoleInheritance(rwc, sys_admin_role)
+#     s: Schema = Schema(database=d, schema_name=schema_name, comment=snowflake_comment, owner=Role(rwc.name))
 
-    try:
-        flake.register_asset(db_sys_admin, assets_queue)
-        flake.register_asset(db_usr_admin, assets_queue)
-        flake.register_asset(r1, assets_queue)
-        flake.register_asset(d, assets_queue)
-        flake.register_asset(r, assets_queue)
-        flake.register_asset(rw, assets_queue)
-        flake.register_asset(rwc, assets_queue)
-        flake.register_asset(r2, assets_queue)
-        flake.register_asset(r3, assets_queue)
-        flake.register_asset(r4, assets_queue)
-        flake.register_asset(s, assets_queue)
-    except Exception as err:
-        flake.delete_assets(assets_queue)
-        raise err
+#     try:
+#         flake.register_asset(db_sys_admin, assets_queue)
+#         flake.register_asset(db_usr_admin, assets_queue)
+#         flake.register_asset(r1, assets_queue)
+#         flake.register_asset(d, assets_queue)
+#         flake.register_asset(r, assets_queue)
+#         flake.register_asset(rw, assets_queue)
+#         flake.register_asset(rwc, assets_queue)
+#         flake.register_asset(r2, assets_queue)
+#         flake.register_asset(r3, assets_queue)
+#         flake.register_asset(r4, assets_queue)
+#         flake.register_asset(s, assets_queue)
+#     except Exception as err:
+#         flake.delete_assets(assets_queue)
+#         raise err
 
-    return d, s, r, rw, rwc
+#     return d, s, r, rw, rwc

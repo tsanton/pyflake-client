@@ -31,8 +31,9 @@ def test_describe_future_grant_for_non_existing_role(flake: PyflakeClient):
 
 def test_role_database_object_future_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
-    role = RoleAsset("IGT_CREATE_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
+    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
+    role = RoleAsset("IGT_CREATE_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
     grant = GrantAction(role, DatabaseObjectFutureGrant(database_name=database.db_name, grant_target=ObjectType.TABLE), [Privilege.SELECT, Privilege.REFERENCES])
 
     try:
@@ -66,9 +67,10 @@ def test_role_database_object_future_grant(flake: PyflakeClient, assets_queue: q
 
 def test_role_schema_object_future_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
-    schema = SchemaAsset(database, "IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
-    role = RoleAsset("IGT_CREATE_ROLE", RoleAsset("USERADMIN"), f"pyflake_client_test_{uuid.uuid4()}")
+    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
+    schema = SchemaAsset(database, "IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
+    role = RoleAsset("IGT_CREATE_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
     grant = GrantAction(role, SchemaObjectFutureGrant(database_name=database.db_name, schema_name=schema.schema_name, grant_target=ObjectType.TABLE), [Privilege.SELECT, Privilege.REFERENCES])
     try:
         flake.register_asset(database, assets_queue)

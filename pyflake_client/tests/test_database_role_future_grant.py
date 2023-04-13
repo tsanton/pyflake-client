@@ -58,7 +58,7 @@ def test_database_role_future_database_object_grant(flake: PyflakeClient, assets
     user_admin = RoleAsset("USERADMIN")
     sys_admin = RoleAsset("SYSADMIN")
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin)
-    db_role = DatabaseRoleAsset("IGT_DB_ROLE", database.db_name, user_admin, f"pyflake_client_test_{uuid.uuid4()}")
+    db_role = DatabaseRoleAsset("IGT_DB_ROLE", database.db_name, f"pyflake_client_test_{uuid.uuid4()}", user_admin)
     grant = GrantAction(db_role, DatabaseObjectFutureGrant(database_name=database.db_name, grant_target=ObjectType.TABLE), [Privilege.SELECT, Privilege.REFERENCES])
 
     try:
@@ -99,7 +99,7 @@ def test_database_role_schema_object_future_grant(flake: PyflakeClient, assets_q
     sys_admin = RoleAsset("SYSADMIN")
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", sys_admin)
     schema = SchemaAsset(database, "IGT_SCHEMA", f"pyflake_client_test_{uuid.uuid4()}", sys_admin)
-    db_role = DatabaseRoleAsset("IGT_DB_ROLE", database.db_name, user_admin, f"pyflake_client_test_{uuid.uuid4()}")
+    db_role = DatabaseRoleAsset("IGT_DB_ROLE", database.db_name, f"pyflake_client_test_{uuid.uuid4()}", user_admin)
     grant = GrantAction(db_role, SchemaObjectFutureGrant(database_name=database.db_name, schema_name=schema.schema_name, grant_target=ObjectType.TABLE), [Privilege.SELECT, Privilege.REFERENCES])
 
     try:

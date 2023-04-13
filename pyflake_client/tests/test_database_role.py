@@ -14,13 +14,14 @@ from pyflake_client.models.assets.database import Database as DatabaseAsset
 
 def test_create_database_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role"""
+    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     role: DatabaseRole = DatabaseRole(
         name="IGT_CREATE_ROLE",
         database_name=database.db_name,
+        comment=snowflake_comment,
         owner=RoleAsset("USERADMIN"),
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
     )
 
     try:
@@ -56,8 +57,9 @@ def test_get_database_role_from_db_not_exists(flake: PyflakeClient, existing_dat
 
 
 def test_get_database_role_not_exists(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
     try:
-        database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+        database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
 
         flake.register_asset(database, assets_queue)
         sf_role = flake.describe_one(DescribablesRole(name="I_SURELY_DO_NOT_EXIST_DATABASE_ROLE", db_name=database.db_name), EntitiesRole)
