@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/Tsanton/pyflake-client/compare/v0.5.0...v0.5.1) (2023-04-13)
+
+
+### Bug Fixes
+
+* broken import in client ([1886cc5](https://github.com/Tsanton/pyflake-client/commit/1886cc56af1b788235030ea30cd716a73dd6a3b2))
+
 ## [0.5.0](https://github.com/Tsanton/pyflake-client/compare/v0.4.0...v0.5.0) (2023-04-13)
 
 
