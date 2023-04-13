@@ -2,6 +2,7 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-locals
 
+from datetime import datetime
 import queue
 import uuid
 
@@ -95,6 +96,7 @@ def test_create_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
         assert parent is not None
         assert parent.distance_from_source == 0
         assert parent.granted_identifier == child1_role.name
+        assert isinstance(parent.created_on, datetime)
 
         assert grandparent1 is not None
         assert grandparent1.distance_from_source == 1

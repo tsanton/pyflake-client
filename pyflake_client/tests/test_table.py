@@ -46,7 +46,7 @@ def test_create_table(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         assert t.schema_name == schema.schema_name
         assert t.kind == "TABLE"
         assert t.owner == "ACCOUNTADMIN"
-        assert t.retention_time == "1"
+        assert t.retention_time == 1
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)

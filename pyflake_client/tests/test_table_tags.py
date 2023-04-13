@@ -73,7 +73,7 @@ def test_create_table_with_tag_without_value(flake: PyflakeClient, assets_queue:
         assert t.schema_name == schema.schema_name
         assert t.kind == "TABLE"
         assert t.owner == "ACCOUNTADMIN"
-        assert t.retention_time == "1"
+        assert t.retention_time == 1
         assert t.tags is not None
         assert len(t.tags) == 1
         tag = t.tags[0]
@@ -139,7 +139,7 @@ def test_create_table_with_tag_with_value(flake: PyflakeClient, assets_queue: qu
         assert t.schema_name == schema.schema_name
         assert t.kind == "TABLE"
         assert t.owner == "ACCOUNTADMIN"
-        assert t.retention_time == "1"
+        assert t.retention_time == 1
         assert t.tags is not None
         assert len(t.tags) == 1
         tag = t.tags[0]
@@ -219,7 +219,7 @@ def test_create_table_with_multiple_tags(flake: PyflakeClient, assets_queue: que
         assert t.schema_name == schema.schema_name
         assert t.kind == "TABLE"
         assert t.owner == "ACCOUNTADMIN"
-        assert t.retention_time == "1"
+        assert t.retention_time == 1
         assert t.tags is not None
         assert len(t.tags) == 2
         tag_1 = next(t for t in t.tags if t.tag_name == tag_asset_1.tag_name)

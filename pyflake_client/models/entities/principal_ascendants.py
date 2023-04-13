@@ -3,10 +3,12 @@ from __future__ import annotations
 from typing import Any, Union, Dict
 from typing import List
 from dataclasses import dataclass
+from datetime import datetime
 
 import dacite
 
 from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
+from pyflake_client.utils.parse_sf_types import parse_sf_datetime
 
 
 @dataclass(frozen=True)
@@ -17,7 +19,7 @@ class PrincipalAscendant:
     granted_identifier: str
     granted_on: str
     granted_by: str
-    created_on: str  # TODO: datetime, not string. It's pyflake_client.describe() with json.loads() that fails this
+    created_on: datetime
     distance_from_source: int
 
     @staticmethod
@@ -32,6 +34,8 @@ class PrincipalAscendant:
     def load_from_sf(cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None) -> PrincipalAscendant:
         for old_key, new_key in cls.map_key_names().items():
             data[new_key] = data.pop(old_key)
+
+        data["created_on"] = parse_sf_datetime(data["created_on"])
         return PrincipalAscendant(**{k: data[k] for k in cls.__dataclass_fields__})
 
 @dataclass(frozen=True)

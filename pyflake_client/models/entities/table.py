@@ -25,7 +25,7 @@ class Table(ISnowflakeEntity):
     tags: List[ClassificationTag]
     rows: int
     owner: str
-    retention_time: str #TODO: int
+    retention_time: int #TODO: int
     created_on: datetime
 
     @classmethod
@@ -42,6 +42,6 @@ class Table(ISnowflakeEntity):
             tags=tags,
             rows=data["rows"],
             owner=data["owner"],
-            retention_time=data["retention_time"],
+            retention_time=int(data["retention_time"]),
             created_on=data["created_on"],
         )
