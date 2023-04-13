@@ -11,28 +11,20 @@ from snowflake.connector import SnowflakeConnection
 from snowflake.connector.errors import ProgrammingError
 
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.describables.snowflake_describable_interface import (
-    ISnowflakeDescribable,
-)
+from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
 from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
-from pyflake_client.models.executables.snowflake_executable_interface import (
-    ISnowflakeExecutable,
-)
-from pyflake_client.models.mergeables.snowflake_mergable_interface import (
-    ISnowflakeMergable,
-)
-from pyflake_client.tests.models.mergable_entity import MergableEntity
+from pyflake_client.models.executables.snowflake_executable_interface import ISnowflakeExecutable
+from pyflake_client.models.mergeables.snowflake_mergable_interface import ISnowflakeMergable
 
 
 T = TypeVar("T", bound=ISnowflakeEntity)
+U = TypeVar("U", bound=ISnowflakeMergable)
 
 
 class PyflakeClient:
     """PyflakeClient"""
 
-    def __init__(
-        self, conn: SnowflakeConnection, gov_db: str = None, mgmt_schema: str = None
-    ) -> None:
+    def __init__(self, conn: SnowflakeConnection, gov_db: str = None, mgmt_schema: str = None) -> None:
         self._conn: SnowflakeConnection = conn
         self.gov_db = gov_db
         self.mgmt_schema = mgmt_schema
@@ -61,9 +53,7 @@ class PyflakeClient:
         """create_asset"""
         self._create_asset(obj)
 
-    def register_asset(
-        self, obj: ISnowflakeAsset, asset_queue: queue.LifoQueue
-    ) -> None:
+    def register_asset(self, obj: ISnowflakeAsset, asset_queue: queue.LifoQueue) -> None:
         """register_asset"""
         self._create_asset(obj)
         asset_queue.put(obj)
@@ -85,9 +75,7 @@ class PyflakeClient:
         """delete_asset"""
         self._conn.execute_string(obj.get_delete_statement())
 
-    def describe_one(
-        self, describable: ISnowflakeDescribable, entity: Type[T]
-    ) -> Union[T, None]:
+    def describe_one(self, describable: ISnowflakeDescribable, entity: Type[T]) -> Union[T, None]:
         class_ = entity
         with self._conn.cursor() as cur:
             try:
@@ -108,9 +96,7 @@ class PyflakeClient:
 
             return class_.load_from_sf(data=dict(zip([c[0] for c in cur.description], row)),config=describable.get_dacite_config())
 
-    def describe_many(
-        self, describable: ISnowflakeDescribable, entity: Type[T]
-    ) -> Union[List[T], None]:
+    def describe_many(self, describable: ISnowflakeDescribable, entity: Type[T]) -> Union[List[T], None]:
         class_ = entity
         with self._conn.cursor() as cur:
             try:
@@ -139,18 +125,16 @@ class PyflakeClient:
                 for r in res
             ]
 
-    def merge_into(self, obj: ISnowflakeMergable) -> bool:
+    def merge_into(self, obj: U) -> bool:
         """merge_into"""
         try:
-            self._conn.execute_string(
-                obj.merge_into_statement(self.gov_db, self.mgmt_schema)
-            )
+            self._conn.execute_string(obj.merge_into_statement(self.gov_db, self.mgmt_schema))
             return True
         except Exception as e:
             print(e)
         return False
 
-    def get_mergeable(self, obj: ISnowflakeMergable) -> MergableEntity:
+    def get_mergeable(self, obj: U) -> U:
         """get_mergeable"""
         module = importlib.import_module(obj.__module__)
         class_ = getattr(module, obj.__class__.__name__)
