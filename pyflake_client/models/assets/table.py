@@ -1,7 +1,7 @@
 """table"""
 # pylint: disable=line-too-long
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Union
 
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
@@ -16,9 +16,9 @@ class Table(ISnowflakeAsset, ISnowflakeGrantPrincipal):
     schema: Schema
     table_name: str
     columns: List[Column]
-    owner: ISnowflakePrincipal
     tags: List[ClassificationTag] = field(default_factory=list)
     data_retention_time_days: int = 1
+    owner: Union[ISnowflakePrincipal, None] = None
 
     def get_create_statement(self) -> str:
         if self.owner is None:

@@ -12,8 +12,8 @@ class Role(ISnowflakeAsset, ISnowflakePrincipal, ISnowflakeGrantPrincipal):
     """Role"""
 
     name: str
-    owner: Union[ISnowflakePrincipal, None] = None
     comment: str = ""
+    owner: Union[ISnowflakePrincipal, None] = None
 
     def get_create_statement(self) -> str:
         """get_create_statement"""

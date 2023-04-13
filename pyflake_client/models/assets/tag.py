@@ -11,8 +11,8 @@ class Tag(ISnowflakeAsset):
     schema_name: str
     tag_name: str
     tag_values: List[str]
-    owner: ISnowflakePrincipal = Role(name="SYSADMIN")
     comment: str = ""
+    owner: ISnowflakePrincipal = Role(name="SYSADMIN")
 
     def get_create_statement(self) -> str:
         if self.owner is None:
