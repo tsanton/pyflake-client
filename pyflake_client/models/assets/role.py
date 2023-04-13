@@ -26,7 +26,7 @@ class Role(ISnowflakeAsset, ISnowflakePrincipal, ISnowflakeGrantPrincipal):
             raise NotImplementedError("Ownership is not implementer for asset of type {self.owner.__class__}")
 
         return f"""CREATE OR REPLACE ROLE {self.name} COMMENT = '{self.comment}';
-                   GRANT OWNERSHIP ON {role_type} {self.name} to {role_type} {self.owner.get_identifier()} REVOKE CURRENT GRANTS;"""
+                   GRANT OWNERSHIP ON ROLE {self.name} to {role_type} {self.owner.get_identifier()} REVOKE CURRENT GRANTS;"""
 
     def get_delete_statement(self):
         """get_delete_statement"""
