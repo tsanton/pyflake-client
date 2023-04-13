@@ -125,7 +125,7 @@ class PyflakeClient:
             if describable.is_procedure():
                 data = [json.loads(r) for r in res[0]][0]
                 if data in ({}, []):
-                    return []
+                    return None
 
                 return [
                     class_.load_from_sf(data=d, config=describable.get_dacite_config()) for d in data

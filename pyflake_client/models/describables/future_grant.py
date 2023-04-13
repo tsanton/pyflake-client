@@ -47,7 +47,7 @@ as $$
 def show_grants_to_database_role_py(snowpark_session, database_name_py:str, database_role_name_py:str):
     res = []
     for row in snowpark_session.sql(f'SHOW FUTURE GRANTS IN DATABASE {database_name_py.upper()}').to_local_iterator():
-        if row['grant_to'] == 'DATABASE_ROLE' and row['grant_to'] == 'DATABASE_ROLE':
+        if row['grant_to'] == 'DATABASE_ROLE' and row['grantee_name'] == database_role_name_py:
                 res.append(row.as_dict())
     for schema_object in snowpark_session.sql(f'SHOW SCHEMAS IN DATABASE {database_name_py.upper()}').to_local_iterator():
         schema_name:str = schema_object['name']
@@ -60,14 +60,14 @@ def show_grants_to_database_role_py(snowpark_session, database_name_py:str, data
 $$
 call show_grants_to_database_role('%(s1)s','%(s2)s');
         """ % {
-                "s1": "DATABASE_ROLE",
-                "s2": f"{self.principal.database_name}.{self.principal.name}",
+                "s1": self.principal.db_name,
+                "s2": self.principal.name,
             }
         else:
             raise NotImplementedError(
                 f"Future Grant describe statement for {self.__class__} is not implemented"
             )
-
+        print(query)
         return query
 
     def is_procedure(self) -> bool:
