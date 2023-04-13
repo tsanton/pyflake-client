@@ -18,6 +18,7 @@ from pyflake_client.models.describables.database_role import DatabaseRole as Dat
 from pyflake_client.models.describables.principal_ascendants import PrincipalAscendants as RoleAscendantsDescribable
 
 from pyflake_client.models.entities.principal_ascendants import PrincipalAscendants as RoleAscendantsEntity
+from pyflake_client.models.enums.role_type import RoleType
 
 
 
@@ -25,7 +26,8 @@ def test_get_principal_ascendants(flake: PyflakeClient):
     """test_get_principal_ascendants: we know that USERADMIN -> SECURITYADMIN -> ACCOUNTADMIN"""
     ### Act ###
     snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
-    hierarchy: RoleAscendantsEntity = flake.describe_one(RoleAscendantsDescribable(RoleDescribable("USERADMIN")), RoleAscendantsEntity)
+    hierarchy = flake.describe_one(RoleAscendantsDescribable(RoleDescribable("USERADMIN")), RoleAscendantsEntity)
+    assert hierarchy is not None
 
     sec_admin = next((r for r in hierarchy.ascendants if r.grantee_identifier == "SECURITYADMIN"), None)
     acc_admin = next((r for r in hierarchy.ascendants if r.grantee_identifier == "ACCOUNTADMIN"), None)
@@ -33,7 +35,7 @@ def test_get_principal_ascendants(flake: PyflakeClient):
 
     ### Assert ###
     assert hierarchy.principal_identifier == "USERADMIN"
-    assert hierarchy.principal_type == "ROLE"
+    assert hierarchy.principal_type == RoleType.ROLE
     assert sys_admin is None
 
     assert sec_admin is not None
@@ -80,7 +82,8 @@ def test_create_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
         flake.register_asset(sysadmin_great_grandparent_relationship, assets_queue)
 
         ### Act ###
-        hierarchy: RoleAscendantsEntity = flake.describe_one(RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE")), RoleAscendantsEntity)
+        hierarchy = flake.describe_one(RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE")), RoleAscendantsEntity)
+        assert hierarchy is not None
         parent = next((r for r in hierarchy.ascendants if r.grantee_identifier == parent_role.name), None)
         grandparent1 = next((r for r in hierarchy.ascendants if r.grantee_identifier == grandparent1_role.name), None)
         grandparent2 = next((r for r in hierarchy.ascendants if r.grantee_identifier == grandparent2_role.name), None)
@@ -91,7 +94,7 @@ def test_create_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
         ### Assert ###
         # {parent: 0, grandparent: 1, great_grandparent: 2, sysadmin: 3, accountadmin: 4}
         assert hierarchy.principal_identifier == "IGT_CHILD1_ROLE"
-        assert hierarchy.principal_type == "ROLE"
+        assert hierarchy.principal_type == RoleType.ROLE
 
         assert parent is not None
         assert parent.distance_from_source == 0
@@ -158,7 +161,8 @@ def test_broken_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
         flake.register_asset(sysadmin_great_grandparent_relationship, assets_queue)
 
         ### Act ###
-        hierarchy: RoleAscendantsEntity = flake.describe_one(RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE")), RoleAscendantsEntity)
+        hierarchy = flake.describe_one(RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE")), RoleAscendantsEntity)
+        assert hierarchy is not None
         parent = next((r for r in hierarchy.ascendants if r.grantee_identifier == parent_role.name), None)
         grandparent = next((r for r in hierarchy.ascendants if r.grantee_identifier == grandparent_role.name), None)
         great_grandparent = next((r for r in hierarchy.ascendants if r.grantee_identifier == great_grandparent_role.name), None)
@@ -168,7 +172,7 @@ def test_broken_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
         ### Assert ###
         # {parent: 0, grandparent: 1, great_grandparent: 2, sysadmin: 3, accountadmin: 4}
         assert hierarchy.principal_identifier == "IGT_CHILD1_ROLE"
-        assert hierarchy.principal_type == "ROLE"
+        assert hierarchy.principal_type == RoleType.ROLE
 
         assert parent is not None
         assert parent.distance_from_source == 0
@@ -219,7 +223,9 @@ def test_ascendants_with_database_roles(flake: PyflakeClient, assets_queue: queu
         flake.register_asset(rel4, assets_queue)
 
         ### Act ###
-        hierarchy: RoleAscendantsEntity = flake.describe_one(RoleAscendantsDescribable(DatabaseRoleDescribable(dr_r.name, dr_r.database_name)), RoleAscendantsEntity)
+        hierarchy = flake.describe_one(RoleAscendantsDescribable(DatabaseRoleDescribable(dr_r.name, dr_r.database_name)), RoleAscendantsEntity)
+        assert hierarchy is not None
+
         db_rw = next((r for r in hierarchy.ascendants if r.grantee_identifier == dr_rw.get_identifier()), None)
         db_rwc = next((r for r in hierarchy.ascendants if r.grantee_identifier == dr_rwc.get_identifier()), None)
         db_sysadmin = next((r for r in hierarchy.ascendants if r.grantee_identifier == dr_sys.get_identifier()), None)
@@ -228,32 +234,32 @@ def test_ascendants_with_database_roles(flake: PyflakeClient, assets_queue: queu
 
         ### Assert ###
         assert hierarchy.principal_identifier == dr_r.get_identifier()
-        assert hierarchy.principal_type == "DATABASE_ROLE"
+        assert hierarchy.principal_type == RoleType.DATABASE_ROLE
 
         assert db_rw is not None
         assert db_rw.distance_from_source == 0
         assert db_rw.granted_identifier == dr_r.get_identifier()
-        assert db_rw.principal_type == "DATABASE_ROLE"
+        assert db_rw.principal_type == RoleType.DATABASE_ROLE
 
         assert db_rwc is not None
         assert db_rwc.distance_from_source == 1
         assert db_rwc.granted_identifier == dr_rw.get_identifier()
-        assert db_rwc.principal_type == "DATABASE_ROLE"
+        assert db_rwc.principal_type == RoleType.DATABASE_ROLE
 
         assert db_sysadmin is not None
         assert db_sysadmin.distance_from_source == 2
         assert db_sysadmin.granted_identifier == dr_rwc.get_identifier()
-        assert db_sysadmin.principal_type == "DATABASE_ROLE"
+        assert db_sysadmin.principal_type == RoleType.DATABASE_ROLE
 
         assert sys_admin is not None
         assert sys_admin.distance_from_source == 3
         assert sys_admin.granted_identifier == dr_sys.get_identifier()
-        assert sys_admin.principal_type == "ROLE"
+        assert sys_admin.principal_type == RoleType.ROLE
 
         assert acc_admin is not None
         assert acc_admin.distance_from_source == 4
         assert acc_admin.granted_identifier == sys_admin_role.get_identifier()
-        assert acc_admin.principal_type == "ROLE"
+        assert acc_admin.principal_type == RoleType.ROLE
 
     finally:
         ### Cleanup ###
