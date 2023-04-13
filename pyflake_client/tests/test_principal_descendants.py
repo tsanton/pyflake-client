@@ -30,7 +30,7 @@ def test_get_descendant_roles(flake: PyflakeClient):
 
     ### Assert ###
     assert hierarchy.principal_identifier == "ACCOUNTADMIN"
-    assert hierarchy.principal_type == "ROLE"
+    assert hierarchy.principal_type == RoleType.ROLE
 
     assert sec_admin is not None
     assert sec_admin.grantee_identifier == "ACCOUNTADMIN"

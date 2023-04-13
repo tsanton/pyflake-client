@@ -18,20 +18,22 @@ from pyflake_client.models.describables.role import Role as RoleDescribable
 from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
 
 from pyflake_client.models.entities.role_inheritance import RoleInheritance as RoleInheritanceEntity
+from pyflake_client.models.enums.role_type import RoleType
 
 def test_get_role_inheritance(flake: PyflakeClient):
     """test_get_role_inheritance"""
     ### Act ###
-    role: RoleInheritanceEntity = flake.describe_one(
+    role = flake.describe_one(
         RoleInheritanceDescribable(RoleDescribable("SYSADMIN"), RoleDescribable("ACCOUNTADMIN")), 
         RoleInheritanceEntity
     )
 
     ### Assert ###
+    assert role is not None
     assert role.inherited_role_identifier == "SYSADMIN"
-    assert role.inherited_role_type == "ROLE"
+    assert role.inherited_role_type == RoleType.ROLE
     assert role.principal_identifier == "ACCOUNTADMIN"
-    assert role.principal_type == "ROLE"
+    assert role.principal_type == RoleType.ROLE
     assert role.granted_by == ""
 
 
@@ -47,16 +49,17 @@ def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQ
         flake.register_asset(RoleInheritanceAsset(child_role, parent_role), assets_queue)
 
         ### Act ###
-        rel: RoleInheritanceEntity = flake.describe_one(
+        rel = flake.describe_one(
             RoleInheritanceDescribable(RoleDescribable(child_role.name), RoleDescribable(parent_role.name)), 
             RoleInheritanceEntity
         )
 
         ### Assert ###
+        assert rel is not None
         assert rel.inherited_role_identifier == child_role.name
-        assert rel.inherited_role_type == "ROLE"
+        assert rel.inherited_role_type == RoleType.ROLE
         assert rel.principal_identifier == parent_role.name
-        assert rel.principal_type == "ROLE"
+        assert rel.principal_type == RoleType.ROLE
         assert rel.granted_by == "USERADMIN"
 
     finally:
@@ -78,22 +81,23 @@ def test_delete_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQ
         flake.register_asset(child_role, assets_queue)
         flake.register_asset(parent_role, assets_queue)
         flake.create_asset(relationship)
-        new_rel: RoleInheritanceEntity = flake.describe_one(
+        new_rel = flake.describe_one(
             relationship_describable, RoleInheritanceEntity
         )
 
         ### Act ###
         flake.delete_asset(relationship)
-        del_rel: RoleInheritanceEntity = flake.describe_one(
+        del_rel = flake.describe_one(
             relationship_describable, RoleInheritanceEntity
         )
 
         ### Assert ###
+        assert new_rel is not None
         assert del_rel is None
         assert new_rel.inherited_role_identifier == child_role.name
-        assert new_rel.inherited_role_type == "ROLE"
+        assert new_rel.inherited_role_type == RoleType.ROLE
         assert new_rel.principal_identifier == parent_role.name
-        assert new_rel.principal_type == "ROLE"
+        assert new_rel.principal_type == RoleType.ROLE
         assert new_rel.granted_by == "USERADMIN"
 
     finally:
@@ -104,7 +108,7 @@ def test_delete_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQ
 def test_get_non_existing_role_inheritance(flake: PyflakeClient):
     """test_get_role_inheritance: both roles exists, but ACCOUNTADMIN is not granted to SYSADMIN; it's the other way around"""
     ### Act ###
-    role: RoleInheritanceEntity = flake.describe_one(
+    role = flake.describe_one(
         RoleInheritanceDescribable(
             RoleDescribable("ACCOUNTADMIN"), 
             RoleDescribable("SYSADMIN")
@@ -119,7 +123,7 @@ def test_get_non_existing_role_inheritance(flake: PyflakeClient):
 def test_get_role_inheritance_non_existing_child_role(flake: PyflakeClient):
     """test_get_role_inheritance_non_existing_child_role"""
     ### Act ###
-    role: RoleInheritanceEntity = flake.describe_one(
+    role = flake.describe_one(
         RoleInheritanceDescribable(
             RoleDescribable("I_MOST_CERTAINLY_DO_NOT_EXIST"), 
             RoleDescribable("SYSADMIN")
@@ -134,7 +138,7 @@ def test_get_role_inheritance_non_existing_child_role(flake: PyflakeClient):
 def test_get_role_inheritance_non_existing_parent_role(flake: PyflakeClient):
     """test_get_role_inheritance: both roles exists, but ACCOUNTADMIN is not granted to SYSADMIN; it's the other way around"""
     ### Act ###
-    role: RoleInheritanceEntity = flake.describe_one(
+    role = flake.describe_one(
         RoleInheritanceDescribable(
             RoleDescribable("SYSADMIN"), 
             RoleDescribable("I_MOST_CERTAINLY_DO_NOT_EXIST")

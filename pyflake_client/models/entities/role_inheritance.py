@@ -7,6 +7,7 @@ from typing import Any, Dict, Union
 import dacite
 
 from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
+from pyflake_client.models.enums.role_type import RoleType
 from pyflake_client.utils.parse_sf_types import parse_sf_bool, parse_sf_datetime
 
 
@@ -14,9 +15,9 @@ from pyflake_client.utils.parse_sf_types import parse_sf_bool, parse_sf_datetime
 class RoleInheritance(ISnowflakeEntity):
     """RoleInheritance"""
     principal_identifier: str
-    principal_type: str
+    principal_type: RoleType
     inherited_role_identifier: str
-    inherited_role_type: str #TODO: enum?
+    inherited_role_type: RoleType
     privilege: str #TODO: enum
     grant_option: bool
     granted_by: str
@@ -39,4 +40,6 @@ class RoleInheritance(ISnowflakeEntity):
 
         data["created_on"] = parse_sf_datetime(data["created_on"])
         data["grant_option"] = parse_sf_bool(data["grant_option"])
+        data["principal_type"] = RoleType[data["principal_type"]]
+        data["inherited_role_type"] = RoleType[data["inherited_role_type"]]
         return RoleInheritance(**{k: data[k] for k in cls.__dataclass_fields__})
