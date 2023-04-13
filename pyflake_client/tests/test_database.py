@@ -6,24 +6,26 @@ from datetime import date
 
 from pyflake_client.client import PyflakeClient
 
-from pyflake_client.models.assets.database import Database as AssetsDatabase
-from pyflake_client.models.entities.database import Database as EntitiesDatabase
-from pyflake_client.models.describables.database import Database as DescribablesDatabase
+from pyflake_client.models.assets.database import Database as DatabaseAsset
+from pyflake_client.models.entities.database import Database as DatabaseEntity
+from pyflake_client.models.describables.database import Database as DatabaseDescribable
+
+from pyflake_client.models.assets.role import Role as RoleDescribable
 
 
 def test_create_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_database"""
+
     ### Arrange ###
-    database: AssetsDatabase = AssetsDatabase(
-        "IGT_DEMO", f"pyflake_client_TEST_{uuid.uuid4()}"
-    )
+    database: DatabaseAsset = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleDescribable("SYSADMIN"))
 
     try:
         flake.register_asset(database, assets_queue)
 
         ### Act ###
-        sf_db: EntitiesDatabase = flake.describe(DescribablesDatabase(database.db_name), EntitiesDatabase)
+        sf_db = flake.describe_one(DatabaseDescribable(database.db_name), DatabaseEntity)
         ### Assert ###
+        assert sf_db is not None
         assert sf_db.name == database.db_name
         assert sf_db.comment == database.comment
         assert sf_db.owner == "SYSADMIN"
@@ -36,9 +38,10 @@ def test_create_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 def test_get_database(flake: PyflakeClient):
     """test_get_database"""
     ### Act ###
-    database: EntitiesDatabase = flake.describe(DescribablesDatabase("SNOWFLAKE"), EntitiesDatabase)
+    database = flake.describe_one(DatabaseDescribable("SNOWFLAKE"), DatabaseEntity)
 
     ### Assert ###
+    assert database is not None
     assert database.name == "SNOWFLAKE"
     assert database.origin == "SNOWFLAKE.ACCOUNT_USAGE"
 
@@ -46,7 +49,7 @@ def test_get_database(flake: PyflakeClient):
 def test_get_database_that_does_not_exist(flake: PyflakeClient):
     """test_get_database_does_not_exist"""
     ### Act ###
-    database: EntitiesDatabase = flake.describe(DescribablesDatabase("I_DO_NOT_EXIST"), EntitiesDatabase)
+    database = flake.describe_one(DatabaseDescribable("I_DO_NOT_EXIST"), DatabaseEntity)
 
     ### Assert ###
     assert database is None

@@ -1,14 +1,16 @@
 """role"""
 from dataclasses import dataclass
-
-from dacite import Config
+from typing import Union
+import dacite
 
 from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
+from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
 
 
 @dataclass(frozen=True)
-class Role(ISnowflakeDescribable):
+class Role(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
     """Role"""
+
     name: str
 
     def get_describe_statement(self) -> str:
@@ -19,5 +21,11 @@ class Role(ISnowflakeDescribable):
         """is_procedure"""
         return False
 
-    def get_dacite_config(self) -> Config:
+    def get_dacite_config(self) -> Union[dacite.Config, None]:
+        """get_dacite_config"""
         return None
+    
+    @staticmethod
+    def get_snowflake_type() -> str:
+        """get_snowflake_type"""
+        return "ROLE"

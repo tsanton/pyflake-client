@@ -17,31 +17,12 @@ class ObjectType(str, Enum):
     TASK = "TASK"
 
     def __str__(self):
-        # Not using match self.type: for python 3.8 compatability
-        if self == ObjectType.TABLE:
-            return "TABLE"
-        elif self == ObjectType.VIEW:
-            return "VIEW"
-        elif self == ObjectType.MATVIEW:
+        if self == ObjectType.MATVIEW:
             return "MATERIALIZED VIEW"
-        elif self == ObjectType.ACCOUNT:
-            return "ACCOUNT"
-        elif self == ObjectType.STAGE:
-            return "STAGE"
         elif self == ObjectType.FILE_FORMAT:
             return "FILE FORMAT"
-        elif self == ObjectType.STREAM:
-            return "STREAM"
-        elif self == ObjectType.PROCEDURE:
-            return "PROCEDURE"
-        elif self == ObjectType.FUNCTION:
-            return "FUNCTION"
-        elif self == ObjectType.SEQUENCE:
-            return "SEQUENCE"
-        elif self == ObjectType.TASK:
-            return "TASK"
         else:
-            return ""
+            return self
 
     def singularize(self) -> str:
         """singularize"""
@@ -49,25 +30,6 @@ class ObjectType(str, Enum):
 
     def pluralize(self) -> str:
         """pluralize"""
-        if self == ObjectType.TABLE:
-            return "TABLES"
-        elif self == ObjectType.VIEW:
-            return "VIEWS"
-        elif self == ObjectType.MATVIEW:
-            return "MATERIALIZED VIEWS"
-        elif self == ObjectType.ACCOUNT:
-            return "ACCOUNTS"
-        elif self == ObjectType.STAGE:
-            return "STAGES"
-        elif self == ObjectType.FILE_FORMAT:
-            return "FILE FORMATS"
-        elif self == ObjectType.STREAM:
-            return "STREAMS"
-        elif self == ObjectType.PROCEDURE:
-            return "PROCEDURES"
-        elif self == ObjectType.FUNCTION:
-            return "FUNCTIONS"
-        elif self == ObjectType.SEQUENCE:
-            return "SEQUENCES"
-        elif self == ObjectType.TASK:
-            return "TASKS"
+        # if self == ObjectType.TABLE: // If we have an object that can't be pluralized (i.e. MASKING POLICY -> MASKING POILICIES)
+        #     return "TABLES"
+        return f"{str(self)}S"

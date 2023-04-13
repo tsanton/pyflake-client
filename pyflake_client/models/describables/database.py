@@ -1,14 +1,18 @@
 """database"""
 from dataclasses import dataclass
+from typing import Union
 
-from dacite import Config
+import dacite
 
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
 
 
 @dataclass(frozen=True)
 class Database(ISnowflakeDescribable):
     """Database"""
+
     name: str
 
     def get_describe_statement(self) -> str:
@@ -19,6 +23,6 @@ class Database(ISnowflakeDescribable):
         """is_procedure"""
         return False
 
-    def get_dacite_config(self) -> Config:
+    def get_dacite_config(self) -> Union[dacite.Config, None]:
         """get_dacite_config"""
         return None

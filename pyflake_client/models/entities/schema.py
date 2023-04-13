@@ -12,5 +12,5 @@ class Schema(ISnowflakeEntity):
     database_name: str
     owner: str
     comment: str
-    retention_time: str
+    retention_time: str  #TODO: int
     created_on: datetime
