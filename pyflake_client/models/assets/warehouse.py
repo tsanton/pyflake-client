@@ -5,7 +5,7 @@ from typing import Union
 from dataclasses import dataclass
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
-from pyflake_client.models.assets.enums import WarehouseSize 
+from pyflake_client.models.enums.warehouse_size import WarehouseSize 
 
 
 @dataclass(frozen=True)
