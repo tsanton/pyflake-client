@@ -26,9 +26,7 @@ class DatabaseRole(ISnowflakeAsset, ISnowflakePrincipal):
         elif isinstance(self.owner, Role):
             role_type = "ROLE"
         else:
-            raise NotImplementedError(
-                "Ownership is not implementer for this interface type"
-            )
+            raise NotImplementedError("Ownership is not implementer for asset of type {self.owner.__class__}")
 
         return f"""CREATE OR REPLACE DATABASE ROLE {self.database_name}.{self.name} COMMENT = '{self.comment}';
                    GRANT OWNERSHIP ON DATABASE ROLE {self.database_name}.{self.name} TO {role_type} {self.owner.get_identifier()}
