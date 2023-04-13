@@ -31,9 +31,7 @@ def test_merge_into(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         ### Act ###
         ins = MergableEntity("TEST", True)
         success = flake.merge_into(ins)
-        entity = flake.get_mergeable(
-            MergableEntity(the_primary_key=ins.the_primary_key)
-        )
+        entity = flake.get_mergeable(MergableEntity(the_primary_key=ins.the_primary_key))
 
         ### Assert ###
         assert success is True
@@ -64,12 +62,8 @@ def test_merge_into_and_update(flake: PyflakeClient, assets_queue: queue.LifoQue
         ins_update = MergableEntity("TEST", False)
         success_create = flake.merge_into(ins_create)
         success_update = flake.merge_into(ins_update)
-        entity: MergableEntity = flake.get_mergeable(
-            MergableEntity(the_primary_key=ins_update.the_primary_key)
-        )
-        inserted = flake.execute_scalar(
-            f"select count(1) from {flake.gov_db}.{flake.mgmt_schema}.{TABLE_NAME}"
-        )
+        entity = flake.get_mergeable(MergableEntity(the_primary_key=ins_update.the_primary_key))
+        inserted = flake.execute_scalar(f"select count(1) from {flake.gov_db}.{flake.mgmt_schema}.{TABLE_NAME}")
 
         ### Assert ###
         assert success_create is True
