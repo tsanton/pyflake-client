@@ -18,7 +18,7 @@ class Schema(ISnowflakeDescribable):
     database_name: str
     owner: Union[str, None] = None
     comment: Union[str, None] = None
-    retention_time: Union[str, None] = None
+    retention_time: Union[str, None] = None  #TODO: int
     created_on: Union[datetime, None] = None
 
     def get_describe_statement(self) -> str:

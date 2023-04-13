@@ -11,7 +11,7 @@ from pyflake_client.models.enums.privilege import Privilege
 @dataclass(frozen=True)
 class FutureGrant(ISnowflakeEntity):
     grantee_identifier: str
-    grantee_type: str
+    grantee_type: str #TODO: Enum?
     grant_on: str
     grant_identifier: str
     privilege: Privilege

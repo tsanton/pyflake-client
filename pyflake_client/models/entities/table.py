@@ -25,13 +25,11 @@ class Table(ISnowflakeEntity):
     tags: List[ClassificationTag]
     rows: int
     owner: str
-    retention_time: str
+    retention_time: str #TODO: int
     created_on: datetime
 
     @classmethod
-    def load_from_sf(
-        cls, data: Dict[str, Any], config: Union[dacite.Config, None]
-    ) -> Table:
+    def load_from_sf(cls, data: Dict[str, Any], config: Union[dacite.Config, None]) -> Table:
         columns = [ColumnEntity.load_from_sf(c) for c in data["columns"]]
         tags = [ClassificationTag.load_from_sf(t) for t in data["tags"]]
         return Table(

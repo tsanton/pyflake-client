@@ -11,11 +11,10 @@ from pyflake_client.models.entities.snowflake_entity_interface import ISnowflake
 @dataclass(frozen=True)
 class RoleInheritance(ISnowflakeEntity):
     """RoleInheritance"""
-
     principal_identifier: str
     principal_type: str
     inherited_role_identifier: str
-    inherited_role_type: str
+    inherited_role_type: str #TODO: enum?
     privilege: str #TODO: enum
     grant_option: str #TODO: Boolean
     granted_by: str
