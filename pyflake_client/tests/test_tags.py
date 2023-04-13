@@ -4,7 +4,7 @@ import uuid
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as DatabaseAsset
 from pyflake_client.models.assets.schema import Schema as SchemaAsset
-from pyflake_client.models.assets.tag import Tag as AssetsTag
+from pyflake_client.models.assets.tag import Tag as TagAsset
 from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.describables.tag import Tag as DescribablesTag
 from pyflake_client.models.entities.tag import Tag as EntitiesTag
@@ -48,7 +48,7 @@ def test_create_tag_without_tag_values(flake: PyflakeClient, assets_queue: queue
         comment=f"pyflake_client_test_{uuid.uuid4()}",
         owner=RoleAsset("SYSADMIN"),
     )
-    tag = AssetsTag(
+    tag = TagAsset(
         database_name=database.db_name,
         schema_name=schema.schema_name,
         tag_name="TEST_TAG",
@@ -87,7 +87,7 @@ def test_create_tag_with_tag_values(flake: PyflakeClient, assets_queue: queue.Li
         comment=f"pyflake_client_test_{uuid.uuid4()}",
         owner=RoleAsset("SYSADMIN"),
     )
-    tag = AssetsTag(
+    tag = TagAsset(
         database_name=database.db_name,
         schema_name=schema.schema_name,
         tag_name="TEST_TAG",

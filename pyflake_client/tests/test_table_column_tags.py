@@ -12,7 +12,7 @@ from pyflake_client.models.assets.table_columns import (
 from pyflake_client.models.entities.table import Table as TableEntity
 from pyflake_client.models.describables.table import Table as TableDescribable
 from pyflake_client.models.assets.role import Role as RoleAsset
-from pyflake_client.models.assets.tag import Tag as AssetsTag
+from pyflake_client.models.assets.tag import Tag as TagAsset
 from pyflake_client.models.assets.database import Database as DatabaseAsset
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.client import PyflakeClient
@@ -29,7 +29,7 @@ def test_create_column_with_tag_without_value(flake: PyflakeClient, assets_queue
         owner=RoleAsset("SYSADMIN"),
     )
 
-    tag_asset = AssetsTag(
+    tag_asset = TagAsset(
         database_name=database.db_name,
         schema_name=schema.schema_name,
         tag_name="TEST_TAG",
@@ -92,7 +92,7 @@ def test_create_column_with_tag_with_value(flake: PyflakeClient, assets_queue: q
         comment=f"pyflake_client_test_{uuid.uuid4()}",
         owner=RoleAsset("SYSADMIN"),
     )
-    tag_asset = AssetsTag(
+    tag_asset = TagAsset(
         database_name=database.db_name,
         schema_name=schema.schema_name,
         tag_name="TEST_TAG",
@@ -149,14 +149,14 @@ def test_create_table_with_multiple_tags(flake: PyflakeClient, assets_queue: que
         comment=f"pyflake_client_test_{uuid.uuid4()}",
         owner=RoleAsset("SYSADMIN"),
     )
-    tag_asset_1 = AssetsTag(
+    tag_asset_1 = TagAsset(
         database_name=database.db_name,
         schema_name=schema.schema_name,
         tag_name="TEST_TAG_1",
         tag_values=[],
         owner=RoleAsset(name="SYSADMIN"),
     )
-    tag_asset_2 = AssetsTag(
+    tag_asset_2 = TagAsset(
         database_name=database.db_name,
         schema_name=schema.schema_name,
         tag_name="TEST_TAG_2",
