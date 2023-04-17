@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List
 from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
 from pyflake_client.models.assets.role import Role
+from pyflake_client.models.assets.database_role import DatabaseRole
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 
 
@@ -17,6 +18,13 @@ class Tag(ISnowflakeAsset):
     def get_create_statement(self) -> str:
         if self.owner is None:
             raise ValueError("Create statement not supported for owner-less tags")
+        if isinstance(self.owner, DatabaseRole):
+            role_type = "DATABASE ROLE"
+        elif isinstance(self.owner, Role):
+            role_type = "ROLE"
+        else:
+            raise NotImplementedError("Ownership is not implementer for asset of type {self.owner.__class__}")
+        
         query = ""
         query += f"CREATE OR REPLACE TAG {self.database_name}.{self.schema_name}.{self.tag_name}"
         if len(self.tag_values) > 0:
@@ -24,7 +32,7 @@ class Tag(ISnowflakeAsset):
             query += f" ALLOWED_VALUES {tag_values}"
 
         query += f" COMMENT = '{self.comment}';"
-        query += f"\nGRANT OWNERSHIP ON TAG {self.database_name}.{self.schema_name}.{self.tag_name} TO {self.owner.get_snowflake_type()} {self.owner.get_identifier()}"
+        query += f"\nGRANT OWNERSHIP ON TAG {self.database_name}.{self.schema_name}.{self.tag_name} TO {role_type} {self.owner.get_identifier()}"
         return query
 
     def get_delete_statement(self) -> str:
