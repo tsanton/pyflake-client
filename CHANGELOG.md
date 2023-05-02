@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.6.0](https://github.com/Tsanton/pyflake-client/compare/v0.5.2...v0.6.0) (2023-05-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* schema & table implement db_name:str
+
+### Bug Fixes
+
+* implement table owner (not required) ([f77fb05](https://github.com/Tsanton/pyflake-client/commit/f77fb055e7a39830273272a6e6532929c75d012c))
+
+
+### Code Refactoring
+
+* schema & table implement db_name:str ([c097640](https://github.com/Tsanton/pyflake-client/commit/c0976406810ed6a54ce1991d5e6cb5d2d0debc20))
+
 ## [0.5.2](https://github.com/Tsanton/pyflake-client/compare/v0.5.1...v0.5.2) (2023-04-13)
 
 
