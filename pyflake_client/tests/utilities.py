@@ -47,7 +47,7 @@ def _spawn_with_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQue
     r2 = RoleInheritance(r, rw)
     r3 = RoleInheritance(rw, rwc)
     r4 = RoleInheritance(rwc, sys_admin_role)
-    s: Schema = Schema(database=d, schema_name=schema_name, comment=snowflake_comment, owner=Role(rwc.name))
+    s: Schema = Schema(db_name=d.db_name, schema_name=schema_name, comment=snowflake_comment, owner=Role(rwc.name))
 
     r_table =  [Privilege.SELECT, Privilege.REFERENCES]
     rw_table = [Privilege.INSERT, Privilege.UPDATE, Privilege.DELETE, Privilege.TRUNCATE]

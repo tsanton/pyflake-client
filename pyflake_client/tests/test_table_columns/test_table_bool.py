@@ -15,7 +15,7 @@ from pyflake_client.client import PyflakeClient
 def test_table_bool(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
-        database=database,
+        db_name=database.db_name,
         schema_name="TEST_SCHEMA",
         comment=f"pyflake_client_test_{uuid.uuid4()}",
         owner=RoleAsset("SYSADMIN"),
@@ -24,7 +24,8 @@ def test_table_bool(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         Bool(name="BOOL_COLUMN"),
     ]
     table = TableAsset(
-        schema=schema,
+        db_name=database.db_name,    
+        schema_name=schema.schema_name,
         table_name="TEST_TABLE",
         columns=columns,  # type: ignore
         owner=RoleAsset("SYSADMIN"),
@@ -66,7 +67,7 @@ def test_table_bool(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 def test_table_bool_primary_key(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
-        database=database,
+        db_name=database.db_name,
         schema_name="TEST_SCHEMA",
         comment=f"pyflake_client_test_{uuid.uuid4()}",
         owner=RoleAsset("SYSADMIN"),
@@ -75,7 +76,8 @@ def test_table_bool_primary_key(flake: PyflakeClient, assets_queue: queue.LifoQu
         Bool(name="BOOL_COLUMN", primary_key=True),
     ]
     table = TableAsset(
-        schema=schema,
+        db_name=database.db_name,    
+        schema_name=schema.schema_name,
         table_name="TEST_TABLE",
         columns=columns,  # type: ignore
         owner=RoleAsset("SYSADMIN"),

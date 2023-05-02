@@ -1,8 +1,6 @@
 """warehouse"""
 # pylint: disable=line-too-long
 from dataclasses import dataclass
-from pyflake_client.models.assets.role import Role as RoleAsset
-from pyflake_client.models.assets.database import Database
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
 
@@ -24,13 +22,12 @@ class Warehouse(ISnowflakeAsset):
         if self.owner is None:
             raise ValueError("Create statement not supported for owner-less warehouses")
 
-        if isinstance(self.owner, RoleAsset):
-            grantee_type = "ROLE"
-        else:
+        snowflake_principal_type = self.owner.get_snowflake_type().snowflake_type()
+        if snowflake_principal_type not in ["ROLE"]:
             raise NotImplementedError("Ownership is not implementer for asset of type {self.owner.__class__}")
         
         return f"""CREATE OR REPLACE WAREHOUSE {self.warehouse_name} WITH WAREHOUSE_SIZE = '{self.size}' WAREHOUSE_TYPE = '{self.warehouse_type}' AUTO_RESUME = {self.auto_resume} AUTO_SUSPEND = {self.auto_suspend} INITIALLY_SUSPENDED = {self.init_suspend} COMMENT = '{self.comment}';
-                   GRANT OWNERSHIP ON WAREHOUSE {self.warehouse_name} TO {grantee_type} {self.owner.get_identifier()} REVOKE CURRENT GRANTS;"""
+                   GRANT OWNERSHIP ON WAREHOUSE {self.warehouse_name} TO {snowflake_principal_type} {self.owner.get_identifier()} REVOKE CURRENT GRANTS;"""
 
     def get_delete_statement(self):
         """get_delete_statement"""

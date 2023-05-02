@@ -20,13 +20,14 @@ def test_create_simple_table_ddl():
     ### Arrange ###
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
-        database=database,
+        db_name=database.db_name,
         schema_name="S1",
         comment="SCHEMA",
         owner=RoleAsset("SYSADMIN"),
     )
     table = TableAsset(
-        schema,
+        database.db_name,
+        schema.schema_name,
         "TEST",
         [Integer(name="ID", identity=Identity(1, 1))],
         owner=RoleAsset("SYSADMIN"),
@@ -35,10 +36,7 @@ def test_create_simple_table_ddl():
     ### Act ###
     definition = table.get_create_statement()
 
-    assert (
-        definition
-        == """CREATE OR REPLACE TABLE IGT_DEMO.S1.TEST (ID NUMBER(38,0) NOT NULL IDENTITY (1,1));"""
-    )
+    assert "CREATE OR REPLACE TABLE IGT_DEMO.S1.TEST (ID NUMBER(38,0) NOT NULL IDENTITY (1,1));GRANT OWNERSHIP ON TABLE IGT_DEMO.S1.TEST TO ROLE SYSADMIN;" == definition
 
 
 def test_create_complex_table_ddl():
@@ -46,20 +44,20 @@ def test_create_complex_table_ddl():
     ### Arrange ###
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
-        database=database,
+        db_name=database.db_name,
         schema_name="S1",
         comment="SCHEMA",
         owner=RoleAsset("SYSADMIN"),
     )
     table = TableAsset(
-        schema,
+        database.db_name,
+        schema.schema_name,
         "TEST",
         [
             Integer(name="ID", identity=Identity(1, 1)),
             Varchar(name="VARCHAR_NO_DEFAULT"),
             Varchar(name="VARCHAR_DEFAULT", default_value="YES"),
-        ],
-        owner=RoleAsset("SYSADMIN"),
+        ]
     )
 
     ### Act ###
@@ -76,13 +74,14 @@ def test_create_complex_table_with_primary_key_ddl():
     ### Arrange ###
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
-        database=database,
+        db_name=database.db_name,
         schema_name="S1",
         comment="SCHEMA",
         owner=RoleAsset("SYSADMIN"),
     )
     table = TableAsset(
-        schema,
+        database.db_name,
+        schema.schema_name,
         "TEST",
         [
             Integer(name="ID", identity=Identity(1, 1)),
@@ -91,8 +90,7 @@ def test_create_complex_table_with_primary_key_ddl():
                 name="VARCHAR_2",
                 primary_key=True,
             ),
-        ],
-        owner=RoleAsset("SYSADMIN"),
+        ]
     )
 
     ### Act ###
@@ -111,19 +109,19 @@ def test_create_simple_table_with_default_date_ddl():
     ### Arrange ###
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
-        database=database,
+        db_name=database.db_name,
         schema_name="S1",
         comment="SCHEMA",
         owner=RoleAsset("SYSADMIN"),
     )
     table = TableAsset(
-        schema,
+        database.db_name,
+        schema.schema_name,
         "TEST",
         [
             Integer(name="ID", identity=Identity(1, 1)),
             Date(name="SOME_DATE", default_value=date(2000, 1, 1)),
-        ],
-        owner=RoleAsset("SYSADMIN"),
+        ]
     )
 
     ### Act ###
@@ -142,13 +140,14 @@ def test_create_simple_table_with_default_datetime_ddl():
     ### Arrange ###
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     schema = Schema(
-        database=database,
+        db_name=database.db_name,
         schema_name="S1",
         comment="SCHEMA",
         owner=RoleAsset("SYSADMIN"),
     )
     table = TableAsset(
-        schema,
+        database.db_name,
+        schema.schema_name,
         "TEST",
         [
             Integer(name="ID", not_null=True, identity=Identity(1, 1)),
@@ -158,7 +157,6 @@ def test_create_simple_table_with_default_datetime_ddl():
                 nullable=True,
             ),
         ],
-        owner=RoleAsset("SYSADMIN"),
     )
 
     ### Act ###

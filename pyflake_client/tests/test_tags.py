@@ -17,7 +17,7 @@ def test_describe_non_existing_tag(flake: PyflakeClient, assets_queue: queue.Lif
     snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     schema = SchemaAsset(
-        database=database,
+        db_name=database.db_name,
         schema_name="TEST_SCHEMA",
         comment=snowflake_comment,
         owner=RoleAsset("SYSADMIN"),
@@ -47,7 +47,7 @@ def test_create_tag_without_tag_values(flake: PyflakeClient, assets_queue: queue
     snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     schema = SchemaAsset(
-        database=database,
+        db_name=database.db_name,
         schema_name="TEST_SCHEMA",
         comment=snowflake_comment,
         owner=RoleAsset("SYSADMIN"),
@@ -87,7 +87,7 @@ def test_create_tag_with_tag_values(flake: PyflakeClient, assets_queue: queue.Li
     snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     schema = SchemaAsset(
-        database=database,
+        db_name=database.db_name,
         schema_name="TEST_SCHEMA",
         comment=snowflake_comment,
         owner=RoleAsset("SYSADMIN"),
@@ -139,7 +139,7 @@ def test_create_tag_with_database_role_owner(flake: PyflakeClient, assets_queue:
     )
     rel = RoleInheritanceAsset(child_principal=db_role, parent_principal=sys_admin) #So we can delete the schema in the finally
     schema = SchemaAsset(
-        database=database,
+        db_name=database.db_name,
         schema_name="TEST_SCHEMA",
         comment=snowflake_comment,
         owner=db_role,

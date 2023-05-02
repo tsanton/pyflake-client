@@ -110,7 +110,7 @@ def test_role_schema_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue)
     sysadmin_role = RoleAsset("SYSADMIN")
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=sysadmin_role)
     schema = SchemaAsset(
-        database=database,
+        db_name=database.db_name,
         schema_name="SOME_SCHEMA",
         comment=snowflake_comment,
         owner=sysadmin_role,

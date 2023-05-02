@@ -21,12 +21,13 @@ from pyflake_client.client import PyflakeClient
 def test_create_table_with_tag_without_value(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_table"""
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    sysadmin = RoleAsset("SYSADMIN")
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sysadmin)
     schema: Schema = Schema(
-        database=database,
+        db_name=database.db_name,
         schema_name="SOME_SCHEMA",
         comment=f"pyflake_client_test_{uuid.uuid4()}",
-        owner=RoleAsset("SYSADMIN"),
+        owner=sysadmin,
     )
     columns = [
         Number("ID", identity=Identity(1, 1)),
@@ -38,7 +39,7 @@ def test_create_table_with_tag_without_value(flake: PyflakeClient, assets_queue:
         schema_name=schema.schema_name,
         tag_name="TEST_TAG",
         tag_values=[],
-        owner=RoleAsset(name="SYSADMIN"),
+        owner=sysadmin,
     )
     classification_tag = ClassificationTag(
         database_name=database.db_name,
@@ -47,10 +48,11 @@ def test_create_table_with_tag_without_value(flake: PyflakeClient, assets_queue:
         tag_value=None,
     )
     table = TableAsset(
-        schema=schema,
+        db_name=database.db_name,    
+        schema_name=schema.schema_name,
         table_name="TEST",
         columns=columns,
-        owner=RoleAsset("SYSADMIN"),
+        owner=sysadmin,
         tags=[classification_tag],
     )
 
@@ -61,10 +63,7 @@ def test_create_table_with_tag_without_value(flake: PyflakeClient, assets_queue:
         flake.register_asset(table, assets_queue)
 
         ### Act ###
-        t = flake.describe_one(
-            TableDescribable(database.db_name, schema.schema_name, table.table_name),
-            TableEntity,
-        )
+        t = flake.describe_one(TableDescribable(database.db_name, schema.schema_name, table.table_name), TableEntity)
 
         ### Assert ###
         assert t is not None
@@ -72,7 +71,7 @@ def test_create_table_with_tag_without_value(flake: PyflakeClient, assets_queue:
         assert t.database_name == database.db_name
         assert t.schema_name == schema.schema_name
         assert t.kind == "TABLE"
-        assert t.owner == "ACCOUNTADMIN"
+        assert t.owner == sysadmin.name
         assert t.retention_time == "1"
         assert t.tags is not None
         assert len(t.tags) == 1
@@ -87,12 +86,13 @@ def test_create_table_with_tag_without_value(flake: PyflakeClient, assets_queue:
 def test_create_table_with_tag_with_value(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_table"""
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    sysadmin = RoleAsset("SYSADMIN")
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sysadmin)
     schema: Schema = Schema(
-        database=database,
+        db_name=database.db_name,
         schema_name="SOME_SCHEMA",
         comment=f"pyflake_client_test_{uuid.uuid4()}",
-        owner=RoleAsset("SYSADMIN"),
+        owner=sysadmin,
     )
     columns = [
         Number("ID", identity=Identity(1, 1)),
@@ -113,10 +113,11 @@ def test_create_table_with_tag_with_value(flake: PyflakeClient, assets_queue: qu
         tag_value="FOO",
     )
     table = TableAsset(
-        schema=schema,
+        db_name=database.db_name,    
+        schema_name=schema.schema_name,
         table_name="TEST",
         columns=columns,
-        owner=RoleAsset("SYSADMIN"),
+        owner=sysadmin,
         tags=[classification_tag],
     )
 
@@ -138,7 +139,7 @@ def test_create_table_with_tag_with_value(flake: PyflakeClient, assets_queue: qu
         assert t.database_name == database.db_name
         assert t.schema_name == schema.schema_name
         assert t.kind == "TABLE"
-        assert t.owner == "ACCOUNTADMIN"
+        assert t.owner == sysadmin.name
         assert t.retention_time == "1"
         assert t.tags is not None
         assert len(t.tags) == 1
@@ -153,12 +154,13 @@ def test_create_table_with_tag_with_value(flake: PyflakeClient, assets_queue: qu
 def test_create_table_with_multiple_tags(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_table"""
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    sysadmin = RoleAsset("SYSADMIN")
+    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sysadmin)
     schema: Schema = Schema(
-        database=database,
+        db_name=database.db_name,
         schema_name="SOME_SCHEMA",
         comment=f"pyflake_client_test_{uuid.uuid4()}",
-        owner=RoleAsset("SYSADMIN"),
+        owner=sysadmin,
     )
     columns = [
         Number("ID", identity=Identity(1, 1)),
@@ -192,10 +194,11 @@ def test_create_table_with_multiple_tags(flake: PyflakeClient, assets_queue: que
         tag_value="FOO",
     )
     table = TableAsset(
-        schema=schema,
+        db_name=database.db_name,    
+        schema_name=schema.schema_name,
         table_name="TEST",
         columns=columns,
-        owner=RoleAsset("SYSADMIN"),
+        owner=sysadmin,
         tags=[classification_tag_1, classification_tag_2],
     )
 
@@ -218,7 +221,7 @@ def test_create_table_with_multiple_tags(flake: PyflakeClient, assets_queue: que
         assert t.database_name == database.db_name
         assert t.schema_name == schema.schema_name
         assert t.kind == "TABLE"
-        assert t.owner == "ACCOUNTADMIN"
+        assert t.owner == sysadmin.name
         assert t.retention_time == "1"
         assert t.tags is not None
         assert len(t.tags) == 2

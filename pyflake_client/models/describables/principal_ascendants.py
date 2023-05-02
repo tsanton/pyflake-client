@@ -75,7 +75,6 @@ call show_all_roles_that_inherit_source('%(s1)s', '%(s2)s');""" % {
             "s1": principal_type,
             "s2": principal_identifier
         }
-        print(query)
         return query
 
     def is_procedure(self) -> bool:

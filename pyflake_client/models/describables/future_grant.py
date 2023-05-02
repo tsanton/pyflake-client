@@ -67,7 +67,6 @@ call show_grants_to_database_role('%(s1)s','%(s2)s');
             raise NotImplementedError(
                 f"Future Grant describe statement for {self.__class__} is not implemented"
             )
-        print(query)
         return query
 
     def is_procedure(self) -> bool:

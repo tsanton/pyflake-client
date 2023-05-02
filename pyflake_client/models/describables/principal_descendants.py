@@ -56,7 +56,6 @@ call show_direct_descendants_from_principal('%(s1)s', '%(s2)s');""" % {
             "s1": principal_type,
             "s2": principal_identifier,
         }
-        print(query)
         return query
 
     def is_procedure(self) -> bool:
