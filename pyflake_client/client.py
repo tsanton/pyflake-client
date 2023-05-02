@@ -131,7 +131,8 @@ class PyflakeClient:
             self._conn.execute_string(obj.merge_into_statement(self.gov_db, self.mgmt_schema))
             return True
         except Exception as e:
-            print(e)
+            # print(e)
+            print("merge_into threw an exception!")
         return False
 
     def get_mergeable(self, obj: U) -> U:

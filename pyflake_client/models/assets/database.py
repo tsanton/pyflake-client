@@ -1,7 +1,6 @@
 """database"""
 from dataclasses import dataclass
 
-from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
 
@@ -18,13 +17,12 @@ class Database(ISnowflakeAsset):
         """get_create_statement"""
         if self.owner is None:
             raise ValueError("Create statement not supported for owner-less databases")
-        if isinstance(self.owner, RoleAsset):
-                grantee_type = "ROLE"
-        else:
+        snowflake_principal_type = self.owner.get_snowflake_type().snowflake_type()
+        if snowflake_principal_type not in ["ROLE"]:
             raise NotImplementedError("Ownership is not implementer for asset of type {self.owner.__class__}")
 
         return f"""CREATE OR REPLACE DATABASE {self.db_name} COMMENT = '{self.comment}';
-                   GRANT OWNERSHIP ON DATABASE {self.db_name} TO {grantee_type} {self.owner.get_identifier()};"""
+                   GRANT OWNERSHIP ON DATABASE {self.db_name} TO {snowflake_principal_type} {self.owner.get_identifier()};"""
 
     def get_delete_statement(self):
         """get_delete_statement"""
