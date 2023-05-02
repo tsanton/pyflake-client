@@ -94,7 +94,7 @@ def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.Li
     user_admin = RoleAsset("USERADMIN")
     sys_admin = RoleAsset("SYSADMIN")
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin)
-    schema = SchemaAsset(database, "IGT_SCHEMA", f"pyflake_client_test_{uuid.uuid4()}", sys_admin)
+    schema = SchemaAsset(database.db_name, "IGT_SCHEMA", f"pyflake_client_test_{uuid.uuid4()}", sys_admin)
     db_role = DatabaseRoleAsset("IGT_DB_ROLE", database.db_name, f"pyflake_client_test_{uuid.uuid4()}", user_admin)
     grant = GrantAction(db_role, SchemaGrant(database_name=database.db_name, schema_name=schema.schema_name), [Privilege.USAGE, Privilege.CREATE_TABLE])
 

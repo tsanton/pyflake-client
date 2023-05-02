@@ -69,7 +69,7 @@ def test_role_schema_object_future_grant(flake: PyflakeClient, assets_queue: que
     ### Arrange ###
     snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
-    schema = SchemaAsset(database, "IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
+    schema = SchemaAsset(database.db_name, "IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     role = RoleAsset("IGT_CREATE_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
     grant = GrantAction(role, SchemaObjectFutureGrant(database_name=database.db_name, schema_name=schema.schema_name, grant_target=ObjectType.TABLE), [Privilege.SELECT, Privilege.REFERENCES])
     try:

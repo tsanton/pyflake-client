@@ -22,8 +22,8 @@ from pyflake_client.tests.utilities import _spawn_with_rwc_privileges
 def test_merge_into(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_merge_into"""
     ### Arrange ###
-    _, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
-    t = Table(s, TABLE_NAME, TABLE_COLUMN_DEFINITION, owner=RoleAsset("SYSADMIN"))
+    db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
+    t = Table(db.db_name, s.schema_name, TABLE_NAME, TABLE_COLUMN_DEFINITION)
 
     try:
         flake.register_asset(t, assets_queue)
@@ -51,8 +51,8 @@ def test_merge_into(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 def test_merge_into_and_update(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_merge_into_and_update"""
     ### Arrange ###
-    _, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
-    t = Table(s, TABLE_NAME, TABLE_COLUMN_DEFINITION, owner=RoleAsset("SYSADMIN"))
+    db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
+    t = Table(db.db_name, s.schema_name, TABLE_NAME, TABLE_COLUMN_DEFINITION)
 
     try:
         flake.register_asset(t, assets_queue)

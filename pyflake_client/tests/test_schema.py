@@ -48,7 +48,7 @@ def test_create_schema_with_role_owner(flake: PyflakeClient, assets_queue: queue
     snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     some_schema = SchemaAsset(
-        database=database,
+        db_name=database.db_name,
         schema_name="SOME_SCHEMA",
         comment=snowflake_comment,
         owner=RoleAsset("SYSADMIN"),
@@ -59,14 +59,14 @@ def test_create_schema_with_role_owner(flake: PyflakeClient, assets_queue: queue
 
         ### Act ###
         sch_so = flake.describe_one(
-            SchemaDescribable(some_schema.schema_name, some_schema.database.db_name),
+            SchemaDescribable(some_schema.schema_name, some_schema.db_name),
             SchemaEntity,
         )
 
         ### Assert ###
         assert sch_so is not None
         assert sch_so.name == some_schema.schema_name
-        assert sch_so.database_name == some_schema.database.db_name
+        assert sch_so.database_name == some_schema.db_name
         assert sch_so.comment == some_schema.comment
         assert sch_so.owner == "SYSADMIN"
         assert sch_so.created_on.date() == date.today()
@@ -91,7 +91,7 @@ def test_create_schema_with_database_role_owner(flake: PyflakeClient, assets_que
     rel = RoleInheritanceAsset(child_principal=db_role, parent_principal=sys_admin) #So we can delete the schema in the finally
         
     schema = SchemaAsset(
-        database=database,
+        db_name=database.db_name,
         schema_name="SOME_SCHEMA",
         comment=snowflake_comment,
         owner=db_role,
@@ -109,7 +109,7 @@ def test_create_schema_with_database_role_owner(flake: PyflakeClient, assets_que
         ### Assert ###
         assert sch is not None
         assert sch.name == schema.schema_name
-        assert sch.database_name == schema.database.db_name
+        assert sch.database_name == schema.db_name
         assert sch.comment == schema.comment
         assert sch.owner == db_role.name
         assert sch.created_on.date() == date.today()
