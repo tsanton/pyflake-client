@@ -13,14 +13,10 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 @dataclass(frozen=True)
 class Schema(ISnowflakeDescribable):
     """Schema"""
-
     name: str
     database_name: str
-    owner: Union[str, None] = None
-    comment: Union[str, None] = None
-    retention_time: Union[str, None] = None  #TODO: int
-    created_on: Union[datetime, None] = None
-
+    
+    
     def get_describe_statement(self) -> str:
         """get_describe_statement"""
         return (

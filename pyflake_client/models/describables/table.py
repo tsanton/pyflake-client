@@ -14,7 +14,6 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 @dataclass(frozen=True)
 class Table(ISnowflakeDescribable):
     """Table"""
-
     database_name: str
     schema_name: str
     name: str
