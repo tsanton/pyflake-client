@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1](https://github.com/Tsanton/pyflake-client/compare/v0.6.0...v0.6.1) (2023-05-05)
+
+
+### Bug Fixes
+
+* added BOOLEAN proc arg ([da31b4a](https://github.com/Tsanton/pyflake-client/commit/da31b4a2e470420f2b2d22dcdc77fd763445a9c6))
+* fluff in table describable and added BOOLEAN proc arg ([eac302e](https://github.com/Tsanton/pyflake-client/commit/eac302e4b55783112d0f45f8afb2b6d5866e7a50))
+
 ## [0.6.0](https://github.com/Tsanton/pyflake-client/compare/v0.5.2...v0.6.0) (2023-05-02)
 
 
