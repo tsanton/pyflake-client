@@ -1,9 +1,11 @@
 """object_type"""
 from enum import Enum
 
+
 class Principal(str, Enum):
     """Principal"""
-    USER = "TABLE"
+
+    USER = "USER"
     DATABASE_ROLE = "DATABASE_ROLE"
     ROLE = "ROLE"
 
