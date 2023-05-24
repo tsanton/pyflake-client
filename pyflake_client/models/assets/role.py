@@ -23,7 +23,7 @@ class Role(ISnowflakeAsset, ISnowflakePrincipal, ISnowflakeGrantPrincipal):
 
         snowflake_principal_type = self.owner.get_snowflake_type().snowflake_type()
         if snowflake_principal_type not in ["ROLE"]:
-            raise NotImplementedError("Ownership is not implementer for asset of type {self.owner.__class__}")
+            raise NotImplementedError("Ownership is not implemented for asset of type {self.owner.__class__}")
 
         return f"""CREATE OR REPLACE ROLE {self.name} COMMENT = '{self.comment}';
                    GRANT OWNERSHIP ON ROLE {self.name} to {snowflake_principal_type} {self.owner.get_identifier()} REVOKE CURRENT GRANTS;"""

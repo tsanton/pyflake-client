@@ -21,7 +21,7 @@ class Schema(ISnowflakeAsset):
 
         snowflake_principal_type = self.owner.get_snowflake_type().snowflake_type()
         if snowflake_principal_type not in ["ROLE", "DATABASE ROLE"]:
-            raise NotImplementedError("Ownership is not implementer for asset of type {self.owner.__class__}")
+            raise NotImplementedError("Ownership is not implemented for asset of type {self.owner.__class__}")
         
         return f"""CREATE OR REPLACE SCHEMA {self.db_name}.{self.schema_name} WITH MANAGED ACCESS COMMENT = '{self.comment}';
                    GRANT OWNERSHIP ON SCHEMA {self.db_name}.{self.schema_name} to {snowflake_principal_type} {self.owner.get_identifier()} REVOKE CURRENT GRANTS;"""

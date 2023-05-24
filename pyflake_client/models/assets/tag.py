@@ -19,7 +19,7 @@ class Tag(ISnowflakeAsset):
             raise ValueError("Create statement not supported for owner-less tags")
         snowflake_principal_type = self.owner.get_snowflake_type().snowflake_type()
         if snowflake_principal_type not in ["ROLE", "DATABASE ROLE"]:
-            raise NotImplementedError("Ownership is not implementer for asset of type {self.owner.__class__}")
+            raise NotImplementedError("Ownership is not implemented for asset of type {self.owner.__class__}")
         
         query = ""
         query += f"CREATE OR REPLACE TAG {self.database_name}.{self.schema_name}.{self.tag_name}"
