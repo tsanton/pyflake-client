@@ -31,6 +31,8 @@ class RoleInheritance(ISnowflakeAsset):
             grant_statement += f" ROLE {self.parent_principal.get_identifier()};";
         elif parent_principal_type == Principal.DATABASE_ROLE:
             grant_statement += f" DATABASE ROLE {self.parent_principal.get_identifier()};";
+        elif parent_principal_type == Principal.USER:
+            grant_statement += f" USER {self.parent_principal.get_identifier()};"
         else:
             raise NotImplementedError(f"Can't generate grant statement for asset of type {self.parent_principal.__class__}")
 
