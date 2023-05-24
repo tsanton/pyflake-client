@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.0](https://github.com/Tsanton/pyflake-client/compare/v0.6.2...v0.7.0) (2023-05-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* add user type to role_inheritance
+
+### Features
+
+* add user type to role_inheritance ([c6239ee](https://github.com/Tsanton/pyflake-client/commit/c6239ee3bf7891f1edf82e3185b04e9c3c355773))
+
 ## [0.6.2](https://github.com/Tsanton/pyflake-client/compare/v0.6.1...v0.6.2) (2023-05-24)
 
 
