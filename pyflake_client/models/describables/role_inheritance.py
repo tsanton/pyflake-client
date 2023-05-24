@@ -8,6 +8,7 @@ import dacite
 from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
 from pyflake_client.models.describables.role import Role as RoleDescribable
 from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
+from pyflake_client.models.describables.user import User as UserDescribable
 from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
 
 @dataclass(frozen=True)
@@ -47,6 +48,9 @@ class RoleInheritance(ISnowflakeDescribable):
         elif isinstance(self.parent_principal, DatabaseRoleDescribable):
             parent_type = DatabaseRoleDescribable
             parent_identifier = f"{self.parent_principal.db_name}.{self.parent_principal.name}"
+        elif isinstance(self.parent_principal, UserDescribable):
+            parent_type = UserDescribable
+            parent_identifier = self.parent_principal.name
         else:
             raise NotImplementedError()
         
@@ -55,8 +59,12 @@ class RoleInheritance(ISnowflakeDescribable):
         
         if inherited_type == DatabaseRoleDescribable:
             inherited_type = "DATABASE_ROLE"
-        else:
+        elif inherited_type == RoleDescribable:
             inherited_type = "ROLE"
+        elif inherited_type == UserDescribable:
+            inherited_type = "USER"
+        else:
+            raise NotImplementedError()
 
         return """
 with show_inherited_role as procedure(parent_principal_identifier varchar, parent_principal_type varchar, child_role_identifier varchar, child_role_type varchar)
