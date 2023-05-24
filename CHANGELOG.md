@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/Tsanton/pyflake-client/compare/v0.6.1...v0.6.2) (2023-05-24)
+
+
+### Features
+
+* user model ([ba13069](https://github.com/Tsanton/pyflake-client/commit/ba130696461399ffcceb1c0b504b6666c8134266))
+
 ## [0.6.1](https://github.com/Tsanton/pyflake-client/compare/v0.6.0...v0.6.1) (2023-05-05)
 
 
