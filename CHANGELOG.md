@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/Tsanton/pyflake-client/compare/v0.7.0...v0.8.0) (2023-05-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* fixed major docstring issue
+
+### Features
+
+* fixed major docstring issue ([0440da1](https://github.com/Tsanton/pyflake-client/commit/0440da1c2d2c0cce0a571ef563e8dd54162b9744))
+* handle user grants format ([6d6d930](https://github.com/Tsanton/pyflake-client/commit/6d6d9300af46c949c9448dc23d3bebb1254844dc))
+
 ## [0.7.0](https://github.com/Tsanton/pyflake-client/compare/v0.6.2...v0.7.0) (2023-05-24)
 
 
