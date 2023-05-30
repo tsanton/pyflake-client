@@ -53,13 +53,15 @@ class RoleInheritance(ISnowflakeAsset):
         elif child_principal_type == Principal.DATABASE_ROLE:
             revoke_statement += f" DATABASE ROLE {self.child_principal.get_identifier()} FROM"
         else:
-            raise NotImplementedError("get_identifier is not implemented for this interface type")
+            raise NotImplementedError("get_delete_statement is not implemented for this interface type")
         
         parent_principal_type = self.parent_principal.get_snowflake_type()
         if parent_principal_type == Principal.ROLE:
             revoke_statement += f" ROLE {self.parent_principal.get_identifier()};"
         elif parent_principal_type == Principal.DATABASE_ROLE:
             revoke_statement += f" DATABASE ROLE {self.parent_principal.get_identifier()};"
+        elif parent_principal_type == Principal.USER:
+            revoke_statement += f" USER {self.parent_principal.get_identifier()};"
         else:
-            raise NotImplementedError("get_identifier is not implemented for this interface type")
+            raise NotImplementedError("get_delete_statement is not implemented for this interface type")
         return revoke_statement
