@@ -20,7 +20,7 @@ class SchemaGrant(ISnowflakeGrantAsset):
         if isinstance(principal, RoleAsset):
             return f"GRANT {privs} ON SCHEMA {self.database_name}.{self.schema_name} TO ROLE {principal.get_identifier()}"
         if isinstance(principal, DatabaseRoleAsset):
-            return f"GRANT {privs} ON schema {self.database_name}.{self.schema_name} TO DATABASE ROLE {principal.get_identifier()}"
+            return f"GRANT {privs} ON SCHEMA {self.database_name}.{self.schema_name} TO DATABASE ROLE {principal.get_identifier()}"
 
         raise NotImplementedError(
             f"Can't generate grant statement for asset of type {self.__class__}"
