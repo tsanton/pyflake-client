@@ -3,6 +3,7 @@
 # pylint: disable=too-many-locals
 
 import queue
+from typing import List
 import uuid
 
 from pyflake_client.client import PyflakeClient
@@ -16,23 +17,20 @@ from pyflake_client.models.describables.role import Role as RoleDescribable
 from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
 from pyflake_client.models.describables.principal_ascendants import PrincipalAscendants as RoleAscendantsDescribable
 
-from pyflake_client.models.entities.principal_ascendants import PrincipalAscendants as RoleAscendantsEntity
-
-
+from pyflake_client.models.entities.principal_ascendant import PrincipalAscendant
+from pyflake_client.tests.utilities import find
 
 def test_get_principal_ascendants(flake: PyflakeClient):
     """test_get_principal_ascendants: we know that USERADMIN -> SECURITYADMIN -> ACCOUNTADMIN"""
     ### Act ###
-    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
-    hierarchy: RoleAscendantsEntity = flake.describe_one(RoleAscendantsDescribable(RoleDescribable("USERADMIN")), RoleAscendantsEntity)
+    ascendants: List[PrincipalAscendant] = flake.describe_many(RoleAscendantsDescribable(RoleDescribable("USERADMIN")), PrincipalAscendant)
 
-    sec_admin = next((r for r in hierarchy.ascendants if r.grantee_identifier == "SECURITYADMIN"), None)
-    acc_admin = next((r for r in hierarchy.ascendants if r.grantee_identifier == "ACCOUNTADMIN"), None)
-    sys_admin = next((r for r in hierarchy.ascendants if r.grantee_identifier == "SYSADMIN"), None)
+    sec_admin = find(ascendants, lambda x: x.grantee_identifier == "SECURITYADMIN" and x.granted_identifier == "USERADMIN")
+    acc_admin = find(ascendants, lambda x: x.grantee_identifier == "ACCOUNTADMIN" and x.granted_identifier == "SECURITYADMIN")
+    sys_admin = find(ascendants, lambda x: x.grantee_identifier == "SYSADMIN")
 
     ### Assert ###
-    assert hierarchy.principal_identifier == "USERADMIN"
-    assert hierarchy.principal_type == "ROLE"
+
     assert sys_admin is None
 
     assert sec_admin is not None
@@ -79,19 +77,17 @@ def test_create_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
         flake.register_asset(sysadmin_great_grandparent_relationship, assets_queue)
 
         ### Act ###
-        hierarchy: RoleAscendantsEntity = flake.describe_one(RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE")), RoleAscendantsEntity)
-        parent = next((r for r in hierarchy.ascendants if r.grantee_identifier == parent_role.name), None)
-        grandparent1 = next((r for r in hierarchy.ascendants if r.grantee_identifier == grandparent1_role.name), None)
-        grandparent2 = next((r for r in hierarchy.ascendants if r.grantee_identifier == grandparent2_role.name), None)
-        great_grandparent = next((r for r in hierarchy.ascendants if r.grantee_identifier == great_grandparent_role.name), None)
-        sys_admin = next((r for r in hierarchy.ascendants if r.grantee_identifier == "SYSADMIN"), None)
-        acc_admin = next((r for r in hierarchy.ascendants if r.grantee_identifier == "ACCOUNTADMIN"), None)
+        ascendants: List[PrincipalAscendant] = flake.describe_many(RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE")), PrincipalAscendant)
+
+        parent = find(ascendants, lambda x: x.grantee_identifier == parent_role.name)
+        grandparent1 = find(ascendants, lambda x: x.grantee_identifier == grandparent1_role.name)
+        grandparent2 = find(ascendants, lambda x: x.grantee_identifier == grandparent2_role.name)
+        great_grandparent = find(ascendants, lambda x: x.grantee_identifier == great_grandparent_role.name)
+        sys_admin = find(ascendants, lambda x: x.grantee_identifier == "SYSADMIN")
+        acc_admin = find(ascendants, lambda x: x.grantee_identifier == "ACCOUNTADMIN" and x.granted_identifier == "SYSADMIN")
 
         ### Assert ###
         # {parent: 0, grandparent: 1, great_grandparent: 2, sysadmin: 3, accountadmin: 4}
-        assert hierarchy.principal_identifier == "IGT_CHILD1_ROLE"
-        assert hierarchy.principal_type == "ROLE"
-
         assert parent is not None
         assert parent.distance_from_source == 0
         assert parent.granted_identifier == child1_role.name
@@ -126,7 +122,7 @@ def test_broken_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
     ### Arrange ###
     snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
     user_admin_role = Role("USERADMIN")
-    sys_admin_role = Role("SYSADMIN")
+    # sys_admin_role = Role("SYSADMIN")
     child1_role = Role("IGT_CHILD1_ROLE", snowflake_comment, user_admin_role)
     child2_role = Role("IGT_CHILD2_ROLE", snowflake_comment, user_admin_role)
     parent_role = Role("IGT_PARENT_ROLE", snowflake_comment, user_admin_role)
@@ -156,18 +152,15 @@ def test_broken_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
         flake.register_asset(sysadmin_great_grandparent_relationship, assets_queue)
 
         ### Act ###
-        hierarchy: RoleAscendantsEntity = flake.describe_one(RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE")), RoleAscendantsEntity)
-        parent = next((r for r in hierarchy.ascendants if r.grantee_identifier == parent_role.name), None)
-        grandparent = next((r for r in hierarchy.ascendants if r.grantee_identifier == grandparent_role.name), None)
-        great_grandparent = next((r for r in hierarchy.ascendants if r.grantee_identifier == great_grandparent_role.name), None)
-        sys_admin = next((r for r in hierarchy.ascendants if r.grantee_identifier == "SYSADMIN"), None)
-        acc_admin = next((r for r in hierarchy.ascendants if r.grantee_identifier == "ACCOUNTADMIN"), None)
+        ascendants: List[PrincipalAscendant] = flake.describe_many(RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE")), PrincipalAscendant)
+        parent = find(ascendants, lambda x: x.grantee_identifier == parent_role.name)
+        grandparent = find(ascendants, lambda x: x.grantee_identifier == grandparent_role.name)
+        great_grandparent = find(ascendants, lambda x: x.grantee_identifier == great_grandparent_role.name)
+        sys_admin = find(ascendants, lambda x: x.grantee_identifier == "SYSADMIN")
+        acc_admin = find(ascendants, lambda x: x.grantee_identifier == "ACCOUNTADMIN" and x.granted_identifier == "SYSADMIN")
 
         ### Assert ###
         # {parent: 0, grandparent: 1, great_grandparent: 2, sysadmin: 3, accountadmin: 4}
-        assert hierarchy.principal_identifier == "IGT_CHILD1_ROLE"
-        assert hierarchy.principal_type == "ROLE"
-
         assert parent is not None
         assert parent.distance_from_source == 0
         assert parent.granted_identifier == child1_role.name
@@ -217,17 +210,14 @@ def test_ascendants_with_database_roles(flake: PyflakeClient, assets_queue: queu
         flake.register_asset(rel4, assets_queue)
 
         ### Act ###
-        hierarchy: RoleAscendantsEntity = flake.describe_one(RoleAscendantsDescribable(DatabaseRoleDescribable(dr_r.name, dr_r.database_name)), RoleAscendantsEntity)
-        db_rw = next((r for r in hierarchy.ascendants if r.grantee_identifier == dr_rw.get_identifier()), None)
-        db_rwc = next((r for r in hierarchy.ascendants if r.grantee_identifier == dr_rwc.get_identifier()), None)
-        db_sysadmin = next((r for r in hierarchy.ascendants if r.grantee_identifier == dr_sys.get_identifier()), None)
-        sys_admin = next((r for r in hierarchy.ascendants if r.grantee_identifier == "SYSADMIN"), None)
-        acc_admin = next((r for r in hierarchy.ascendants if r.grantee_identifier == "ACCOUNTADMIN"), None)
+        ascendants: List[PrincipalAscendant] = flake.describe_many(RoleAscendantsDescribable(DatabaseRoleDescribable(dr_r.name, dr_r.database_name)),PrincipalAscendant)
+        db_rw = find(ascendants, lambda x: x.grantee_identifier == dr_rw.get_identifier())
+        db_rwc = find(ascendants, lambda x: x.grantee_identifier == dr_rwc.get_identifier())
+        db_sysadmin = find(ascendants, lambda x: x.grantee_identifier == dr_sys.get_identifier())
+        sys_admin = find(ascendants, lambda x: x.grantee_identifier == "SYSADMIN")
+        acc_admin = find(ascendants, lambda x: x.grantee_identifier == "ACCOUNTADMIN" and x.granted_identifier == "SYSADMIN")
 
         ### Assert ###
-        assert hierarchy.principal_identifier == dr_r.get_identifier()
-        assert hierarchy.principal_type == "DATABASE_ROLE"
-
         assert db_rw is not None
         assert db_rw.distance_from_source == 0
         assert db_rw.granted_identifier == dr_r.get_identifier()

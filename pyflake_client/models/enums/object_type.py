@@ -22,7 +22,7 @@ class ObjectType(str, Enum):
         elif self == ObjectType.FILE_FORMAT:
             return "FILE FORMAT"
         else:
-            return self
+            return self.value
 
     def singularize(self) -> str:
         """singularize"""

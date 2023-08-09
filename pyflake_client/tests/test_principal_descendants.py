@@ -15,27 +15,30 @@ from pyflake_client.models.describables.role import Role as RoleDescribable
 from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
 from pyflake_client.models.describables.principal_descendants import PrincipalDescendants as RoleDescendantsDescribable
 
-from pyflake_client.models.entities.principal_descendants import PrincipalDescendants as RoleDescendantsEntity
 from pyflake_client.models.entities.grant import Grant as GrantEntity
+from pyflake_client.tests.utilities import find
+
+
 
 def test_get_descendant_roles(flake: PyflakeClient):
     """test_get_descendant_roles: we know that ACCOUNTADMIN is the parent of both SECURITYADMIN and SYSADMIN"""
     ### Act ###
-    hierarchy = flake.describe_one(RoleDescendantsDescribable(RoleDescribable("ACCOUNTADMIN")), RoleDescendantsEntity)
+    descendants = flake.describe_many(RoleDescendantsDescribable(RoleDescribable("ACCOUNTADMIN")), GrantEntity)
 
-    assert hierarchy is not None
-    sec_admin:GrantEntity = next((r for r in hierarchy.descendants if r.granted_identifier == "SECURITYADMIN"), None)
-    sys_admin:GrantEntity = next((r for r in hierarchy.descendants if r.granted_identifier == "SYSADMIN"), None)
+    assert descendants is not None
+    
+    sec_admin = find(descendants, lambda x: x.granted_identifier == "SECURITYADMIN")
+    sys_admin = find(descendants, lambda x: x.granted_identifier == "SYSADMIN")
+    
 
     ### Assert ###
-    assert hierarchy.principal_identifier == "ACCOUNTADMIN"
-    assert hierarchy.principal_type == "ROLE"
-
     assert sec_admin is not None
     assert sec_admin.grantee_identifier == "ACCOUNTADMIN"
+    assert sec_admin.grantee_type == "ROLE"
 
     assert sys_admin is not None
     assert sys_admin.grantee_identifier == "ACCOUNTADMIN"
+    assert sys_admin.granted_on == "ROLE"
 
 
 
@@ -52,11 +55,11 @@ def test_role_to_role_descendants(flake: PyflakeClient, assets_queue: queue.Lifo
         flake.register_asset(parent_role, assets_queue)
         flake.register_asset(rel, assets_queue)
 
-        hierarchy = flake.describe_one(RoleDescendantsDescribable(RoleDescribable(parent_role.name)), RoleDescendantsEntity)
+        descendants = flake.describe_many(RoleDescendantsDescribable(RoleDescribable(parent_role.name)), GrantEntity)
 
-        assert hierarchy is not None
-        assert len(hierarchy.descendants) == 1
-        child:GrantEntity = next((r for r in hierarchy.descendants if r.granted_identifier == child_role.name), None)
+        assert descendants is not None
+        assert len(descendants) == 1
+        child = find(descendants, lambda x: x.granted_identifier == child_role.name)
         assert child is not None
         assert child.grantee_identifier == parent_role.name
         assert child.grantee_type == "ROLE"
@@ -85,12 +88,12 @@ def test_role_to_roles_descendants(flake: PyflakeClient, assets_queue: queue.Lif
         flake.register_asset(rel_1, assets_queue)
         flake.register_asset(rel_2, assets_queue)
 
-        hierarchy = flake.describe_one(RoleDescendantsDescribable(RoleDescribable(parent_role.name)), RoleDescendantsEntity)
+        descendants = flake.describe_many(RoleDescendantsDescribable(RoleDescribable(parent_role.name)), GrantEntity)
 
-        assert hierarchy is not None
-        assert len(hierarchy.descendants) == 2
-        child_1:GrantEntity = next((r for r in hierarchy.descendants if r.granted_identifier == child_role_1.name), None)
-        child_2:GrantEntity = next((r for r in hierarchy.descendants if r.granted_identifier == child_role_2.name), None)
+        assert descendants is not None
+        assert len(descendants) == 2
+        child_1 = find(descendants, lambda x: x.granted_identifier == child_role_1.name)
+        child_2 = find(descendants, lambda x: x.granted_identifier == child_role_2.name)
 
         assert child_1 is not None
         assert child_1.grantee_identifier == parent_role.name
@@ -128,12 +131,12 @@ def test_role_to_role_and_database_role_descendants(flake: PyflakeClient, assets
         flake.register_asset(rel_1, assets_queue)
         flake.register_asset(rel_2, assets_queue)
 
-        hierarchy = flake.describe_one(RoleDescendantsDescribable(RoleDescribable(parent_role.name)), RoleDescendantsEntity)
+        descendants = flake.describe_many(RoleDescendantsDescribable(RoleDescribable(parent_role.name)), GrantEntity)
 
-        assert hierarchy is not None
-        assert len(hierarchy.descendants) == 2
-        child_1:GrantEntity = next((r for r in hierarchy.descendants if r.granted_identifier == child_role_1.name), None)
-        child_2:GrantEntity = next((r for r in hierarchy.descendants if r.granted_identifier == child_role_2.get_identifier()), None)
+        assert descendants is not None
+        assert len(descendants) == 2
+        child_1 = find(descendants, lambda x: x.granted_identifier == child_role_1.name)
+        child_2 = find(descendants, lambda x: x.granted_identifier == child_role_2.get_identifier())
 
         assert child_1 is not None
         assert child_1.grantee_identifier == parent_role.name
@@ -170,12 +173,12 @@ def test_database_role_to_database_roles_descendants(flake: PyflakeClient, asset
         flake.register_asset(rel_1, assets_queue)
         flake.register_asset(rel_2, assets_queue)
 
-        hierarchy = flake.describe_one(RoleDescendantsDescribable(DatabaseRoleDescribable(parent_role.name, parent_role.database_name)), RoleDescendantsEntity)
+        descendants = flake.describe_many(RoleDescendantsDescribable(DatabaseRoleDescribable(parent_role.name, parent_role.database_name)), GrantEntity)
 
-        assert hierarchy is not None
-        assert len(hierarchy.descendants) == 2
-        child_1:GrantEntity = next((r for r in hierarchy.descendants if r.granted_identifier == child_role_1.get_identifier()), None)
-        child_2:GrantEntity = next((r for r in hierarchy.descendants if r.granted_identifier == child_role_2.get_identifier()), None)
+        assert descendants is not None
+        assert len(descendants) == 2
+        child_1 = find(descendants, lambda x: x.granted_identifier == child_role_1.get_identifier())
+        child_2 = find(descendants, lambda x: x.granted_identifier == child_role_2.get_identifier())
 
         assert child_1 is not None
         assert child_1.grantee_identifier == parent_role.name

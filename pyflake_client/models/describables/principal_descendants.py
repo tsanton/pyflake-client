@@ -46,11 +46,7 @@ def show_direct_descendants_from_principal_py(snowpark_session, principal_type_p
                 **row.as_dict(), 
                 **{'distance_from_source': 0 } 
             })
-    return {
-        'principal_identifier': principal_identifier_py,
-        'principal_type': principal_type_py if principal_type_py != 'DATABASE ROLE' else 'DATABASE_ROLE',
-        'descendants': res
-    }
+    return res
 $$
 call show_direct_descendants_from_principal('%(s1)s', '%(s2)s');""" % {
             "s1": principal_type,
