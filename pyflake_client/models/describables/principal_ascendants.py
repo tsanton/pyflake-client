@@ -54,8 +54,8 @@ def show_all_roles_that_inherit_source_py(snowpark_session, principal_type: str,
     roles = show_grants_on_py(snowpark_session, principal_type, principal_identifier, links_removed)
     show_inheritance = []
     for role in roles:
+        result.append(role)
         if not role['grantee_name'] in roles_shown:
-            result.append(role)
             roles_shown.add(role['grantee_name'].upper())
             show_inheritance.append(role)
     for role in show_inheritance:
@@ -65,11 +65,7 @@ def show_all_roles_that_inherit_source_py(snowpark_session, principal_type: str,
 def main_py(snowpark_session, principal_type_py:str, principal_identifier_py:str):
     res = []
     show_all_roles_that_inherit_source_py(snowpark_session, principal_type_py, principal_identifier_py, 0, res)
-    return {
-        'principal_identifier': principal_identifier_py,
-        'principal_type': principal_type_py if principal_type_py != 'DATABASE ROLE' else 'DATABASE_ROLE',
-        'ascendants': res
-    }
+    return res
 $$
 call show_all_roles_that_inherit_source('%(s1)s', '%(s2)s');""" % {
             "s1": principal_type,

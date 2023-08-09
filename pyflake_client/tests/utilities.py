@@ -5,8 +5,9 @@
 
 import collections
 import queue
-from typing import Tuple
+from typing import List, Callable, Tuple, Optional, TypeVar
 import uuid
+
 from pyflake_client.models.assets.database import Database
 from pyflake_client.models.assets.role import Role
 from pyflake_client.models.assets.role_inheritance import RoleInheritance
@@ -19,6 +20,7 @@ from pyflake_client.models.enums.object_type import ObjectType
 
 from pyflake_client.client import PyflakeClient
 
+T = TypeVar("T")
 
 def compare(x, y) -> bool:
     """compare:
@@ -28,6 +30,12 @@ def compare(x, y) -> bool:
        - compare([1,2,3], [3,2,1]) -> true
     """
     return collections.Counter(x) == collections.Counter(y)
+
+def find(collection: List[T], predicate: Callable[[T], bool]) -> Optional[T]:
+    for item in collection:
+        if predicate(item):
+            return item
+    return None
 
 
 def _spawn_with_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQueue) -> Tuple[Database, Schema, Role, Role, Role]:

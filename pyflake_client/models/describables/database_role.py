@@ -13,7 +13,7 @@ from pyflake_client.models.describables.snowflake_grant_principal import (
 
 @dataclass(frozen=True)
 class DatabaseRole(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
-    """Role"""
+    """DatabaseRole"""
 
     name: str
     db_name: str

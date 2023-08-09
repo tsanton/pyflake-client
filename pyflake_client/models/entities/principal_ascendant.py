@@ -33,19 +33,3 @@ class PrincipalAscendant:
         for old_key, new_key in cls.map_key_names().items():
             data[new_key] = data.pop(old_key)
         return PrincipalAscendant(**{k: data[k] for k in cls.__dataclass_fields__})
-
-@dataclass(frozen=True)
-class PrincipalAscendants(ISnowflakeEntity):
-    """PrincipalAscendants"""
-    principal_identifier: str
-    principal_type: str #TODO: enum
-    ascendants: List[PrincipalAscendant]
-
-    @classmethod
-    def load_from_sf(cls, data: Dict[str, Any], config: Union[dacite.Config, None]) -> PrincipalAscendants:
-        ascendants = [PrincipalAscendant.load_from_sf(c) for c in data["ascendants"]]
-        return PrincipalAscendants(
-            principal_identifier=data["principal_identifier"],
-            principal_type=data["principal_type"],
-            ascendants=ascendants
-        )
