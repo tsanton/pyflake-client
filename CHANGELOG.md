@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.9.0](https://github.com/Tsanton/pyflake-client/compare/v0.8.0...v0.9.0) (2023-08-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* principal ascendants and descendants to describe_many
+
+### Features
+
+* added database roles describable ([1926794](https://github.com/Tsanton/pyflake-client/commit/1926794cf5d593f4a24684555077ca6227bb4a44))
+* find() added to test utilities ([1fbf608](https://github.com/Tsanton/pyflake-client/commit/1fbf608d9a1cd5940baac5145fd28df9d97a2ece))
+
+
+### Code Refactoring
+
+* principal ascendants and descendants to describe_many ([c8c041c](https://github.com/Tsanton/pyflake-client/commit/c8c041ca15568b4059ab9acd8d99356214c6b84a))
+
 ## [0.8.0](https://github.com/Tsanton/pyflake-client/compare/v0.7.0...v0.8.0) (2023-05-30)
 
 
