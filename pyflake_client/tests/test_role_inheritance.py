@@ -2,7 +2,6 @@
 # pylint: disable=line-too-long
 import queue
 import secrets
-import uuid
 
 import pytest
 
@@ -40,12 +39,11 @@ def test_get_role_inheritance(flake: PyflakeClient):
     assert role.granted_by == ""
 
 
-def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str):
     """test_create_role_inheritance"""
     ### Arrange ###
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
-    child_role = RoleAsset("IGT_CHILD_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
-    parent_role = RoleAsset("IGT_PARENT_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
+    child_role = RoleAsset("IGT_CHILD_ROLE", comment, RoleAsset("USERADMIN"))
+    parent_role = RoleAsset("IGT_PARENT_ROLE", comment, RoleAsset("USERADMIN"))
     try:
         w1 = flake.register_asset_async(child_role, assets_queue)
         w2 = flake.register_asset_async(parent_role, assets_queue)
@@ -69,12 +67,11 @@ def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQ
         flake.delete_assets(assets_queue)
 
 
-def test_delete_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+def test_delete_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str):
     """test_delete_role_inheritance"""
     ### Arrange ###
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
-    child_role = RoleAsset("IGT_CHILD_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
-    parent_role = RoleAsset("IGT_PARENT_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
+    child_role = RoleAsset("IGT_CHILD_ROLE", comment, RoleAsset("USERADMIN"))
+    parent_role = RoleAsset("IGT_PARENT_ROLE", comment, RoleAsset("USERADMIN"))
     relationship = RoleInheritanceAsset(child_role, parent_role)
 
     relationship_describable = RoleInheritanceDescribable(
@@ -146,11 +143,10 @@ def test_get_role_inheritance_non_existing_parent_role(flake: PyflakeClient):
 
 
 def test_show_role_to_database_role_inheritance_in_non_existing_database(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str
 ):
     """test_show_role_to_database_role_inheritance_in_non_existing_database"""
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
-    r1 = RoleAsset("TEST_SNOWPLOW_ROLE_1", snowflake_comment, RoleAsset("USERADMIN"))
+    r1 = RoleAsset("TEST_SNOWPLOW_ROLE_1", comment, RoleAsset("USERADMIN"))
     relationship_describable = RoleInheritanceDescribable(
         DatabaseRoleDescribable("I_DONT_EXIST_ROLE", "I_DONT_EXIST_EITHER_DATABASE"), RoleDescribable(r1.name)
     )
@@ -164,16 +160,15 @@ def test_show_role_to_database_role_inheritance_in_non_existing_database(
         flake.delete_assets(assets_queue)
 
 
-def test_show_role_to_database_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+def test_show_role_to_database_role_inheritance(flake: PyflakeClient, comment: str):
     """test_show_role_to_database_role_inheritance"""
     ### Arrange ###
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
-    database = DatabaseAsset("IGT_DEMO", snowflake_comment, RoleAsset("SYSADMIN"))
-    r1 = RoleAsset("TEST_SNOWPLOW_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
+    database = DatabaseAsset("IGT_DEMO", comment, RoleAsset("SYSADMIN"))
+    r1 = RoleAsset("TEST_SNOWPLOW_ROLE", comment, RoleAsset("USERADMIN"))
     dr1 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE",
         database_name=database.db_name,
-        comment=snowflake_comment,
+        comment=comment,
         owner=RoleAsset("USERADMIN"),
     )
     rel = RoleInheritanceAsset(r1, dr1)
@@ -189,17 +184,16 @@ def test_show_role_to_database_role_inheritance(flake: PyflakeClient, assets_que
 # region database role to role inheritance
 
 
-def test_show_database_role_to_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+def test_show_database_role_to_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str):
     """test_show_database_role_to_role_inheritance"""
     ### Arrange ###
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
-    database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
-    r1 = RoleAsset("TEST_SNOWPLOW_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
+    database = DatabaseAsset("IGT_DEMO", comment, owner=RoleAsset("SYSADMIN"))
+    r1 = RoleAsset("TEST_SNOWPLOW_ROLE", comment, RoleAsset("USERADMIN"))
     dr1 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE",
         database_name=database.db_name,
         owner=RoleAsset("USERADMIN"),
-        comment=snowflake_comment,
+        comment=comment,
     )
     rel = RoleInheritanceAsset(child_principal=dr1, parent_principal=r1)
 
@@ -271,9 +265,7 @@ def test_show_database_role_to_database_role_same_database_inheritance(
         flake.delete_assets(assets_queue)
 
 
-def test_show_database_role_to_database_role_cross_database_inheritance(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str
-):
+def test_show_database_role_to_database_role_cross_database_inheritance(flake: PyflakeClient, comment: str):
     """test_show_database_role_to_database_role_inheritance"""
     ### Arrange ###
     database = DatabaseAsset(f"PYFLAKE_CLIENT_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN"))
@@ -283,13 +275,13 @@ def test_show_database_role_to_database_role_cross_database_inheritance(
     dr1 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE_1",
         database_name=database.db_name,
-        comment=snowflake_comment,
+        comment=comment,
         owner=RoleAsset("USERADMIN"),
     )
     dr2 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE_2",
         database_name=database2.db_name,
-        comment=snowflake_comment,
+        comment=comment,
         owner=RoleAsset("USERADMIN"),
     )
     rel = RoleInheritanceAsset(child_principal=dr1, parent_principal=dr2)
