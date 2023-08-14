@@ -231,7 +231,7 @@ def test_show_database_role_to_role_inheritance(flake: PyflakeClient, assets_que
 
 
 def test_show_database_role_to_database_role_same_database_inheritance(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue, comment:str
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str
 ):
     """test_show_database_role_to_database_role_inheritance"""
     ### Arrange ###
@@ -272,12 +272,14 @@ def test_show_database_role_to_database_role_same_database_inheritance(
 
 
 def test_show_database_role_to_database_role_cross_database_inheritance(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue, comment:str
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str
 ):
     """test_show_database_role_to_database_role_inheritance"""
     ### Arrange ###
     database = DatabaseAsset(f"PYFLAKE_CLIENT_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN"))
-    database2 = DatabaseAsset(f"PYFLAKE_CLIENT_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN"))
+    database2 = DatabaseAsset(
+        f"PYFLAKE_CLIENT_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN")
+    )
     dr1 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE_1",
         database_name=database.db_name,

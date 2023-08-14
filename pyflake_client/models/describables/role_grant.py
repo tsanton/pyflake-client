@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Any, Callable, Dict
 
 import dacite
@@ -15,7 +14,6 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 from pyflake_client.models.describables.snowflake_grant_principal import (
     ISnowflakeGrantPrincipal,
 )
-
 from pyflake_client.models.entities.role_grant import RoleGrant as RoleGrantEntity
 from pyflake_client.models.enums.privilege import Privilege
 
@@ -38,7 +36,7 @@ class RoleGrant(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
 
     @classmethod
     def get_deserializer(cls) -> Callable[[Dict[str, Any]], RoleGrantEntity]:
-        def deserialize(data:Dict[str, Any]) -> RoleGrantEntity:
+        def deserialize(data: Dict[str, Any]) -> RoleGrantEntity:
             renaming = {
                 "grantee_name": "grantee_identifier",
                 "granted_to": "grantee_type",
@@ -46,10 +44,12 @@ class RoleGrant(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
             }
             for old_key, new_key in renaming.items():
                 data[new_key] = data.pop(old_key)
-            return dacite.from_dict(RoleGrantEntity, data, dacite.Config(type_hooks={
-                int: lambda v: int(v),
-                bool: lambda b: bool(b),
-                Privilege: lambda s: Privilege(s)
-            }))
+            return dacite.from_dict(
+                RoleGrantEntity,
+                data,
+                dacite.Config(
+                    type_hooks={int: lambda v: int(v), bool: lambda b: bool(b), Privilege: lambda s: Privilege(s)}
+                ),
+            )
 
         return deserialize

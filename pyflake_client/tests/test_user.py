@@ -10,9 +10,10 @@ from pyflake_client.models.assets.role_inheritance import (
     RoleInheritance as RoleInheritanceAsset,
 )
 from pyflake_client.models.assets.user import User as UserAsset
-from pyflake_client.models.describables.user_grant import UserGrant as UserGrantDescribable
 from pyflake_client.models.describables.user import User as UserDescribable
-from pyflake_client.models.describables.user import User as UserDescribable
+from pyflake_client.models.describables.user_grant import (
+    UserGrant as UserGrantDescribable,
+)
 from pyflake_client.models.entities.user import User as EntitiesUser
 from pyflake_client.models.entities.user_grant import UserGrant as UserGrantEntity
 

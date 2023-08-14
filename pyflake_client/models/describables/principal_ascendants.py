@@ -2,7 +2,7 @@
 # pylint: disable=consider-using-f-string
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Dict
 
 import dacite
 
@@ -16,7 +16,6 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 from pyflake_client.models.describables.snowflake_grant_principal import (
     ISnowflakeGrantPrincipal,
 )
-
 from pyflake_client.models.entities.principal_ascendant import PrincipalAscendant
 
 
@@ -87,7 +86,7 @@ call show_all_roles_that_inherit_source('%(s1)s', '%(s2)s');""" % {
 
     @classmethod
     def get_deserializer(cls) -> Callable[[Dict[str, Any]], PrincipalAscendant]:
-        def deserialize(data:Dict[str, Any]) -> PrincipalAscendant:
+        def deserialize(data: Dict[str, Any]) -> PrincipalAscendant:
             renaming = {
                 "grantee_name": "grantee_identifier",
                 "granted_to": "principal_type",
@@ -95,10 +94,16 @@ call show_all_roles_that_inherit_source('%(s1)s', '%(s2)s');""" % {
             }
             for old_key, new_key in renaming.items():
                 data[new_key] = data.pop(old_key)
-            return dacite.from_dict(PrincipalAscendant, data, dacite.Config(type_hooks={
-                int: lambda v: int(v),
-                bool: lambda b: bool(b),
-                datetime: lambda d: datetime.fromisoformat(d),
-            }))
+            return dacite.from_dict(
+                PrincipalAscendant,
+                data,
+                dacite.Config(
+                    type_hooks={
+                        int: lambda v: int(v),
+                        bool: lambda b: bool(b),
+                        datetime: lambda d: datetime.fromisoformat(d),
+                    }
+                ),
+            )
 
         return deserialize

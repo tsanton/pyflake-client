@@ -12,8 +12,10 @@ from pyflake_client.models.assets.grants.warehouse_grant import WarehouseGrant
 from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.schema import Schema as SchemaAsset
 from pyflake_client.models.assets.warehouse import Warehouse as WarehouseAsset
-from pyflake_client.models.describables.role_grant import RoleGrant as RoleGrantDescribable
 from pyflake_client.models.describables.role import Role as RoleDescribable
+from pyflake_client.models.describables.role_grant import (
+    RoleGrant as RoleGrantDescribable,
+)
 from pyflake_client.models.entities.role_grant import RoleGrant as RoleGrantEntity
 from pyflake_client.models.enums.privilege import Privilege
 

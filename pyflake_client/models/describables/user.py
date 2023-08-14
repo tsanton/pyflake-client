@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Any, Callable, Dict
 
 import dacite
@@ -11,10 +10,7 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 from pyflake_client.models.describables.snowflake_grant_principal import (
     ISnowflakeGrantPrincipal,
 )
-
-
 from pyflake_client.models.entities.user import User as UserEntity
-
 
 
 @dataclass(frozen=True)
@@ -33,10 +29,16 @@ class User(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
 
     @classmethod
     def get_deserializer(cls) -> Callable[[Dict[str, Any]], UserEntity]:
-        def deserialize(data:Dict[str, Any]) -> UserEntity:
-            return dacite.from_dict(UserEntity, data, dacite.Config(type_hooks={
-                int: lambda v: int(v),
-            }))
+        def deserialize(data: Dict[str, Any]) -> UserEntity:
+            return dacite.from_dict(
+                UserEntity,
+                data,
+                dacite.Config(
+                    type_hooks={
+                        int: lambda v: int(v),
+                    }
+                ),
+            )
 
         return deserialize
 

@@ -4,11 +4,10 @@
 import time
 from typing import TypeVar
 
-from snowflake.connector.errors import ProgrammingError
 from snowflake.snowpark import AsyncJob
-from snowflake.snowpark.row import Row
 
 T = TypeVar("T")
+
 
 class AsyncInsertJob:
     def __init__(self, original: AsyncJob):

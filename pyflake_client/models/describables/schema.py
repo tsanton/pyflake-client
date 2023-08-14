@@ -7,7 +7,6 @@ import dacite
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
 )
-
 from pyflake_client.models.entities.schema import Schema as SchemaEntity
 
 
@@ -28,9 +27,7 @@ class Schema(ISnowflakeDescribable):
 
     @classmethod
     def get_deserializer(cls) -> Callable[[Dict[str, Any]], SchemaEntity]:
-        def deserialize(data:Dict[str, Any]) -> SchemaEntity:
-            return dacite.from_dict(SchemaEntity, data, dacite.Config(type_hooks={
-                int: lambda v: int(v)
-            }))
+        def deserialize(data: Dict[str, Any]) -> SchemaEntity:
+            return dacite.from_dict(SchemaEntity, data, dacite.Config(type_hooks={int: lambda v: int(v)}))
 
         return deserialize

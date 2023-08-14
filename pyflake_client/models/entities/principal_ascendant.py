@@ -4,7 +4,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-
 from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
 
 
@@ -13,7 +12,7 @@ class PrincipalAscendant(ISnowflakeEntity):
     """PrincipalAscendant"""
 
     grantee_identifier: str
-    principal_type: str 
+    principal_type: str
     granted_identifier: str
     granted_on: str
     granted_by: str

@@ -9,6 +9,7 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 )
 from pyflake_client.models.entities.database import Database as DatabaseEntity
 
+
 @dataclass(frozen=True)
 class Database(ISnowflakeDescribable):
     """Database"""
@@ -25,9 +26,7 @@ class Database(ISnowflakeDescribable):
 
     @classmethod
     def get_deserializer(cls) -> Callable[[Dict[str, Any]], DatabaseEntity]:
-        def deserialize(data:Dict[str, Any]) -> DatabaseEntity:
-            return dacite.from_dict(DatabaseEntity, data, dacite.Config(type_hooks={
-                int: lambda v: int(v)
-            }))
+        def deserialize(data: Dict[str, Any]) -> DatabaseEntity:
+            return dacite.from_dict(DatabaseEntity, data, dacite.Config(type_hooks={int: lambda v: int(v)}))
 
         return deserialize

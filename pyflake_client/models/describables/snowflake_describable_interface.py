@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Type, TypeVar
+from typing import Any, Callable, Dict, TypeVar
 
 T = TypeVar("T")
 

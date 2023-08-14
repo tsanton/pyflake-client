@@ -74,10 +74,9 @@ class PyflakeClient:
             is_procedure=describable.is_procedure(),
             deserializer=describable.get_deserializer(),
         )
-    
+
     def insert_async(self, statement: str) -> AsyncInsertJob:
         return AsyncInsertJob(original=self._session.sql(statement).collect_nowait())
-
 
     # def merge_into(self, obj: U) -> bool:
     #     """merge_into"""

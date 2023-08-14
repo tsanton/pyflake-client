@@ -13,7 +13,9 @@ from pyflake_client.models.assets.schema import Schema as SchemaAsset
 from pyflake_client.models.describables.database_role import (
     DatabaseRole as DatabaseRoleDescribable,
 )
-from pyflake_client.models.describables.role_grant import RoleGrant as RoleGrantDescribable
+from pyflake_client.models.describables.role_grant import (
+    RoleGrant as RoleGrantDescribable,
+)
 from pyflake_client.models.entities.role_grant import RoleGrant as RoleGrantEntity
 from pyflake_client.models.enums.privilege import Privilege
 

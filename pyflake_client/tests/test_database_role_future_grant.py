@@ -47,9 +47,7 @@ def test_describe_future_grant_for_non_existing_database_role(flake: PyflakeClie
         flake.delete_assets(assets_queue)
 
 
-def test_describe_future_grant_for_database_role_in_non_existing_database(
-    flake: PyflakeClient
-):
+def test_describe_future_grant_for_database_role_in_non_existing_database(flake: PyflakeClient):
     """test_describe_future_grant_for_database_role_in_non_existing_database"""
     ### Act ###
     grants = flake.describe_async(

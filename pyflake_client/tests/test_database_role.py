@@ -63,9 +63,7 @@ def test_get_database_role_async(flake: PyflakeClient, assets_queue: queue.LifoQ
         flake.create_asset_async(role).wait()
 
         ### Act ###
-        r = flake.describe_async(RoleDescribable(name=role.name, db_name=database.db_name)).deserialize_one(
-            RoleEntity
-        )
+        r = flake.describe_async(RoleDescribable(name=role.name, db_name=database.db_name)).deserialize_one(RoleEntity)
 
         ### Assert ###
         assert r is not None

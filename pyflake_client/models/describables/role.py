@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Dict
 
 import dacite
 
@@ -10,8 +10,8 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 from pyflake_client.models.describables.snowflake_grant_principal import (
     ISnowflakeGrantPrincipal,
 )
-
 from pyflake_client.models.entities.role import Role as RoleEntity
+
 
 @dataclass(frozen=True)
 class Role(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
@@ -29,10 +29,8 @@ class Role(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
 
     @classmethod
     def get_deserializer(cls) -> Callable[[Dict[str, Any]], RoleEntity]:
-        def deserialize(data:Dict[str, Any]) -> RoleEntity:
-            return dacite.from_dict(RoleEntity, data, dacite.Config(type_hooks={
-                int: lambda v: int(v)
-            }))
+        def deserialize(data: Dict[str, Any]) -> RoleEntity:
+            return dacite.from_dict(RoleEntity, data, dacite.Config(type_hooks={int: lambda v: int(v)}))
 
         return deserialize
 

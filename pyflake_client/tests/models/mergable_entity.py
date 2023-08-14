@@ -36,7 +36,7 @@ TABLE_COLUMN_DEFINITION = [
 class MergableEntity(ISnowflakeMergable):
     """MergableEntity"""
 
-    def configure(self, db_name:str, schema_name:str, table_name: str):
+    def configure(self, db_name: str, schema_name: str, table_name: str):
         self._db_name = db_name
         self._schema_name = schema_name
         self._table_name = table_name

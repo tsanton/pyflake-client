@@ -27,7 +27,9 @@ class AsyncDescribeJob:
                 raise TimeoutError(f"Job did not complete after {timeout} seconds.")
             time.sleep(0.1)
 
-    def deserialize_one(self, _: Type[T], deserializer: Union[Callable[[Dict[str, Any]], T], None] = None) -> Union[T, None]:
+    def deserialize_one(
+        self, _: Type[T], deserializer: Union[Callable[[Dict[str, Any]], T], None] = None
+    ) -> Union[T, None]:
         if self._deserializer is None and deserializer is None:
             raise ValueError("cannot deserialize_one without any deserializer")
         deserializer_func = deserializer if deserializer is not None else self._deserializer
@@ -63,9 +65,7 @@ class AsyncDescribeJob:
             if data in ({}, []) or data is None:
                 return []
             return [deserializer_func(x) for x in data]
-        return [
-            deserializer_func(x.as_dict()) for x in rows
-        ]
+        return [deserializer_func(x.as_dict()) for x in rows]
 
     def is_done(self) -> bool:
         return self._original.is_done()
