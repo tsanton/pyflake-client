@@ -1,4 +1,4 @@
-"""procedure"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 
 from dataclasses import dataclass

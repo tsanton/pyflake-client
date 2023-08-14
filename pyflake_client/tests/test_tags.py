@@ -1,20 +1,23 @@
+# -*- coding: utf-8 -*-
 import queue
 import uuid
 
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as DatabaseAsset
+from pyflake_client.models.assets.database_role import DatabaseRole as DatabaseRoleAsset
+from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.role_inheritance import (
+    RoleInheritance as RoleInheritanceAsset,
+)
 from pyflake_client.models.assets.schema import Schema as SchemaAsset
 from pyflake_client.models.assets.tag import Tag as TagAsset
-from pyflake_client.models.assets.role import Role as RoleAsset
-from pyflake_client.models.assets.database_role import DatabaseRole as DatabaseRoleAsset
-from pyflake_client.models.assets.role_inheritance import RoleInheritance as RoleInheritanceAsset
 from pyflake_client.models.describables.tag import Tag as DescribablesTag
 from pyflake_client.models.entities.tag import Tag as EntitiesTag
 
 
 def test_describe_non_existing_tag(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     ### Arrange ###
-    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     schema = SchemaAsset(
         db_name=database.db_name,
@@ -32,7 +35,8 @@ def test_describe_non_existing_tag(flake: PyflakeClient, assets_queue: queue.Lif
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 tag_name="I_DONT_EXIST_TAG",
-            )).deserialize_one(EntitiesTag)
+            )
+        ).deserialize_one(EntitiesTag)
         ### Assert ###
         assert tag is None
     finally:
@@ -42,7 +46,7 @@ def test_describe_non_existing_tag(flake: PyflakeClient, assets_queue: queue.Lif
 
 def test_create_tag_without_tag_values(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     ### Arrange ###
-    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     schema = SchemaAsset(
         db_name=database.db_name,
@@ -68,7 +72,8 @@ def test_create_tag_without_tag_values(flake: PyflakeClient, assets_queue: queue
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 tag_name=tag.tag_name,
-            )).deserialize_one(EntitiesTag)
+            )
+        ).deserialize_one(EntitiesTag)
         ### Assert ###
         assert sf_tag is not None
         assert sf_tag.name == tag.tag_name
@@ -80,7 +85,7 @@ def test_create_tag_without_tag_values(flake: PyflakeClient, assets_queue: queue
 
 def test_create_tag_with_tag_values(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     ### Arrange ###
-    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     schema = SchemaAsset(
         db_name=database.db_name,
@@ -106,7 +111,8 @@ def test_create_tag_with_tag_values(flake: PyflakeClient, assets_queue: queue.Li
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 tag_name=tag.tag_name,
-            )).deserialize_one(EntitiesTag)
+            )
+        ).deserialize_one(EntitiesTag)
         ### Assert ###
         assert sf_tag is not None
         assert sf_tag.name == tag.tag_name
@@ -118,11 +124,9 @@ def test_create_tag_with_tag_values(flake: PyflakeClient, assets_queue: queue.Li
         flake.delete_assets(asset_queue=assets_queue)
 
 
-
-
 def test_create_tag_with_database_role_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     ### Arrange ###
-    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     sys_admin = RoleAsset("SYSADMIN")
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     db_role = DatabaseRoleAsset(
@@ -131,7 +135,9 @@ def test_create_tag_with_database_role_owner(flake: PyflakeClient, assets_queue:
         comment=snowflake_comment,
         owner=RoleAsset("USERADMIN"),
     )
-    rel = RoleInheritanceAsset(child_principal=db_role, parent_principal=sys_admin) #So we can delete the schema in the finally
+    rel = RoleInheritanceAsset(
+        child_principal=db_role, parent_principal=sys_admin
+    )  # So we can delete the schema in the finally
     schema = SchemaAsset(
         db_name=database.db_name,
         schema_name="TEST_SCHEMA",
@@ -154,9 +160,11 @@ def test_create_tag_with_database_role_owner(flake: PyflakeClient, assets_queue:
         w3 = flake.register_asset_async(rel, asset_queue=assets_queue)
         w4 = flake.register_asset_async(tag, asset_queue=assets_queue)
         flake.wait_all([w3, w4])
-        
+
         ### Act ###
-        sf_tag = flake.describe_async(DescribablesTag(database_name=database.db_name,schema_name=schema.schema_name,tag_name=tag.tag_name)).deserialize_one(EntitiesTag)
+        sf_tag = flake.describe_async(
+            DescribablesTag(database_name=database.db_name, schema_name=schema.schema_name, tag_name=tag.tag_name)
+        ).deserialize_one(EntitiesTag)
 
         ### Assert ###
         assert sf_tag is not None

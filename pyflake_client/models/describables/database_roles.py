@@ -1,4 +1,4 @@
-"""role"""
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 
 from dacite import Config
@@ -11,6 +11,7 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 @dataclass(frozen=True)
 class DatabaseRoles(ISnowflakeDescribable):
     """DatabaseRoles"""
+
     db_name: str
 
     def get_describe_statement(self) -> str:

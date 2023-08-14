@@ -1,16 +1,22 @@
-"""table"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 from dataclasses import dataclass, field
 from typing import List, Union
 
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.assets.table_columns import Column, ClassificationTag
-from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
-from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
+from pyflake_client.models.assets.snowflake_principal_interface import (
+    ISnowflakePrincipal,
+)
+from pyflake_client.models.assets.table_columns import ClassificationTag, Column
+from pyflake_client.models.describables.snowflake_grant_principal import (
+    ISnowflakeGrantPrincipal,
+)
+
 
 @dataclass(frozen=True)
 class Table(ISnowflakeAsset, ISnowflakeGrantPrincipal):
     """Table"""
+
     db_name: str
     schema_name: str
     table_name: str
@@ -29,7 +35,7 @@ class Table(ISnowflakeAsset, ISnowflakeGrantPrincipal):
             table_definition += f", PRIMARY KEY({','.join(primary_keys)})"
 
         table_definition += ");"
-        
+
         if self.owner is not None:
             table_definition += f"GRANT OWNERSHIP ON TABLE {self.db_name}.{self.schema_name}.{self.table_name} TO {self.owner.get_snowflake_type()} {self.owner.get_identifier()};"
 

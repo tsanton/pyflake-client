@@ -1,21 +1,19 @@
-"""test_role"""
+# -*- coding: utf-8 -*-
 import queue
 import uuid
-from datetime import date
-
 
 from pyflake_client.client import PyflakeClient
+from pyflake_client.models.assets.database import Database as DatabaseAsset
 from pyflake_client.models.assets.database_role import DatabaseRole
+from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.describables.database_roles import DatabaseRoles
 from pyflake_client.models.entities.role import Role as EntitiesRole
-from pyflake_client.models.assets.role import Role as RoleAsset
-from pyflake_client.models.assets.database import Database as DatabaseAsset
 from pyflake_client.tests.utilities import find
 
 
 def test_get_single_database_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role"""
-    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     ### Arrange ###
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     role: DatabaseRole = DatabaseRole(
@@ -45,7 +43,7 @@ def test_get_single_database_role(flake: PyflakeClient, assets_queue: queue.Lifo
 
 def test_get_database_roles(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role"""
-    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     ### Arrange ###
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     role_1: DatabaseRole = DatabaseRole(
@@ -86,10 +84,9 @@ def test_get_database_roles(flake: PyflakeClient, assets_queue: queue.LifoQueue)
         flake.delete_assets(assets_queue)
 
 
-
 def test_get_database_role_none_exist(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role"""
-    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     ### Arrange ###
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
 
@@ -105,10 +102,9 @@ def test_get_database_role_none_exist(flake: PyflakeClient, assets_queue: queue.
         flake.delete_assets(assets_queue)
 
 
-
 def test_get_database_role_async(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role"""
-    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     ### Arrange ###
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
     role: DatabaseRole = DatabaseRole(

@@ -1,9 +1,10 @@
-from abc import abstractmethod, ABC
+# -*- coding: utf-8 -*-
+import re
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import date, time, datetime
+from datetime import date, datetime, time
 from decimal import Decimal
 from typing import List, Union
-import re
 
 
 @dataclass
@@ -58,9 +59,7 @@ class Column(ABC):
         Must begin with a letter or underscore.
         Must be less than the maximum length of 251 characters"""
         if re.match(r"^[a-zA-Z_][a-zA-Z0-9_]{0,250}$", self.name) is None:
-            raise ValueError(
-                "Invalid name, column name must match ^[a-zA-Z_][a-zA-Z0-9_]{0,250}$"
-            )
+            raise ValueError("Invalid name, column name must match ^[a-zA-Z_][a-zA-Z0-9_]{0,250}$")
 
         # TODO : how can we check if the foreign_key is valid? probably not here ...
         self.post_init()
@@ -245,12 +244,8 @@ class Timestamp(Column):
     def post_init(self) -> None:
         if self.precision < 0 or self.precision > 10:
             raise ValueError("TIMESTAMP precision must be between 0 and 9")
-        if self.default_value is not None and (
-            self.default_value.year > 9999 or self.default_value.year < 1582
-        ):
-            raise ValueError(
-                f"TIMESTAMP year must be between 1582 and 9999 (was {self.default_value.year})"
-            )
+        if self.default_value is not None and (self.default_value.year > 9999 or self.default_value.year < 1582):
+            raise ValueError(f"TIMESTAMP year must be between 1582 and 9999 (was {self.default_value.year})")
 
     def get_definition(self) -> str:
         definition = f"{self.name} TIMESTAMP({self.precision})"
@@ -259,7 +254,9 @@ class Timestamp(Column):
         if self.unique:
             definition += " UNIQUE"
         if self.default_value is not None:
-            definition += f" DEFAULT '{self.default_value.strftime('%Y-%m-%dT%H:%M:%S.%f')}'::TIMESTAMP({self.precision})"
+            definition += (
+                f" DEFAULT '{self.default_value.strftime('%Y-%m-%dT%H:%M:%S.%f')}'::TIMESTAMP({self.precision})"
+            )
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
 

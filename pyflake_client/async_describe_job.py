@@ -1,4 +1,4 @@
-"""pyflake_client"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 # pylint: disable=invalid-name
 import json
@@ -13,6 +13,7 @@ from snowflake.snowpark.row import Row
 from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
 
 T = TypeVar("T", bound=ISnowflakeEntity)
+
 
 class AsyncDescribeJob:
     def __init__(self, original: AsyncJob, is_procedure: bool, config: Union[dacite.Config, None]):
@@ -30,7 +31,7 @@ class AsyncDescribeJob:
         print(res)
 
     def deserialize_one(self, entity: Type[T], config: Union[dacite.Config, None] = None) -> Union[T, None]:
-        data:Dict[str, Any] = {}
+        data: Dict[str, Any] = {}
         try:
             rows: List[Row] = self._original.result()
         except ProgrammingError as e:
@@ -59,10 +60,12 @@ class AsyncDescribeJob:
             if data in ({}, []):
                 return []
             return [entity.deserialize(data=x, config=config if config is not None else self._config) for x in data]
-        return [entity.deserialize(data=x.as_dict(), config=config if config is not None else self._config) for x in rows]
+        return [
+            entity.deserialize(data=x.as_dict(), config=config if config is not None else self._config) for x in rows
+        ]
 
     def is_done(self) -> bool:
         return self._original.is_done()
-    
+
     def cancel(self) -> None:
         return self._original.cancel()

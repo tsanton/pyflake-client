@@ -1,21 +1,19 @@
-"""test_mergeable"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 # pylint: disable=invalid-name
 # pylint: disable=too-many-locals
 
 
-from datetime import date
 import queue
+from datetime import date
 
-from pyflake_client.models.assets.table import Table
 from pyflake_client.client import PyflakeClient
-from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.table import Table
 from pyflake_client.tests.models.mergable_entity import (
-    TABLE_NAME,
     TABLE_COLUMN_DEFINITION,
+    TABLE_NAME,
     MergableEntity,
 )
-
 from pyflake_client.tests.utilities import _spawn_with_rwc_privileges
 
 

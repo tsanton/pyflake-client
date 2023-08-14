@@ -1,4 +1,4 @@
-"""test_database"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 import queue
 import uuid
@@ -7,13 +7,12 @@ from datetime import date
 import pytest
 
 from pyflake_client.client import PyflakeClient
-
 from pyflake_client.models.assets.database import Database as DatabaseAsset
-from pyflake_client.models.entities.database import Database as DatabaseEntity
-from pyflake_client.models.describables.database import Database as DatabaseDescribable
-
-from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.database_role import DatabaseRole as DatabaseRoleAsset
+from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.describables.database import Database as DatabaseDescribable
+from pyflake_client.models.entities.database import Database as DatabaseEntity
+
 
 def test_get_database(flake: PyflakeClient):
     """test_get_database"""
@@ -35,7 +34,8 @@ def test_get_database_that_does_not_exist(flake: PyflakeClient):
     ### Assert ###
     assert database is None
 
-def test_create_database_with_role_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue, comment:str):
+
+def test_create_database_with_role_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str):
     """test_create_database"""
 
     ### Arrange ###
@@ -61,4 +61,11 @@ def test_create_database_with_role_owner(flake: PyflakeClient, assets_queue: que
 def test_create_database_with_database_role_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_database_with_database_role_owner"""
     with pytest.raises(NotImplementedError):
-        flake.register_asset_async(DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=DatabaseRoleAsset("DATABASE_ROLE", "CANT_OWN_DATABASES")), assets_queue).wait()
+        flake.register_asset_async(
+            DatabaseAsset(
+                "IGT_DEMO",
+                f"pyflake_client_test_{uuid.uuid4()}",
+                owner=DatabaseRoleAsset("DATABASE_ROLE", "CANT_OWN_DATABASES"),
+            ),
+            assets_queue,
+        ).wait()

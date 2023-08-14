@@ -1,4 +1,4 @@
-"""snowflake_asset_interface"""
+# -*- coding: utf-8 -*-
 from abc import ABC, abstractmethod
 
 

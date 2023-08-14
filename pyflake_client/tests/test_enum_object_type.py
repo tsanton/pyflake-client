@@ -1,4 +1,4 @@
-"""object_type_test"""
+# -*- coding: utf-8 -*-
 
 from pyflake_client.models.enums.object_type import ObjectType
 

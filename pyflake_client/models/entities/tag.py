@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Union
@@ -19,9 +21,7 @@ class Tag(ISnowflakeEntity):
     created_on: datetime
 
     @classmethod
-    def deserialize(
-        cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None
-    ) -> Tag:
+    def deserialize(cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None) -> Tag:
         return Tag(
             database_name=data["database_name"],
             schema_name=data["schema_name"],

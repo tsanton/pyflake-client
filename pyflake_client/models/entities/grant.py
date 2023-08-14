@@ -1,5 +1,6 @@
-"""grant"""
+# -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any, Dict, Union
 
@@ -12,15 +13,15 @@ from pyflake_client.models.enums.privilege import Privilege
 @dataclass(frozen=True)
 class Grant(ISnowflakeEntity):
     """Grant"""
+
     grantee_identifier: str
-    grantee_type: str  #TODO: Enum?
+    grantee_type: str  # TODO: Enum?
     granted_on: str
     granted_identifier: str
     privilege: Privilege
-    grant_option: str #TODO: Bool
+    grant_option: str  # TODO: Bool
     granted_by: str
     created_on: str  # TODO: datetime, not string.
-
 
     @staticmethod
     def map_key_names() -> Dict[str, str]:

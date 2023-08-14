@@ -1,8 +1,7 @@
-"""test_role"""
+# -*- coding: utf-8 -*-
 import queue
 import uuid
 from datetime import date
-
 
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.role import Role as RoleAsset

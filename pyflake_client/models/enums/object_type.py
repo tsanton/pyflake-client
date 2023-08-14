@@ -1,9 +1,10 @@
-"""object_type"""
+# -*- coding: utf-8 -*-
 from enum import Enum
 
 
 class ObjectType(str, Enum):
     """ObjectType"""
+
     TABLE = "TABLE"
     VIEW = "VIEW"
     MATVIEW = "MATVIEW"

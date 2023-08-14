@@ -1,8 +1,8 @@
-# **Pyflake Client** 
+# Pyflake Client
 
 A testing utility to deterministically test snowflake implementations
 
-## **Install**
+## Install
 
 ```sh
 # From master

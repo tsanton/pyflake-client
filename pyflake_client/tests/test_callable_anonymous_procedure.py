@@ -1,15 +1,16 @@
-"""test_procedures"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 # pylint: disable=invalid-name
 # pylint: disable=too-many-locals
 
 import queue
 
-from pyflake_client.models.enums.column_type import ColumnType
-from pyflake_client.models.executables.anonymous_procedure import AnonymousProcedure as AnonymousProcedureExec
-from pyflake_client.models.executables.procedure_arg import ProcedureArg
 from pyflake_client.client import PyflakeClient
-
+from pyflake_client.models.enums.column_type import ColumnType
+from pyflake_client.models.executables.anonymous_procedure import (
+    AnonymousProcedure as AnonymousProcedureExec,
+)
+from pyflake_client.models.executables.procedure_arg import ProcedureArg
 
 # from pyflake_client.tests.utilities import _spawn_with_rwc_privileges
 
@@ -141,10 +142,14 @@ def main_py(snowpark_session, greeting_py:str, name_py:str):
     return f'{greeting_py} {name_py}'
 $$
     """
-    proc_exec = AnonymousProcedureExec("anonymous_procedure", sql, [
-        ProcedureArg(1, ColumnType.VARCHAR, "Oh hello"),
-        ProcedureArg(1, ColumnType.VARCHAR, "Tullebukk"),
-    ])
+    proc_exec = AnonymousProcedureExec(
+        "anonymous_procedure",
+        sql,
+        [
+            ProcedureArg(1, ColumnType.VARCHAR, "Oh hello"),
+            ProcedureArg(1, ColumnType.VARCHAR, "Tullebukk"),
+        ],
+    )
 
     try:
         ### Act ###

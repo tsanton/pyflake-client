@@ -1,4 +1,4 @@
-"""pyflake_client"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 # pylint: disable=invalid-name
 import queue
@@ -10,15 +10,15 @@ from snowflake.snowpark import Session
 from pyflake_client.async_asset_job import AsyncAssetJob, AsyncAwaitable
 from pyflake_client.async_describe_job import AsyncDescribeJob
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
-from pyflake_client.models.mergeables.snowflake_mergable_interface import ISnowflakeMergable
-
-
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
+from pyflake_client.models.mergeables.snowflake_mergable_interface import (
+    ISnowflakeMergable,
+)
 
 U = TypeVar("U", bound=ISnowflakeMergable)
 V = TypeVar("V")
-
-
 
 
 class PyflakeClient:
@@ -28,7 +28,6 @@ class PyflakeClient:
         self._conn: SnowflakeConnection = conn
         self._session = Session.builder.config("connection", conn).create()
 
-    
     def wait_all(self, waiters: List[AsyncAwaitable], timeout: int = 60) -> None:
         for waiter in waiters:
             waiter.wait()
@@ -56,7 +55,6 @@ class PyflakeClient:
     def create_asset_async(self, obj: ISnowflakeAsset) -> AsyncAssetJob:
         """create_asset"""
         return self._create_asset_async(obj, None)
-        
 
     def register_asset_async(self, obj: ISnowflakeAsset, asset_queue: queue.LifoQueue) -> AsyncAssetJob:
         """register_asset"""
@@ -66,13 +64,7 @@ class PyflakeClient:
         """create_asset"""
         cur = self._conn.cursor()
         cur.execute(obj.get_create_statement().strip(), num_statements=0, _exec_async=True)
-        return AsyncAssetJob(
-            conn=self._conn,
-            cursor=cur,
-            query_id=cur.sfqid,
-            asset=obj,
-            queue=asset_queue
-        )
+        return AsyncAssetJob(conn=self._conn, cursor=cur, query_id=cur.sfqid, asset=obj, queue=asset_queue)
 
     def delete_asset_async(self, obj: ISnowflakeAsset) -> AsyncAssetJob:
         """delete_asset"""
@@ -86,7 +78,7 @@ class PyflakeClient:
     def _delete_asset_async(self, obj: ISnowflakeAsset) -> AsyncAssetJob:
         """delete_asset"""
         return AsyncDescribeJob(
-            original=self._session.sql(obj.get_delete_statement()).collect_nowait(), 
+            original=self._session.sql(obj.get_delete_statement()).collect_nowait(),
             is_procedure=False,
             config=None,
         )
@@ -94,7 +86,7 @@ class PyflakeClient:
     def describe_async(self, describable: ISnowflakeDescribable) -> AsyncDescribeJob:
         """The ISnowflakeDescribable must contain a single statement query (1x';')"""
         return AsyncDescribeJob(
-            original=self._session.sql(describable.get_describe_statement()).collect_nowait(), 
+            original=self._session.sql(describable.get_describe_statement()).collect_nowait(),
             is_procedure=describable.is_procedure(),
             config=describable.get_dacite_config(),
         )

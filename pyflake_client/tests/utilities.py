@@ -1,35 +1,37 @@
-"""utilities"""
+# -*- coding: utf-8 -*-
 # pylint: disable=invalid-name
 # pylint: disable=line-too-long
 # pylint: disable=too-many-locals
 
 import collections
 import queue
-from typing import List, Callable, Tuple, Optional, TypeVar
 import uuid
+from typing import Callable, List, Optional, Tuple, TypeVar
 
+from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database
+from pyflake_client.models.assets.grant_action import GrantAction
+from pyflake_client.models.assets.grants.schema_object_future_grant import (
+    SchemaObjectFutureGrant,
+)
 from pyflake_client.models.assets.role import Role
 from pyflake_client.models.assets.role_inheritance import RoleInheritance
 from pyflake_client.models.assets.schema import Schema
-from pyflake_client.models.assets.grant_action import GrantAction
-from pyflake_client.models.assets.grants.schema_object_future_grant import SchemaObjectFutureGrant
-
-from pyflake_client.models.enums.privilege import Privilege
 from pyflake_client.models.enums.object_type import ObjectType
-
-from pyflake_client.client import PyflakeClient
+from pyflake_client.models.enums.privilege import Privilege
 
 T = TypeVar("T")
 
+
 def compare(x, y) -> bool:
     """compare:
-       - compare([1,2,3], [1,2,3,3]) -> false
-       - compare([1,2,3], [1,2,4]) -> false
-       - compare([1,2,3], [1,2,3]) -> true
-       - compare([1,2,3], [3,2,1]) -> true
+    - compare([1,2,3], [1,2,3,3]) -> false
+    - compare([1,2,3], [1,2,4]) -> false
+    - compare([1,2,3], [1,2,3]) -> true
+    - compare([1,2,3], [3,2,1]) -> true
     """
     return collections.Counter(x) == collections.Counter(y)
+
 
 def find(collection: List[T], predicate: Callable[[T], bool]) -> Optional[T]:
     for item in collection:
@@ -38,7 +40,9 @@ def find(collection: List[T], predicate: Callable[[T], bool]) -> Optional[T]:
     return None
 
 
-def _spawn_with_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQueue) -> Tuple[Database, Schema, Role, Role, Role]:
+def _spawn_with_rwc_privileges(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue
+) -> Tuple[Database, Schema, Role, Role, Role]:
     """bootstrap utility function"""
     snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     db_name = "IGT_DEMO"
@@ -57,19 +61,39 @@ def _spawn_with_rwc_privileges(flake: PyflakeClient, assets_queue: queue.LifoQue
     r4 = RoleInheritance(rwc, sys_admin_role)
     s: Schema = Schema(db_name=d.db_name, schema_name=schema_name, comment=snowflake_comment, owner=Role(rwc.name))
 
-    r_table =  [Privilege.SELECT, Privilege.REFERENCES]
+    r_table = [Privilege.SELECT, Privilege.REFERENCES]
     rw_table = [Privilege.INSERT, Privilege.UPDATE, Privilege.DELETE, Privilege.TRUNCATE]
     r_procedure = [Privilege.USAGE]
-    
+
     # rw_procedure = []
     rwcp = [Privilege.OWNERSHIP]
-    table_privilege_r = GrantAction(r, SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.TABLE), r_table)
-    table_privilege_rw = GrantAction(rw, SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.TABLE), rw_table)
-    table_privilege_rwc = GrantAction(rwc, SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.TABLE), rwcp)
+    table_privilege_r = GrantAction(
+        r,
+        SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.TABLE),
+        r_table,
+    )
+    table_privilege_rw = GrantAction(
+        rw,
+        SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.TABLE),
+        rw_table,
+    )
+    table_privilege_rwc = GrantAction(
+        rwc,
+        SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.TABLE),
+        rwcp,
+    )
 
-    procedure_privilege_r = GrantAction(r, SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.PROCEDURE), r_procedure)
+    procedure_privilege_r = GrantAction(
+        r,
+        SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.PROCEDURE),
+        r_procedure,
+    )
     # procedure_privilege_rw = GrantAction(rw, SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.PROCEDURE), rw_procedure)
-    procedure_privilege_rwc = GrantAction(rwc, SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.PROCEDURE), rwcp)
+    procedure_privilege_rwc = GrantAction(
+        rwc,
+        SchemaObjectFutureGrant(database_name=d.db_name, schema_name=s.schema_name, grant_target=ObjectType.PROCEDURE),
+        rwcp,
+    )
     try:
         flake.register_asset(db_sys_admin, assets_queue)
         flake.register_asset(db_usr_admin, assets_queue)

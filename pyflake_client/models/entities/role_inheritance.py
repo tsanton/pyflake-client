@@ -1,5 +1,6 @@
-"""role_inheritance"""
+# -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any, Dict, Union
 
@@ -11,15 +12,15 @@ from pyflake_client.models.entities.snowflake_entity_interface import ISnowflake
 @dataclass(frozen=True)
 class RoleInheritance(ISnowflakeEntity):
     """RoleInheritance"""
+
     principal_identifier: str
     principal_type: str
     inherited_role_identifier: str
-    inherited_role_type: str #TODO: enum?
-    privilege: str #TODO: enum
-    grant_option: str #TODO: Boolean
+    inherited_role_type: str  # TODO: enum?
+    privilege: str  # TODO: enum
+    grant_option: str  # TODO: Boolean
     granted_by: str
     created_on: str  # TODO: datetime, not string. It's pyflake_client.describe() with json.loads() that fails this
-
 
     @staticmethod
     def map_key_names() -> Dict[str, str]:

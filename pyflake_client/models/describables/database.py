@@ -1,4 +1,4 @@
-"""database"""
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 from typing import Union
 
@@ -25,8 +25,4 @@ class Database(ISnowflakeDescribable):
 
     def get_dacite_config(self) -> Union[dacite.Config, None]:
         """get_dacite_config"""
-        return dacite.Config(
-            type_hooks={
-                int: lambda v: int(v)
-            }
-        )
+        return dacite.Config(type_hooks={int: lambda v: int(v)})

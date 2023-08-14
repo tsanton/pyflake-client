@@ -1,10 +1,13 @@
-"""database_role"""
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 from typing import Union
 
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
+from pyflake_client.models.assets.snowflake_principal_interface import (
+    ISnowflakePrincipal,
+)
 from pyflake_client.models.enums.principal import Principal
+
 
 @dataclass(frozen=True)
 class DatabaseRole(ISnowflakeAsset, ISnowflakePrincipal):
@@ -34,6 +37,6 @@ class DatabaseRole(ISnowflakeAsset, ISnowflakePrincipal):
 
     def get_identifier(self) -> str:
         return f"{self.database_name}.{self.name}"
-    
+
     def get_snowflake_type(self) -> Principal:
         return Principal.DATABASE_ROLE

@@ -1,4 +1,4 @@
-"""test_role_inheritance"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 import queue
 import uuid
@@ -6,18 +6,23 @@ import uuid
 import pytest
 
 from pyflake_client.client import PyflakeClient
-
-
 from pyflake_client.models.assets.database import Database as DatabaseAsset
-from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.database_role import DatabaseRole as DatabaseRoleAsset
-from pyflake_client.models.assets.role_inheritance import RoleInheritance as RoleInheritanceAsset
-
-from pyflake_client.models.describables.role_inheritance import RoleInheritance as RoleInheritanceDescribable
+from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.role_inheritance import (
+    RoleInheritance as RoleInheritanceAsset,
+)
+from pyflake_client.models.describables.database_role import (
+    DatabaseRole as DatabaseRoleDescribable,
+)
 from pyflake_client.models.describables.role import Role as RoleDescribable
-from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
+from pyflake_client.models.describables.role_inheritance import (
+    RoleInheritance as RoleInheritanceDescribable,
+)
+from pyflake_client.models.entities.role_inheritance import (
+    RoleInheritance as RoleInheritanceEntity,
+)
 
-from pyflake_client.models.entities.role_inheritance import RoleInheritance as RoleInheritanceEntity
 
 def test_get_role_inheritance(flake: PyflakeClient):
     """test_get_role_inheritance"""
@@ -37,7 +42,7 @@ def test_get_role_inheritance(flake: PyflakeClient):
 def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_role_inheritance"""
     ### Arrange ###
-    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     child_role = RoleAsset("IGT_CHILD_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
     parent_role = RoleAsset("IGT_PARENT_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
     try:
@@ -66,27 +71,29 @@ def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQ
 def test_delete_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_delete_role_inheritance"""
     ### Arrange ###
-    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     child_role = RoleAsset("IGT_CHILD_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
     parent_role = RoleAsset("IGT_PARENT_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
     relationship = RoleInheritanceAsset(child_role, parent_role)
 
-    relationship_describable = RoleInheritanceDescribable(RoleDescribable(child_role.name), RoleDescribable(parent_role.name))
+    relationship_describable = RoleInheritanceDescribable(
+        RoleDescribable(child_role.name), RoleDescribable(parent_role.name)
+    )
 
     try:
         w1 = flake.register_asset_async(child_role, assets_queue)
         w2 = flake.register_asset_async(parent_role, assets_queue)
         flake.wait_all([w1, w2])
         flake.create_asset_async(relationship).wait()
-        new_rel: RoleInheritanceEntity = flake.describe_async(
-            relationship_describable
-        ).deserialize_one(RoleInheritanceEntity)
+        new_rel: RoleInheritanceEntity = flake.describe_async(relationship_describable).deserialize_one(
+            RoleInheritanceEntity
+        )
 
         ### Act ###
         flake.delete_asset_async(relationship).wait()
-        del_rel: RoleInheritanceEntity = flake.describe_async(
-            relationship_describable
-        ).deserialize_one(RoleInheritanceEntity)
+        del_rel: RoleInheritanceEntity = flake.describe_async(relationship_describable).deserialize_one(
+            RoleInheritanceEntity
+        )
 
         ### Assert ###
         assert del_rel is None
@@ -105,10 +112,7 @@ def test_get_non_existing_role_inheritance(flake: PyflakeClient):
     """test_get_non_existing_role_inheritance: both roles exists, but ACCOUNTADMIN is not granted to SYSADMIN; it's the other way around"""
     ### Act ###
     role: RoleInheritanceEntity = flake.describe_async(
-        RoleInheritanceDescribable(
-            RoleDescribable("ACCOUNTADMIN"), 
-            RoleDescribable("SYSADMIN")
-        )
+        RoleInheritanceDescribable(RoleDescribable("ACCOUNTADMIN"), RoleDescribable("SYSADMIN"))
     ).deserialize_one(RoleInheritanceEntity)
 
     ### Assert ###
@@ -119,10 +123,7 @@ def test_get_role_inheritance_non_existing_child_role(flake: PyflakeClient):
     """test_get_role_inheritance_non_existing_child_role"""
     ### Act ###
     role: RoleInheritanceEntity = flake.describe_async(
-        RoleInheritanceDescribable(
-            RoleDescribable("I_MOST_CERTAINLY_DO_NOT_EXIST"), 
-            RoleDescribable("SYSADMIN")
-        )
+        RoleInheritanceDescribable(RoleDescribable("I_MOST_CERTAINLY_DO_NOT_EXIST"), RoleDescribable("SYSADMIN"))
     ).deserialize_one(RoleInheritanceEntity)
 
     ### Assert ###
@@ -133,22 +134,25 @@ def test_get_role_inheritance_non_existing_parent_role(flake: PyflakeClient):
     """test_get_role_inheritance_non_existing_parent_role"""
     ### Act ###
     role: RoleInheritanceEntity = flake.describe_async(
-        RoleInheritanceDescribable(
-            RoleDescribable("SYSADMIN"), 
-            RoleDescribable("I_MOST_CERTAINLY_DO_NOT_EXIST")
-        )
+        RoleInheritanceDescribable(RoleDescribable("SYSADMIN"), RoleDescribable("I_MOST_CERTAINLY_DO_NOT_EXIST"))
     ).deserialize_one(RoleInheritanceEntity)
 
     ### Assert ###
     assert role is None
 
-#region role to database role inheritance
 
-def test_show_role_to_database_role_inheritance_in_non_existing_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+# region role to database role inheritance
+
+
+def test_show_role_to_database_role_inheritance_in_non_existing_database(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue
+):
     """test_show_role_to_database_role_inheritance_in_non_existing_database"""
     snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     r1 = RoleAsset("TEST_SNOWPLOW_ROLE_1", snowflake_comment, RoleAsset("USERADMIN"))
-    relationship_describable = RoleInheritanceDescribable(DatabaseRoleDescribable("I_DONT_EXIST_ROLE", "I_DONT_EXIST_EITHER_DATABASE"), RoleDescribable(r1.name))
+    relationship_describable = RoleInheritanceDescribable(
+        DatabaseRoleDescribable("I_DONT_EXIST_ROLE", "I_DONT_EXIST_EITHER_DATABASE"), RoleDescribable(r1.name)
+    )
     try:
         flake.register_asset_async(r1, assets_queue).wait()
         inheritance = flake.describe_async(relationship_describable).deserialize_one(RoleInheritanceEntity)
@@ -157,6 +161,7 @@ def test_show_role_to_database_role_inheritance_in_non_existing_database(flake: 
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
+
 
 def test_show_role_to_database_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_show_role_to_database_role_inheritance"""
@@ -176,10 +181,12 @@ def test_show_role_to_database_role_inheritance(flake: PyflakeClient, assets_que
     with pytest.raises(ValueError):
         flake.register_asset_async(rel, rel).wait()
 
-#endregion
+
+# endregion
 
 
-#region database role to role inheritance
+# region database role to role inheritance
+
 
 def test_show_database_role_to_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_show_database_role_to_role_inheritance"""
@@ -203,23 +210,28 @@ def test_show_database_role_to_role_inheritance(flake: PyflakeClient, assets_que
         flake.register_asset_async(dr1, assets_queue).wait()
         flake.register_asset_async(rel, assets_queue).wait()
 
-        inheritance = flake.describe_async(RoleInheritanceDescribable( 
-                inherited_principal=DatabaseRoleDescribable(dr1.name, dr1.database_name), 
-                parent_principal=RoleDescribable(r1.name)
+        inheritance = flake.describe_async(
+            RoleInheritanceDescribable(
+                inherited_principal=DatabaseRoleDescribable(dr1.name, dr1.database_name),
+                parent_principal=RoleDescribable(r1.name),
             )
         ).deserialize_one(RoleInheritanceEntity)
 
         assert inheritance is not None
     finally:
-            ### Cleanup ###
-            flake.delete_assets(assets_queue)
-
-#endregion
+        ### Cleanup ###
+        flake.delete_assets(assets_queue)
 
 
-#region database role to database role inheritance
+# endregion
 
-def test_show_database_role_to_database_role_same_database_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+
+# region database role to database role inheritance
+
+
+def test_show_database_role_to_database_role_same_database_inheritance(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue
+):
     """test_show_database_role_to_database_role_inheritance"""
     ### Arrange ###
     snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
@@ -246,9 +258,10 @@ def test_show_database_role_to_database_role_same_database_inheritance(flake: Py
         flake.wait_all([w1, w2])
         flake.register_asset_async(rel, assets_queue).wait()
 
-        inheritance = flake.describe_async(RoleInheritanceDescribable( 
+        inheritance = flake.describe_async(
+            RoleInheritanceDescribable(
                 inherited_principal=DatabaseRoleDescribable(dr1.name, dr1.database_name),
-                parent_principal=DatabaseRoleDescribable(dr2.name, dr2.database_name)
+                parent_principal=DatabaseRoleDescribable(dr2.name, dr2.database_name),
             )
         ).deserialize_one(RoleInheritanceEntity)
 
@@ -257,7 +270,10 @@ def test_show_database_role_to_database_role_same_database_inheritance(flake: Py
         ### Cleanup ###
         flake.delete_assets(assets_queue)
 
-def test_show_database_role_to_database_role_cross_database_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+
+def test_show_database_role_to_database_role_cross_database_inheritance(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue
+):
     """test_show_database_role_to_database_role_inheritance"""
     ### Arrange ###
     snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
@@ -281,4 +297,5 @@ def test_show_database_role_to_database_role_cross_database_inheritance(flake: P
     with pytest.raises(ValueError):
         flake.register_asset_async(rel, rel).wait()
 
-#endregion
+
+# endregion

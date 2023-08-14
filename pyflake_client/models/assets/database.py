@@ -1,8 +1,10 @@
-"""database"""
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
+from pyflake_client.models.assets.snowflake_principal_interface import (
+    ISnowflakePrincipal,
+)
 
 
 @dataclass(frozen=True)

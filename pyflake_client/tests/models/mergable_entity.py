@@ -1,4 +1,4 @@
-"""mergable_entity"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 # pylint: disable=invalid-name
 # pylint: disable=too-many-locals
@@ -7,15 +7,15 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Union
 
+from pyflake_client.models.assets.table_columns import (
+    Bool,
+    Identity,
+    Integer,
+    Timestamp,
+    Varchar,
+)
 from pyflake_client.models.mergeables.snowflake_mergable_interface import (
     ISnowflakeMergable,
-)
-from pyflake_client.models.assets.table_columns import (
-    Integer,
-    Varchar,
-    Identity,
-    Bool,
-    Timestamp,
 )
 
 # --------------------------------------------------------

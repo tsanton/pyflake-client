@@ -1,18 +1,19 @@
-"""test_user"""
+# -*- coding: utf-8 -*-
 import os
 import queue
 import uuid
 from datetime import date
 
-
 from pyflake_client.client import PyflakeClient
-from pyflake_client.models.assets.user import User as UserAsset
 from pyflake_client.models.assets.role import Role as RoleAsset
-from pyflake_client.models.describables.user import User as DescribablesUser
-from pyflake_client.models.entities.user import User as EntitiesUser
-from pyflake_client.models.assets.role_inheritance import RoleInheritance as RoleInheritanceAsset
+from pyflake_client.models.assets.role_inheritance import (
+    RoleInheritance as RoleInheritanceAsset,
+)
+from pyflake_client.models.assets.user import User as UserAsset
 from pyflake_client.models.describables.grant import Grant as GrantDescribable
+from pyflake_client.models.describables.user import User as DescribablesUser
 from pyflake_client.models.describables.user import User as UserDescribable
+from pyflake_client.models.entities.user import User as EntitiesUser
 from pyflake_client.models.entities.user_grant import UserGrant as UserGrantEntity
 
 
@@ -78,7 +79,8 @@ def test_user_zero_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         user_grants = flake.describe_async(
             describable=GrantDescribable(
                 principal=UserDescribable(user.name),
-            )).deserialize_many(UserGrantEntity)
+            )
+        ).deserialize_many(UserGrantEntity)
         ### Assert ###
         assert user_grants == []
     finally:
@@ -110,7 +112,8 @@ def test_user_with_role_grant(flake: PyflakeClient, assets_queue: queue.LifoQueu
         user_grants = flake.describe_async(
             describable=GrantDescribable(
                 principal=UserDescribable(user.name),
-            )).deserialize_many(UserGrantEntity)
+            )
+        ).deserialize_many(UserGrantEntity)
 
         ### Assert ###
         assert user_grants is not None
@@ -157,7 +160,8 @@ def test_user_with_multiple_role_grants(flake: PyflakeClient, assets_queue: queu
         user_grants = flake.describe_async(
             describable=GrantDescribable(
                 principal=UserDescribable(user.name),
-            )).deserialize_many(UserGrantEntity)
+            )
+        ).deserialize_many(UserGrantEntity)
 
         ### Assert ###
         assert user_grants is not None

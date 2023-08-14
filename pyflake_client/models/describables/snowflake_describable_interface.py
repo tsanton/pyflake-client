@@ -1,7 +1,9 @@
-"""snowflake_describable_interface"""
+# -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Union
+from typing import Union
+
 import dacite
 
 

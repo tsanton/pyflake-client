@@ -1,16 +1,16 @@
-"""test_table"""
-from datetime import date
+# -*- coding: utf-8 -*-
 import queue
 import uuid
+from datetime import date
 
-from pyflake_client.models.assets.table import Table as TableAsset
-from pyflake_client.models.assets.table_columns import Number, Varchar, Identity
-from pyflake_client.models.entities.table import Table as TableEntity
-from pyflake_client.models.describables.table import Table as TableDescribable
-from pyflake_client.models.assets.role import Role as RoleAsset
-from pyflake_client.models.assets.database import Database as DatabaseAsset
-from pyflake_client.models.assets.schema import Schema
 from pyflake_client.client import PyflakeClient
+from pyflake_client.models.assets.database import Database as DatabaseAsset
+from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.schema import Schema
+from pyflake_client.models.assets.table import Table as TableAsset
+from pyflake_client.models.assets.table_columns import Identity, Number, Varchar
+from pyflake_client.models.describables.table import Table as TableDescribable
+from pyflake_client.models.entities.table import Table as TableEntity
 
 
 def test_create_table_with_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue):
@@ -27,7 +27,13 @@ def test_create_table_with_owner(flake: PyflakeClient, assets_queue: queue.LifoQ
         Number("ID", identity=Identity(1, 1)),
         Varchar("SOME_VARCHAR", primary_key=True),
     ]
-    table = TableAsset(db_name=database.db_name, schema_name=schema.schema_name, table_name="TEST", columns=columns, owner=RoleAsset("SYSADMIN"))
+    table = TableAsset(
+        db_name=database.db_name,
+        schema_name=schema.schema_name,
+        table_name="TEST",
+        columns=columns,
+        owner=RoleAsset("SYSADMIN"),
+    )
 
     try:
         flake.register_asset_async(database, assets_queue).wait()

@@ -1,16 +1,16 @@
-"""test_table_varchar"""
+# -*- coding: utf-8 -*-
 import queue
 import uuid
 
-from pyflake_client.models.assets.table import Table as TableAsset
-from pyflake_client.models.assets.table_columns import Varchar
-from pyflake_client.models.entities.column import Varchar as VarcharEntity
-from pyflake_client.models.entities.table import Table as TableEntity
-from pyflake_client.models.describables.table import Table as TableDescribable
+from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as DatabaseAsset
 from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.schema import Schema
-from pyflake_client.client import PyflakeClient
+from pyflake_client.models.assets.table import Table as TableAsset
+from pyflake_client.models.assets.table_columns import Varchar
+from pyflake_client.models.describables.table import Table as TableDescribable
+from pyflake_client.models.entities.column import Varchar as VarcharEntity
+from pyflake_client.models.entities.table import Table as TableEntity
 
 
 def test_table_varchar(flake: PyflakeClient, assets_queue: queue.LifoQueue):
@@ -25,7 +25,7 @@ def test_table_varchar(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         Varchar(name="VARCHAR_COLUMN"),
     ]
     table = TableAsset(
-        db_name=database.db_name,    
+        db_name=database.db_name,
         schema_name=schema.schema_name,
         table_name="TEST_TABLE",
         columns=columns,  # type: ignore
@@ -43,8 +43,9 @@ def test_table_varchar(flake: PyflakeClient, assets_queue: queue.LifoQueue):
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 name=table.table_name,
-            )).deserialize_one(TableEntity)
-        
+            )
+        ).deserialize_one(TableEntity)
+
         ### Assert ###
         assert sf_table is not None
         assert sf_table.name == table.table_name
@@ -78,7 +79,7 @@ def test_table_varchar_primary_key(flake: PyflakeClient, assets_queue: queue.Lif
         Varchar(name="VARCHAR_COLUMN", primary_key=True),
     ]
     table = TableAsset(
-        db_name=database.db_name,    
+        db_name=database.db_name,
         schema_name=schema.schema_name,
         table_name="TEST_TABLE",
         columns=columns,  # type: ignore
@@ -96,8 +97,9 @@ def test_table_varchar_primary_key(flake: PyflakeClient, assets_queue: queue.Lif
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 name=table.table_name,
-            )).deserialize_one(TableEntity)
-        
+            )
+        ).deserialize_one(TableEntity)
+
         ### Assert ###
         assert sf_table is not None
         assert sf_table.name == table.table_name

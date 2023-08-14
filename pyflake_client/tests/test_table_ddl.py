@@ -1,18 +1,18 @@
-"""test_table"""
-from datetime import date, datetime
+# -*- coding: utf-8 -*-
 import uuid
+from datetime import date, datetime
 
+from pyflake_client.models.assets.database import Database as DatabaseAsset
+from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.assets.table import Table as TableAsset
 from pyflake_client.models.assets.table_columns import (
-    Varchar,
-    Integer,
-    Identity,
-    Timestamp,
     Date,
+    Identity,
+    Integer,
+    Timestamp,
+    Varchar,
 )
-from pyflake_client.models.assets.database import Database as DatabaseAsset
-from pyflake_client.models.assets.role import Role as RoleAsset
 
 
 def test_create_simple_table_ddl():
@@ -36,7 +36,10 @@ def test_create_simple_table_ddl():
     ### Act ###
     definition = table.get_create_statement()
 
-    assert "CREATE OR REPLACE TABLE IGT_DEMO.S1.TEST (ID NUMBER(38,0) NOT NULL IDENTITY (1,1));GRANT OWNERSHIP ON TABLE IGT_DEMO.S1.TEST TO ROLE SYSADMIN;" == definition
+    assert (
+        "CREATE OR REPLACE TABLE IGT_DEMO.S1.TEST (ID NUMBER(38,0) NOT NULL IDENTITY (1,1));GRANT OWNERSHIP ON TABLE IGT_DEMO.S1.TEST TO ROLE SYSADMIN;"
+        == definition
+    )
 
 
 def test_create_complex_table_ddl():
@@ -57,7 +60,7 @@ def test_create_complex_table_ddl():
             Integer(name="ID", identity=Identity(1, 1)),
             Varchar(name="VARCHAR_NO_DEFAULT"),
             Varchar(name="VARCHAR_DEFAULT", default_value="YES"),
-        ]
+        ],
     )
 
     ### Act ###
@@ -90,7 +93,7 @@ def test_create_complex_table_with_primary_key_ddl():
                 name="VARCHAR_2",
                 primary_key=True,
             ),
-        ]
+        ],
     )
 
     ### Act ###
@@ -121,7 +124,7 @@ def test_create_simple_table_with_default_date_ddl():
         [
             Integer(name="ID", identity=Identity(1, 1)),
             Date(name="SOME_DATE", default_value=date(2000, 1, 1)),
-        ]
+        ],
     )
 
     ### Act ###

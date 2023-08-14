@@ -1,4 +1,4 @@
-"""database"""
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 from typing import Union
 
@@ -11,7 +11,7 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 
 @dataclass(frozen=True)
 class Queryable(ISnowflakeDescribable):
-    """Database"""
+    """Queryable"""
 
     query: str
 

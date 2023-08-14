@@ -1,19 +1,18 @@
-"""principal_ascendants"""
+# -*- coding: utf-8 -*-
 from __future__ import annotations
-from typing import Any, Union, Dict
-from typing import List
+
 from dataclasses import dataclass
+from typing import Any, Dict, Union
 
 import dacite
-
-from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
 
 
 @dataclass(frozen=True)
 class PrincipalAscendant:
     """PrincipalAscendant"""
+
     grantee_identifier: str
-    principal_type: str #TODO: enum
+    principal_type: str  # TODO: enum
     granted_identifier: str
     granted_on: str
     granted_by: str

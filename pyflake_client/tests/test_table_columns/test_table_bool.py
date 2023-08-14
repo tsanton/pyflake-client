@@ -1,15 +1,15 @@
-"""test_table_bool"""
+# -*- coding: utf-8 -*-
 import queue
 import uuid
 
-from pyflake_client.models.assets.table import Table as TableAsset
-from pyflake_client.models.assets.table_columns import Bool
-from pyflake_client.models.entities.table import Table as TableEntity
-from pyflake_client.models.describables.table import Table as TableDescribable
+from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as DatabaseAsset
 from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.schema import Schema
-from pyflake_client.client import PyflakeClient
+from pyflake_client.models.assets.table import Table as TableAsset
+from pyflake_client.models.assets.table_columns import Bool
+from pyflake_client.models.describables.table import Table as TableDescribable
+from pyflake_client.models.entities.table import Table as TableEntity
 
 
 def test_table_bool(flake: PyflakeClient, assets_queue: queue.LifoQueue):
@@ -24,7 +24,7 @@ def test_table_bool(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         Bool(name="BOOL_COLUMN"),
     ]
     table = TableAsset(
-        db_name=database.db_name,    
+        db_name=database.db_name,
         schema_name=schema.schema_name,
         table_name="TEST_TABLE",
         columns=columns,  # type: ignore
@@ -42,8 +42,9 @@ def test_table_bool(flake: PyflakeClient, assets_queue: queue.LifoQueue):
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 name=table.table_name,
-            )).deserialize_one(TableEntity)
-        
+            )
+        ).deserialize_one(TableEntity)
+
         ### Assert ###
         assert sf_table is not None
         assert sf_table.name == table.table_name
@@ -75,7 +76,7 @@ def test_table_bool_primary_key(flake: PyflakeClient, assets_queue: queue.LifoQu
         Bool(name="BOOL_COLUMN", primary_key=True),
     ]
     table = TableAsset(
-        db_name=database.db_name,    
+        db_name=database.db_name,
         schema_name=schema.schema_name,
         table_name="TEST_TABLE",
         columns=columns,  # type: ignore
@@ -93,8 +94,9 @@ def test_table_bool_primary_key(flake: PyflakeClient, assets_queue: queue.LifoQu
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 name=table.table_name,
-            )).deserialize_one(TableEntity)
-        
+            )
+        ).deserialize_one(TableEntity)
+
         ### Assert ###
         assert sf_table is not None
         assert sf_table.name == table.table_name

@@ -1,17 +1,21 @@
-"""role"""
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 from typing import Union
 
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
-from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
+from pyflake_client.models.assets.snowflake_principal_interface import (
+    ISnowflakePrincipal,
+)
+from pyflake_client.models.describables.snowflake_grant_principal import (
+    ISnowflakeGrantPrincipal,
+)
 from pyflake_client.models.enums.principal import Principal
-
 
 
 @dataclass(frozen=True)
 class Role(ISnowflakeAsset, ISnowflakePrincipal, ISnowflakeGrantPrincipal):
     """Role"""
+
     name: str
     comment: str = ""
     owner: Union[ISnowflakePrincipal, None] = None

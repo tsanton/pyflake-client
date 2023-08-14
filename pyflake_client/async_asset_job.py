@@ -1,28 +1,34 @@
-"""async_asset_job.py"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 # pylint: disable=invalid-name
-from abc import ABC, abstractmethod
 import queue
 import time
+from abc import ABC, abstractmethod
 from typing import Union
 
-from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-
-from dacite import from_dict
 from snowflake.connector import SnowflakeConnection
+from snowflake.connector.constants import QueryStatus
 from snowflake.connector.cursor import SnowflakeCursor
 from snowflake.connector.errors import ProgrammingError
-from snowflake.connector.constants import QueryStatus
+
+from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 
 
 class AsyncAwaitable(ABC):
     @abstractmethod
-    def wait(self, timeout:int = 60) -> None:
+    def wait(self, timeout: int = 60) -> None:
         """wait"""
 
 
 class AsyncAssetJob(AsyncAwaitable):
-    def __init__(self, conn:SnowflakeConnection, cursor: SnowflakeCursor, query_id: str, asset: Union[ISnowflakeAsset, None], queue: Union[queue.LifoQueue, None]):
+    def __init__(
+        self,
+        conn: SnowflakeConnection,
+        cursor: SnowflakeCursor,
+        query_id: str,
+        asset: Union[ISnowflakeAsset, None],
+        queue: Union[queue.LifoQueue, None],
+    ):
         self._conn = conn
         self._cur = cursor
         self._query_id = query_id
@@ -46,7 +52,6 @@ class AsyncAssetJob(AsyncAwaitable):
                 raise TimeoutError(f"Not all queries completed after {timeout} seconds.")
             # Sleep for a short duration before checking again, to not hog the CPU
             time.sleep(0.1)
-
 
     def cancel(self) -> bool:
         self._cur.abort_query(self._query_id)

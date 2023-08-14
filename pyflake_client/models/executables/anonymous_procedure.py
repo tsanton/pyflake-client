@@ -1,15 +1,18 @@
-"""anonymous_procedure"""
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 from typing import List
+
 from pyflake_client.models.enums.column_type import ColumnType
 from pyflake_client.models.executables.procedure_arg import ProcedureArg
-
-from pyflake_client.models.executables.snowflake_executable_interface import ISnowflakeExecutable
+from pyflake_client.models.executables.snowflake_executable_interface import (
+    ISnowflakeExecutable,
+)
 
 
 @dataclass(frozen=True)
 class AnonymousProcedure(ISnowflakeExecutable):
     """AnonymousProcedure"""
+
     procedure_name: str
     procedure_definition: str
     procedure_args: List[ProcedureArg]

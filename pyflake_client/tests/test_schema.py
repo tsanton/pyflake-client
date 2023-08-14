@@ -1,16 +1,18 @@
-"""test_schema"""
+# -*- coding: utf-8 -*-
 import queue
 import uuid
 from datetime import date
 
 from pyflake_client.client import PyflakeClient
-from pyflake_client.models.assets.role import Role as RoleAsset
-from pyflake_client.models.assets.database_role import DatabaseRole as DatabaseRoleAsset
 from pyflake_client.models.assets.database import Database as DatabaseAsset
+from pyflake_client.models.assets.database_role import DatabaseRole as DatabaseRoleAsset
+from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.role_inheritance import (
+    RoleInheritance as RoleInheritanceAsset,
+)
 from pyflake_client.models.assets.schema import Schema as SchemaAsset
-from pyflake_client.models.assets.role_inheritance import RoleInheritance as RoleInheritanceAsset
-from pyflake_client.models.entities.schema import Schema as SchemaEntity
 from pyflake_client.models.describables.schema import Schema as SchemaDescribable
+from pyflake_client.models.entities.schema import Schema as SchemaEntity
 
 
 def test_get_schema(flake: PyflakeClient):
@@ -27,7 +29,9 @@ def test_get_schema(flake: PyflakeClient):
 def test_get_schema_when_database_does_not_exist(flake: PyflakeClient):
     """test_get_schema_when_database_does_not_exist"""
     ### Act ###
-    schema = flake.describe_async(SchemaDescribable("INFORMATION_SCHEMA", "THIS_DB_DOES_NOT_EXIST")).deserialize_one(SchemaEntity)
+    schema = flake.describe_async(SchemaDescribable("INFORMATION_SCHEMA", "THIS_DB_DOES_NOT_EXIST")).deserialize_one(
+        SchemaEntity
+    )
 
     ### Assert ###
     assert schema is None
@@ -36,7 +40,9 @@ def test_get_schema_when_database_does_not_exist(flake: PyflakeClient):
 def test_get_schema_when_schema_does_not_exist(flake: PyflakeClient):
     """test_get_schema_when_schema_does_not_exist"""
     ### Act ###
-    schema = flake.describe_async(SchemaDescribable("THIS_SCHEMA_DOES_NOT_EXIST", "SNOWFLAKE")).deserialize_one(SchemaEntity)
+    schema = flake.describe_async(SchemaDescribable("THIS_SCHEMA_DOES_NOT_EXIST", "SNOWFLAKE")).deserialize_one(
+        SchemaEntity
+    )
 
     ### Assert ###
     assert schema is None
@@ -75,7 +81,6 @@ def test_create_schema_with_role_owner(flake: PyflakeClient, assets_queue: queue
         flake.delete_assets(assets_queue)
 
 
-
 def test_create_schema_with_database_role_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_create_schema"""
     ### Arrange ###
@@ -88,8 +93,10 @@ def test_create_schema_with_database_role_owner(flake: PyflakeClient, assets_que
         comment=snowflake_comment,
         owner=RoleAsset("USERADMIN"),
     )
-    rel = RoleInheritanceAsset(child_principal=db_role, parent_principal=sys_admin) #So we can delete the schema in the finally
-        
+    rel = RoleInheritanceAsset(
+        child_principal=db_role, parent_principal=sys_admin
+    )  # So we can delete the schema in the finally
+
     schema = SchemaAsset(
         db_name=database.db_name,
         schema_name="SOME_SCHEMA",
@@ -103,10 +110,11 @@ def test_create_schema_with_database_role_owner(flake: PyflakeClient, assets_que
         w2 = flake.register_asset_async(schema, assets_queue)
         flake.wait_all([w1, w2])
         flake.register_asset_async(rel, assets_queue).wait()
-        
 
         ### Act ###
-        sch = flake.describe_async(SchemaDescribable(schema.schema_name, database.db_name)).deserialize_one(SchemaEntity)
+        sch = flake.describe_async(SchemaDescribable(schema.schema_name, database.db_name)).deserialize_one(
+            SchemaEntity
+        )
 
         ### Assert ###
         assert sch is not None

@@ -1,15 +1,17 @@
-"""procedure"""
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 from typing import List
 
-
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.enums.column_type import ColumnType  # TODO: Rename ColumnType to DataType
+from pyflake_client.models.enums.column_type import (
+    ColumnType,  # TODO: Rename ColumnType to DataType
+)
 
 
 @dataclass(frozen=False)
 class Procedure(ISnowflakeAsset):
     """Procedure"""
+
     database_name: str
     schema_name: str
     name: str

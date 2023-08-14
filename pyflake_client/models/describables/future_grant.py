@@ -1,13 +1,18 @@
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 from typing import Union
 
 import dacite
 
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
-from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
-
-from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
-from pyflake_client.models.describables.role import Role as RoleDescribable
+from pyflake_client.models.describables.database_role import (
+    DatabaseRole as DatabaseRoleDescribable,
+)
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
+from pyflake_client.models.describables.snowflake_grant_principal import (
+    ISnowflakeGrantPrincipal,
+)
 
 
 @dataclass
@@ -50,9 +55,7 @@ call show_grants_to_database_role('%(s1)s','%(s2)s');
                 "s2": self.principal.name,
             }
         else:
-            raise NotImplementedError(
-                f"Future Grant describe statement for {self.__class__} is not implemented"
-            )
+            raise NotImplementedError(f"Future Grant describe statement for {self.__class__} is not implemented")
         return query
 
     def is_procedure(self) -> bool:

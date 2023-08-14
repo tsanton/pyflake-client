@@ -1,15 +1,20 @@
-"""principal_ascendants"""
+# -*- coding: utf-8 -*-
 # pylint: disable=consider-using-f-string
 from dataclasses import dataclass
 from typing import Union
+
 import dacite
 
+from pyflake_client.models.describables.database_role import (
+    DatabaseRole as DatabaseRoleDescribable,
+)
 from pyflake_client.models.describables.role import Role as RoleDescribable
-from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
-
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
-
-from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
+from pyflake_client.models.describables.snowflake_grant_principal import (
+    ISnowflakeGrantPrincipal,
+)
 
 
 @dataclass(frozen=True)
@@ -28,8 +33,8 @@ class PrincipalAscendants(ISnowflakeDescribable):
             principal_identifier = f"{self.principal.db_name}.{self.principal.name}"
         else:
             raise NotImplementedError()
-        
-        query =  """
+
+        query = """
 with show_all_roles_that_inherit_source as procedure(principal_type varchar, principal_identifier varchar)
     returns variant not null
     language python
@@ -42,8 +47,8 @@ def show_grants_on_py(snowpark_session, principal_type_py:str, principal_identif
     try:
         for row in snowpark_session.sql(f'SHOW GRANTS OF {principal_type_py} {principal_identifier_py}').to_local_iterator():
             if row['granted_to'] in ['ROLE', 'DATABASE_ROLE']:
-                res.append({ 
-                    **row.as_dict(), 
+                res.append({
+                    **row.as_dict(),
                     **{ 'distance_from_source': links_removed, 'granted_on' : principal_type_py if principal_type_py != 'DATABASE ROLE' else 'DATABASE_ROLE' }
                 })
     except:
@@ -61,7 +66,7 @@ def show_all_roles_that_inherit_source_py(snowpark_session, principal_type: str,
     for role in show_inheritance:
         principal_type_iter:str = role['granted_to'] if role['granted_to'] != 'DATABASE_ROLE' else 'DATABASE ROLE'
         show_all_roles_that_inherit_source_py(snowpark_session, principal_type_iter, role['grantee_name'], links_removed +1, result, roles_shown)
-            
+
 def main_py(snowpark_session, principal_type_py:str, principal_identifier_py:str):
     res = []
     show_all_roles_that_inherit_source_py(snowpark_session, principal_type_py, principal_identifier_py, 0, res)
@@ -69,7 +74,7 @@ def main_py(snowpark_session, principal_type_py:str, principal_identifier_py:str
 $$
 call show_all_roles_that_inherit_source('%(s1)s', '%(s2)s');""" % {
             "s1": principal_type,
-            "s2": principal_identifier
+            "s2": principal_identifier,
         }
         return query
 
@@ -80,6 +85,3 @@ call show_all_roles_that_inherit_source('%(s1)s', '%(s2)s');""" % {
     def get_dacite_config(self) -> Union[dacite.Config, None]:
         """get_dacite_config"""
         return None
-
-
-        

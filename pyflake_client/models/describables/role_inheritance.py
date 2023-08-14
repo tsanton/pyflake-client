@@ -1,15 +1,22 @@
-"""role_inheritance"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 from dataclasses import dataclass
 from typing import Union
 
 import dacite
 
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
+from pyflake_client.models.describables.database_role import (
+    DatabaseRole as DatabaseRoleDescribable,
+)
 from pyflake_client.models.describables.role import Role as RoleDescribable
-from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
+from pyflake_client.models.describables.snowflake_grant_principal import (
+    ISnowflakeGrantPrincipal,
+)
 from pyflake_client.models.describables.user import User as UserDescribable
-from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
+
 
 @dataclass(frozen=True)
 class RoleInheritance(ISnowflakeDescribable):
@@ -26,7 +33,6 @@ class RoleInheritance(ISnowflakeDescribable):
         """get_dacite_config"""
         return None
 
-
     def get_describe_statement(self) -> str:
         """get_describe_statement"""
         inherited_type = None
@@ -39,7 +45,7 @@ class RoleInheritance(ISnowflakeDescribable):
             inherited_identifier = f"{self.inherited_principal.db_name}.{self.inherited_principal.name}"
         else:
             raise NotImplementedError()
-        
+
         parent_type = None
         parent_identifier = None
         if isinstance(self.parent_principal, RoleDescribable):
@@ -53,10 +59,10 @@ class RoleInheritance(ISnowflakeDescribable):
             parent_identifier = self.parent_principal.name
         else:
             raise NotImplementedError()
-        
+
         if parent_type == DatabaseRoleDescribable and inherited_type == RoleDescribable:
             raise NotImplementedError("Account roles cannot be granted to database roles")
-        
+
         if inherited_type == DatabaseRoleDescribable:
             inherited_type = "DATABASE_ROLE"
         elif inherited_type == RoleDescribable:

@@ -1,10 +1,15 @@
-"""user"""
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 from typing import Union
+
 import dacite
 
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
-from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
+from pyflake_client.models.describables.snowflake_grant_principal import (
+    ISnowflakeGrantPrincipal,
+)
 
 
 @dataclass(frozen=True)

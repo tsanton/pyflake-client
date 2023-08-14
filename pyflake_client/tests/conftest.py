@@ -1,4 +1,4 @@
-"""conftest"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 import os
 import queue
@@ -46,6 +46,7 @@ def assets_queue() -> queue.LifoQueue:
 def database() -> DatabaseAsset:
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     return database
+
 
 @pytest.fixture(scope="session")
 def comment() -> str:

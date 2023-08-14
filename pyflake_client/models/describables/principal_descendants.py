@@ -1,15 +1,20 @@
-"""principal_descendants"""
+# -*- coding: utf-8 -*-
 # pylint: disable=consider-using-f-string
 from dataclasses import dataclass
 from typing import Union
+
 import dacite
 
-
+from pyflake_client.models.describables.database_role import (
+    DatabaseRole as DatabaseRoleDescribable,
+)
 from pyflake_client.models.describables.role import Role as RoleDescribable
-from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
-
-from pyflake_client.models.describables.snowflake_describable_interface import  ISnowflakeDescribable
-from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
+from pyflake_client.models.describables.snowflake_grant_principal import (
+    ISnowflakeGrantPrincipal,
+)
 
 
 @dataclass(frozen=True)
@@ -42,9 +47,9 @@ def show_direct_descendants_from_principal_py(snowpark_session, principal_type_p
     res = []
     for row in snowpark_session.sql(f'SHOW GRANTS TO {principal_type_py} {principal_identifier_py}').to_local_iterator():
         if row['privilege'] == 'USAGE' and row['granted_on'] in ['ROLE', 'DATABASE_ROLE']:
-            res.append({ 
-                **row.as_dict(), 
-                **{'distance_from_source': 0 } 
+            res.append({
+                **row.as_dict(),
+                **{'distance_from_source': 0 }
             })
     return res
 $$

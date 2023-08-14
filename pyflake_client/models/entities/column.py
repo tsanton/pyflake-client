@@ -1,14 +1,15 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
+
+import re
 from abc import ABC
 from dataclasses import dataclass
-import re
 from typing import Any, Dict, List, Union
 
 import dacite
 
-
-from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
 from pyflake_client.models.entities.classification_tag import ClassificationTag
+from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
 
 
 @dataclass
@@ -37,9 +38,7 @@ class Column(ISnowflakeEntity, ABC):
         }
 
     @classmethod
-    def deserialize(
-        cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None
-    ) -> Column:
+    def deserialize(cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None) -> Column:
         for old_key, new_key in cls.map_key_names().items():
             data[new_key] = data.pop(old_key)
 

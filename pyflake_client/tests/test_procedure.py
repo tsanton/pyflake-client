@@ -1,19 +1,17 @@
-"""test_procedures"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 # pylint: disable=invalid-name
 # pylint: disable=too-many-locals
 
 import queue
 
+from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.procedure import Procedure as ProcedureAsset
 from pyflake_client.models.describables.procedure import (
     Procedure as ProcedureDescribable,
 )
 from pyflake_client.models.entities.procedure import Procedure as ProcedureEntity
 from pyflake_client.models.enums.column_type import ColumnType
-from pyflake_client.client import PyflakeClient
-
-
 from pyflake_client.tests.utilities import _spawn_with_rwc_privileges, compare
 
 
@@ -32,9 +30,7 @@ def test_create_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.Li
         END
     $$;
     """
-    proc: ProcedureAsset = ProcedureAsset(
-        db.db_name, s.schema_name, "TEST_PROC", [], sql
-    )
+    proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, "TEST_PROC", [], sql)
 
     try:
         flake.register_asset(proc, assets_queue)
@@ -69,9 +65,7 @@ def test_create_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.Lifo
         END
     $$;
     """
-    proc: ProcedureAsset = ProcedureAsset(
-        db.db_name, s.schema_name, "TEST_PROC", [ColumnType.VARCHAR], sql
-    )
+    proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, "TEST_PROC", [ColumnType.VARCHAR], sql)
 
     try:
         flake.register_asset(proc, assets_queue)
