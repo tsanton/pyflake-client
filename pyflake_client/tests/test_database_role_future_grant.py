@@ -48,7 +48,7 @@ def test_describe_future_grant_for_non_existing_database_role(flake: PyflakeClie
 
 
 def test_describe_future_grant_for_database_role_in_non_existing_database(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue
+    flake: PyflakeClient
 ):
     """test_describe_future_grant_for_database_role_in_non_existing_database"""
     ### Act ###

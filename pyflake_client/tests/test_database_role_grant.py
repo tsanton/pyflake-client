@@ -13,8 +13,8 @@ from pyflake_client.models.assets.schema import Schema as SchemaAsset
 from pyflake_client.models.describables.database_role import (
     DatabaseRole as DatabaseRoleDescribable,
 )
-from pyflake_client.models.describables.grant import Grant as GrantDescribable
-from pyflake_client.models.entities.grant import Grant as GrantEntity
+from pyflake_client.models.describables.role_grant import RoleGrant as RoleGrantDescribable
+from pyflake_client.models.entities.role_grant import RoleGrant as RoleGrantEntity
 from pyflake_client.models.enums.privilege import Privilege
 
 # TODO: test_describe_grant_for_non_existing_database_role
@@ -29,10 +29,10 @@ def test_describe_grant_for_non_existing_database_role(flake: PyflakeClient, ass
         flake.register_asset_async(database, assets_queue).wait()
         ### Act ###
         grants = flake.describe_async(
-            describable=GrantDescribable(
+            describable=RoleGrantDescribable(
                 principal=DatabaseRoleDescribable(name="NON_EXISTING_DATABASE_ROLE", db_name=database.db_name)
             )
-        ).deserialize_many(GrantEntity)
+        ).deserialize_many(RoleGrantEntity)
 
         ### Assert ###
 
@@ -62,10 +62,10 @@ def test_database_role_database_grant(flake: PyflakeClient, assets_queue: queue.
 
         ### Act ###
         grants = flake.describe_async(
-            describable=GrantDescribable(
+            describable=RoleGrantDescribable(
                 principal=DatabaseRoleDescribable(name=db_role.name, db_name=database.db_name)
             )
-        ).deserialize_many(GrantEntity)
+        ).deserialize_many(RoleGrantEntity)
 
         ### Assert ###
         assert grants is not None
@@ -123,10 +123,10 @@ def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.Li
 
         ### Act ###
         grants = flake.describe_async(
-            describable=GrantDescribable(
+            describable=RoleGrantDescribable(
                 principal=DatabaseRoleDescribable(name=db_role.name, db_name=database.db_name)
             )
-        ).deserialize_many(GrantEntity)
+        ).deserialize_many(RoleGrantEntity)
 
         ### Assert ###
         assert grants is not None

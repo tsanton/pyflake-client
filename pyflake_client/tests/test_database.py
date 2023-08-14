@@ -45,7 +45,9 @@ def test_create_database_with_role_owner(flake: PyflakeClient, assets_queue: que
         flake.register_asset_async(database, assets_queue).wait()
 
         ### Act ###
-        db = flake.describe_async(DatabaseDescribable(database.db_name)).deserialize_one(DatabaseEntity)
+        db = flake.describe_async(DatabaseDescribable(database.db_name)).deserialize_one(
+            DatabaseEntity
+        )
         ### Assert ###
         assert db is not None
         assert db.name == database.db_name

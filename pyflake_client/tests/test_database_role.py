@@ -8,9 +8,9 @@ from pyflake_client.models.assets.database import Database as DatabaseAsset
 from pyflake_client.models.assets.database_role import DatabaseRole
 from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.describables.database_role import (
-    DatabaseRole as DescribablesRole,
+    DatabaseRole as RoleDescribable,
 )
-from pyflake_client.models.entities.role import Role as EntitiesRole
+from pyflake_client.models.entities.role import Role as RoleEntity
 
 
 def test_create_database_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
@@ -30,8 +30,8 @@ def test_create_database_role(flake: PyflakeClient, assets_queue: queue.LifoQueu
         flake.register_asset_async(role, assets_queue).wait()
 
         ### Act ###
-        sf_role = flake.describe_async(DescribablesRole(name=role.name, db_name=database.db_name)).deserialize_one(
-            EntitiesRole
+        sf_role = flake.describe_async(RoleDescribable(name=role.name, db_name=database.db_name)).deserialize_one(
+            RoleEntity
         )
 
         ### Assert ###
@@ -63,8 +63,8 @@ def test_get_database_role_async(flake: PyflakeClient, assets_queue: queue.LifoQ
         flake.create_asset_async(role).wait()
 
         ### Act ###
-        r = flake.describe_async(DescribablesRole(name=role.name, db_name=database.db_name)).deserialize_one(
-            EntitiesRole
+        r = flake.describe_async(RoleDescribable(name=role.name, db_name=database.db_name)).deserialize_one(
+            RoleEntity
         )
 
         ### Assert ###
@@ -81,8 +81,8 @@ def test_get_database_role_async(flake: PyflakeClient, assets_queue: queue.LifoQ
 
 def test_get_database_role_from_db_not_exists(flake: PyflakeClient):
     sf_role = flake.describe_async(
-        DescribablesRole(name="SNOWFLAKE", db_name="I_SURELY_DO_NOT_EXIST_DATABASE")
-    ).deserialize_one(EntitiesRole)
+        RoleDescribable(name="SNOWFLAKE", db_name="I_SURELY_DO_NOT_EXIST_DATABASE")
+    ).deserialize_one(RoleEntity)
     assert sf_role is None
 
 
@@ -93,8 +93,8 @@ def test_get_database_role_not_exists(flake: PyflakeClient, assets_queue: queue.
 
         flake.register_asset_async(database, assets_queue).wait()
         sf_role = flake.describe_async(
-            DescribablesRole(name="I_SURELY_DO_NOT_EXIST_DATABASE_ROLE", db_name=database.db_name)
-        ).deserialize_one(EntitiesRole)
+            RoleDescribable(name="I_SURELY_DO_NOT_EXIST_DATABASE_ROLE", db_name=database.db_name)
+        ).deserialize_one(RoleEntity)
         assert sf_role is None
     finally:
         flake.delete_assets(assets_queue)

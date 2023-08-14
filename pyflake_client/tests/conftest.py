@@ -52,12 +52,6 @@ def assets_queue() -> queue.LifoQueue:
     return queue.LifoQueue()
 
 
-# @pytest.fixture(scope="function")
-# def database() -> DatabaseAsset:
-#     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
-#     return database
-
-
 @pytest.fixture(scope="session")
 def comment() -> str:
     return f"pyflake_client_test_{uuid.uuid4()}"

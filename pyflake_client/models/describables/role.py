@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from dataclasses import dataclass
-from typing import Union
+from typing import Any, Callable, Dict, Union
 
 import dacite
 
@@ -11,6 +11,7 @@ from pyflake_client.models.describables.snowflake_grant_principal import (
     ISnowflakeGrantPrincipal,
 )
 
+from pyflake_client.models.entities.role import Role as RoleEntity
 
 @dataclass(frozen=True)
 class Role(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
@@ -26,9 +27,14 @@ class Role(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
         """is_procedure"""
         return False
 
-    def get_dacite_config(self) -> Union[dacite.Config, None]:
-        """get_dacite_config"""
-        return None
+    @classmethod
+    def get_deserializer(cls) -> Callable[[Dict[str, Any]], RoleEntity]:
+        def deserialize(data:Dict[str, Any]) -> RoleEntity:
+            return dacite.from_dict(RoleEntity, data, dacite.Config(type_hooks={
+                int: lambda v: int(v)
+            }))
+
+        return deserialize
 
     @staticmethod
     def get_snowflake_type() -> str:

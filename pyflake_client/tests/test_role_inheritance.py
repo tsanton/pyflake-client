@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 import queue
+import secrets
 import uuid
 
 import pytest
@@ -230,22 +231,21 @@ def test_show_database_role_to_role_inheritance(flake: PyflakeClient, assets_que
 
 
 def test_show_database_role_to_database_role_same_database_inheritance(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, comment:str
 ):
     """test_show_database_role_to_database_role_inheritance"""
     ### Arrange ###
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
-    database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN"))
     dr1 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE_1",
         database_name=database.db_name,
-        comment=snowflake_comment,
+        comment=comment,
         owner=RoleAsset("USERADMIN"),
     )
     dr2 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE_2",
         database_name=database.db_name,
-        comment=snowflake_comment,
+        comment=comment,
         owner=RoleAsset("USERADMIN"),
     )
     rel = RoleInheritanceAsset(child_principal=dr1, parent_principal=dr2)
@@ -272,13 +272,12 @@ def test_show_database_role_to_database_role_same_database_inheritance(
 
 
 def test_show_database_role_to_database_role_cross_database_inheritance(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, comment:str
 ):
     """test_show_database_role_to_database_role_inheritance"""
     ### Arrange ###
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
-    database = DatabaseAsset("IGT_DEMO_1", snowflake_comment, owner=RoleAsset("SYSADMIN"))
-    database2 = DatabaseAsset("IGT_DEMO_2", snowflake_comment, owner=RoleAsset("SYSADMIN"))
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN"))
+    database2 = DatabaseAsset(f"PYFLAKE_CLIENT_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN"))
     dr1 = DatabaseRoleAsset(
         name="TEST_SNOWPLOW_DATABASE_ROLE_1",
         database_name=database.db_name,

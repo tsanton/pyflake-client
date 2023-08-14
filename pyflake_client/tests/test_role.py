@@ -5,8 +5,8 @@ from datetime import date
 
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.role import Role as RoleAsset
-from pyflake_client.models.describables.role import Role as DescribablesRole
-from pyflake_client.models.entities.role import Role as EntitiesRole
+from pyflake_client.models.describables.role import Role as RoleDescribable
+from pyflake_client.models.entities.role import Role as RoleEntity
 
 
 def test_create_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
@@ -22,7 +22,7 @@ def test_create_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         flake.register_asset_async(role, assets_queue).wait()
 
         ### Act ###
-        sf_role = flake.describe_async(DescribablesRole(role.name)).deserialize_one(EntitiesRole)
+        sf_role = flake.describe_async(RoleDescribable(role.name)).deserialize_one(RoleEntity)
         ### Assert ###
         assert sf_role is not None
         assert sf_role.name == role.name
@@ -37,7 +37,7 @@ def test_create_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 def test_get_role(flake: PyflakeClient):
     """test_get_role"""
     ### Act ###
-    role = flake.describe_async(DescribablesRole("ACCOUNTADMIN")).deserialize_one(EntitiesRole)
+    role = flake.describe_async(RoleDescribable("ACCOUNTADMIN")).deserialize_one(RoleEntity)
 
     ### Assert ###
     assert role is not None
@@ -48,7 +48,7 @@ def test_get_role(flake: PyflakeClient):
 def test_get_role_that_does_not_exist(flake: PyflakeClient):
     """test_get_role_that_does_not_exist"""
     ### Act ###
-    role = flake.describe_async(DescribablesRole("I_SURELY_DO_NOT_EXIST")).deserialize_one(EntitiesRole)
+    role = flake.describe_async(RoleDescribable("I_SURELY_DO_NOT_EXIST")).deserialize_one(RoleEntity)
 
     ### Assert ###
     assert role is None

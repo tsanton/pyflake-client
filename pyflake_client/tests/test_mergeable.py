@@ -13,6 +13,7 @@ from pyflake_client.models.assets.database import Database
 from pyflake_client.models.assets.database_role import DatabaseRole
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.assets.table import Table
+from pyflake_client.models.describables.queryable import Queryable
 from pyflake_client.tests.models.mergable_entity import (
     TABLE_COLUMN_DEFINITION,
     TABLE_NAME,
@@ -31,15 +32,14 @@ def test_merge_into(
     t = Table(db.db_name, s.schema_name, TABLE_NAME, TABLE_COLUMN_DEFINITION)
 
     try:
-        flake.register_asset(t, assets_queue)
+        flake.register_asset_async(t, assets_queue).wait()
 
         ### Act ###
-        ins = MergableEntity("TEST", True)
-        success = flake.merge_into(ins)
-        entity = flake.get_mergeable(MergableEntity(the_primary_key=ins.the_primary_key))
+        ins = MergableEntity("TEST", True).configure(db.db_name, s.schema_name, TABLE_NAME)
+        flake.insert_async(ins.merge_into_statement()).wait()
+        entity = flake.describe_async(Queryable(ins.select_statement())).deserialize_one(MergableEntity)
 
         ### Assert ###
-        assert success is True
         assert entity is not None
         assert entity.the_primary_key == ins.the_primary_key
         assert entity.enabled == ins.enabled

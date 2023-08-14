@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from dataclasses import dataclass
-from typing import Union
+from datetime import datetime
+from typing import Any, Callable, Dict
 
 import dacite
 
@@ -10,6 +11,10 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 from pyflake_client.models.describables.snowflake_grant_principal import (
     ISnowflakeGrantPrincipal,
 )
+
+
+from pyflake_client.models.entities.user import User as UserEntity
+
 
 
 @dataclass(frozen=True)
@@ -26,9 +31,14 @@ class User(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
         """is_procedure"""
         return False
 
-    def get_dacite_config(self) -> Union[dacite.Config, None]:
-        """get_dacite_config"""
-        return None
+    @classmethod
+    def get_deserializer(cls) -> Callable[[Dict[str, Any]], UserEntity]:
+        def deserialize(data:Dict[str, Any]) -> UserEntity:
+            return dacite.from_dict(UserEntity, data, dacite.Config(type_hooks={
+                int: lambda v: int(v),
+            }))
+
+        return deserialize
 
     @staticmethod
     def get_snowflake_type() -> str:

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 from dataclasses import dataclass
-from typing import Union
+from datetime import datetime
+from typing import Any, Callable, Dict, Union
 
 import dacite
 
@@ -17,6 +18,8 @@ from pyflake_client.models.describables.snowflake_grant_principal import (
 )
 from pyflake_client.models.describables.user import User as UserDescribable
 
+from pyflake_client.models.entities.role_inheritance import RoleInheritance as RoleInheritanceEntity
+from pyflake_client.models.enums.privilege import Privilege
 
 @dataclass(frozen=True)
 class RoleInheritance(ISnowflakeDescribable):
@@ -28,10 +31,6 @@ class RoleInheritance(ISnowflakeDescribable):
     def is_procedure(self) -> bool:
         """is_procedure"""
         return True
-
-    def get_dacite_config(self) -> Union[dacite.Config, None]:
-        """get_dacite_config"""
-        return None
 
     def get_describe_statement(self) -> str:
         """get_describe_statement"""
@@ -96,3 +95,23 @@ call show_inherited_role('%(s1)s', '%(s2)s', '%(s3)s', '%(s4)s');
             "s3": inherited_identifier,
             "s4": inherited_type,
         }
+    
+    @classmethod
+    def get_deserializer(cls) -> Callable[[Dict[str, Any]], RoleInheritanceEntity]:
+        def deserialize(data:Dict[str, Any]) -> RoleInheritanceEntity:
+            renaming = {
+                "grantee_name": "principal_identifier",
+                "granted_to": "principal_type",
+                "name": "inherited_role_identifier",
+                "granted_on": "inherited_role_type",
+            }
+            for old_key, new_key in renaming.items():
+                data[new_key] = data.pop(old_key)
+            return dacite.from_dict(RoleInheritanceEntity, data, dacite.Config(type_hooks={
+                int: lambda v: int(v),
+                datetime: lambda v: datetime.fromisoformat(v),
+                bool: lambda b: bool(b),
+                Privilege: lambda s: Privilege(s)
+            }))
+
+        return deserialize

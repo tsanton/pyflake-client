@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Any, Callable, Dict, Type, TypeVar
 
-import dacite
+T = TypeVar("T")
 
 
 class ISnowflakeDescribable(ABC):
@@ -18,6 +18,6 @@ class ISnowflakeDescribable(ABC):
     def is_procedure(self) -> bool:
         """is_procedure"""
 
-    @abstractmethod
-    def get_dacite_config(self) -> Union[dacite.Config, None]:
-        """get_dacite_config"""
+    @classmethod
+    def get_deserializer(self) -> Callable[[Dict[str, Any]], T]:
+        """get_deserializer"""

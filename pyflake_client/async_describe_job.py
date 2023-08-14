@@ -3,9 +3,8 @@
 # pylint: disable=invalid-name
 import json
 import time
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, Callable, Dict, List, Type, TypeVar, Union
 
-import dacite
 from snowflake.connector.errors import ProgrammingError
 from snowflake.snowpark import AsyncJob
 from snowflake.snowpark.row import Row
@@ -16,10 +15,10 @@ T = TypeVar("T", bound=ISnowflakeEntity)
 
 
 class AsyncDescribeJob:
-    def __init__(self, original: AsyncJob, is_procedure: bool, config: Union[dacite.Config, None]):
+    def __init__(self, original: AsyncJob, is_procedure: bool, deserializer: Callable[[Dict[str, Any]], T]):
         self._original = original
         self._is_procedure = is_procedure
-        self._config = config
+        self._deserializer = deserializer
 
     def wait(self, timeout: int = 60) -> None:
         start_time = time.time()
@@ -28,7 +27,10 @@ class AsyncDescribeJob:
                 raise TimeoutError(f"Job did not complete after {timeout} seconds.")
             time.sleep(0.1)
 
-    def deserialize_one(self, entity: Type[T], config: Union[dacite.Config, None] = None) -> Union[T, None]:
+    def deserialize_one(self, _: Type[T], deserializer: Union[Callable[[Dict[str, Any]], T], None] = None) -> Union[T, None]:
+        if self._deserializer is None and deserializer is None:
+            raise ValueError("cannot deserialize_one without any deserializer")
+        deserializer_func = deserializer if deserializer is not None else self._deserializer
         data: Dict[str, Any] = {}
         try:
             rows: List[Row] = self._original.result()
@@ -43,9 +45,12 @@ class AsyncDescribeJob:
                 return None
         else:
             data = rows[0].as_dict()
-        return entity.deserialize(data=data, config=config if config is not None else self._config)
+        return deserializer_func(data)
 
-    def deserialize_many(self, entity: Type[T], config: Union[dacite.Config, None] = None) -> List[T]:
+    def deserialize_many(self, _: Type[T], deserializer: Union[Callable[[Dict[str, Any]], T], None] = None) -> List[T]:
+        if self._deserializer is None and deserializer is None:
+            raise ValueError("cannot deserialize_many without any deserializer")
+        deserializer_func = deserializer if deserializer is not None else self._deserializer
         try:
             rows: List[Row] = self._original.result()
         except ProgrammingError as e:
@@ -57,9 +62,9 @@ class AsyncDescribeJob:
             data = [json.loads(r) for r in rows[0]][0]
             if data in ({}, []) or data is None:
                 return []
-            return [entity.deserialize(data=x, config=config if config is not None else self._config) for x in data]
+            return [deserializer_func(x) for x in data]
         return [
-            entity.deserialize(data=x.as_dict(), config=config if config is not None else self._config) for x in rows
+            deserializer_func(x.as_dict()) for x in rows
         ]
 
     def is_done(self) -> bool:

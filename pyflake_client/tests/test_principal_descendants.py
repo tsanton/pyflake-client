@@ -17,7 +17,7 @@ from pyflake_client.models.describables.principal_descendants import (
     PrincipalDescendants as RoleDescendantsDescribable,
 )
 from pyflake_client.models.describables.role import Role as RoleDescribable
-from pyflake_client.models.entities.grant import Grant as GrantEntity
+from pyflake_client.models.entities.role_grant import RoleGrant as RoleGrantEntity
 from pyflake_client.tests.utilities import find
 
 
@@ -25,7 +25,7 @@ def test_get_descendant_roles(flake: PyflakeClient):
     """test_get_descendant_roles: we know that ACCOUNTADMIN is the parent of both SECURITYADMIN and SYSADMIN"""
     ### Act ###
     descendants = flake.describe_async(RoleDescendantsDescribable(RoleDescribable("ACCOUNTADMIN"))).deserialize_many(
-        GrantEntity
+        RoleGrantEntity
     )
 
     assert descendants is not None
@@ -59,7 +59,7 @@ def test_role_to_role_descendants(flake: PyflakeClient, assets_queue: queue.Lifo
 
         descendants = flake.describe_async(
             RoleDescendantsDescribable(RoleDescribable(parent_role.name))
-        ).deserialize_many(GrantEntity)
+        ).deserialize_many(RoleGrantEntity)
 
         assert descendants is not None
         assert len(descendants) == 1
@@ -95,7 +95,7 @@ def test_role_to_roles_descendants(flake: PyflakeClient, assets_queue: queue.Lif
 
         descendants = flake.describe_async(
             RoleDescendantsDescribable(RoleDescribable(parent_role.name))
-        ).deserialize_many(GrantEntity)
+        ).deserialize_many(RoleGrantEntity)
 
         assert descendants is not None
         assert len(descendants) == 2
@@ -141,7 +141,7 @@ def test_role_to_role_and_database_role_descendants(flake: PyflakeClient, assets
 
         descendants = flake.describe_async(
             RoleDescendantsDescribable(RoleDescribable(parent_role.name))
-        ).deserialize_many(GrantEntity)
+        ).deserialize_many(RoleGrantEntity)
 
         assert descendants is not None
         assert len(descendants) == 2
@@ -187,7 +187,7 @@ def test_database_role_to_database_roles_descendants(flake: PyflakeClient, asset
 
         descendants = flake.describe_async(
             RoleDescendantsDescribable(DatabaseRoleDescribable(parent_role.name, parent_role.database_name))
-        ).deserialize_many(GrantEntity)
+        ).deserialize_many(RoleGrantEntity)
 
         assert descendants is not None
         assert len(descendants) == 2

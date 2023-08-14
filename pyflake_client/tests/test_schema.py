@@ -61,7 +61,7 @@ def test_create_schema_with_role_owner(flake: PyflakeClient, assets_queue: queue
     )
     try:
         flake.register_asset_async(database, assets_queue).wait()
-        flake.register_asset_async(some_schema, assets_queue).wait()
+        flake.create_asset_async(some_schema).wait()
 
         ### Act ###
         sch_so = flake.describe_async(
@@ -107,7 +107,7 @@ def test_create_schema_with_database_role_owner(flake: PyflakeClient, assets_que
     try:
         flake.register_asset_async(database, assets_queue).wait()
         w1 = flake.register_asset_async(db_role, assets_queue)
-        w2 = flake.register_asset_async(schema, assets_queue)
+        w2 = flake.create_asset_async(schema)
         flake.wait_all([w1, w2])
         flake.register_asset_async(rel, assets_queue).wait()
 

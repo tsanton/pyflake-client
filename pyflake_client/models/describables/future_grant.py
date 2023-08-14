@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from dataclasses import dataclass
-from typing import Union
+from typing import Any, Callable, Dict
+from datetime import datetime
 
 import dacite
 
@@ -13,6 +14,8 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 from pyflake_client.models.describables.snowflake_grant_principal import (
     ISnowflakeGrantPrincipal,
 )
+from pyflake_client.models.entities.future_grant import FutureGrant as FutureGrantEntity
+from pyflake_client.models.enums.privilege import Privilege
 
 
 @dataclass
@@ -63,5 +66,21 @@ call show_grants_to_database_role('%(s1)s','%(s2)s');
             return False
         return True
 
-    def get_dacite_config(self) -> Union[dacite.Config, None]:
-        return None
+    @classmethod
+    def get_deserializer(cls) -> Callable[[Dict[str, Any]], FutureGrantEntity]:
+        def deserialize(data:Dict[str, Any]) -> FutureGrantEntity:
+            renaming = {
+                "grantee_name": "grantee_identifier",
+                "grant_to": "grantee_type",
+                "name": "grant_identifier",
+            }
+            for old_key, new_key in renaming.items():
+                data[new_key] = data.pop(old_key)
+            return dacite.from_dict(FutureGrantEntity, data, dacite.Config(type_hooks={
+                int: lambda v: int(v),
+                datetime: lambda d: datetime.fromisoformat(d) if type(d) == str else d,
+                bool: lambda b: bool(b),
+                Privilege: lambda s: Privilege(s)
+            }))
+
+        return deserialize

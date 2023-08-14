@@ -7,7 +7,7 @@ from pyflake_client.models.assets.database import Database as DatabaseAsset
 from pyflake_client.models.assets.database_role import DatabaseRole
 from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.describables.database_roles import DatabaseRoles
-from pyflake_client.models.entities.role import Role as EntitiesRole
+from pyflake_client.models.entities.role import Role as RoleEntity
 from pyflake_client.tests.utilities import find
 
 
@@ -28,7 +28,7 @@ def test_get_single_database_role(flake: PyflakeClient, assets_queue: queue.Lifo
         flake.create_asset_async(role).wait()
 
         ### Act ###
-        roles = flake.describe_async(DatabaseRoles(db_name=database.db_name)).deserialize_many(EntitiesRole)
+        roles = flake.describe_async(DatabaseRoles(db_name=database.db_name)).deserialize_many(RoleEntity)
 
         ### Assert ###
         assert roles is not None
@@ -66,7 +66,7 @@ def test_get_database_roles(flake: PyflakeClient, assets_queue: queue.LifoQueue)
         flake.wait_all([w1, w2])
 
         ### Act ###
-        roles = flake.describe_async(DatabaseRoles(db_name=database.db_name)).deserialize_many(EntitiesRole)
+        roles = flake.describe_async(DatabaseRoles(db_name=database.db_name)).deserialize_many(RoleEntity)
 
         ### Assert ###
         assert roles is not None
@@ -93,7 +93,7 @@ def test_get_database_role_none_exist(flake: PyflakeClient, assets_queue: queue.
     try:
         flake.register_asset_async(database, assets_queue).wait()
         ### Act ###
-        roles = flake.describe_async(DatabaseRoles(db_name=database.db_name)).deserialize_many(EntitiesRole)
+        roles = flake.describe_async(DatabaseRoles(db_name=database.db_name)).deserialize_many(RoleEntity)
 
         ### Assert ###
         assert roles == []
@@ -119,7 +119,7 @@ def test_get_database_role_async(flake: PyflakeClient, assets_queue: queue.LifoQ
         flake.create_asset_async(role).wait()
 
         ### Act ###
-        roles = flake.describe_async(DatabaseRoles(db_name=database.db_name)).deserialize_many(EntitiesRole)
+        roles = flake.describe_async(DatabaseRoles(db_name=database.db_name)).deserialize_many(RoleEntity)
 
         ### Assert ###
         assert roles is not None

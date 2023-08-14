@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=consider-using-f-string
 from dataclasses import dataclass
-from typing import Union
+from datetime import datetime
+from typing import Any, Callable, Dict, Union
 
 import dacite
 
@@ -15,6 +16,9 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 from pyflake_client.models.describables.snowflake_grant_principal import (
     ISnowflakeGrantPrincipal,
 )
+
+from pyflake_client.models.entities.role_grant import RoleGrant as RoleGrantEntity
+from pyflake_client.models.enums.privilege import Privilege
 
 
 @dataclass(frozen=True)
@@ -62,6 +66,21 @@ call show_direct_descendants_from_principal('%(s1)s', '%(s2)s');""" % {
         """is_procedure"""
         return True
 
-    def get_dacite_config(self) -> Union[dacite.Config, None]:
-        """get_dacite_config"""
-        return None
+    @classmethod
+    def get_deserializer(cls) -> Callable[[Dict[str, Any]], RoleGrantEntity]:
+        def deserialize(data:Dict[str, Any]) -> RoleGrantEntity:
+            renaming = {
+                "grantee_name": "grantee_identifier",
+                "granted_to": "grantee_type",
+                "name": "granted_identifier",
+            }
+            for old_key, new_key in renaming.items():
+                data[new_key] = data.pop(old_key)
+            return dacite.from_dict(RoleGrantEntity, data, dacite.Config(type_hooks={
+                int: lambda v: int(v),
+                datetime: lambda d: datetime.fromisoformat(d),
+                bool: lambda b: bool(b),
+                Privilege: lambda s: Privilege(s)
+            }))
+
+        return deserialize

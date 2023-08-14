@@ -10,6 +10,7 @@ from snowflake.snowpark import Session
 from pyflake_client.async_asset_job import AsyncAssetJob, AsyncAwaitable
 from pyflake_client.async_call_job import AsyncCallJob
 from pyflake_client.async_describe_job import AsyncDescribeJob
+from pyflake_client.async_insert_job import AsyncInsertJob
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
@@ -61,19 +62,22 @@ class PyflakeClient:
 
     def _delete_asset_async(self, obj: ISnowflakeAsset) -> AsyncAssetJob:
         """delete_asset"""
-        return AsyncDescribeJob(
-            original=self._session.sql(obj.get_delete_statement()).collect_nowait(),
-            is_procedure=False,
-            config=None,
-        )
+        cur = self._conn.cursor()
+        statement = obj.get_delete_statement().strip()
+        cur.execute(statement, num_statements=0, _exec_async=True)
+        return AsyncAssetJob(conn=self._conn, cursor=cur, query_id=cur.sfqid, asset=obj, queue=None)
 
     def describe_async(self, describable: ISnowflakeDescribable) -> AsyncDescribeJob:
         """The ISnowflakeDescribable must contain a single statement query (1x';')"""
         return AsyncDescribeJob(
             original=self._session.sql(describable.get_describe_statement()).collect_nowait(),
             is_procedure=describable.is_procedure(),
-            config=describable.get_dacite_config(),
+            deserializer=describable.get_deserializer(),
         )
+    
+    def insert_async(self, statement: str) -> AsyncInsertJob:
+        return AsyncInsertJob(original=self._session.sql(statement).collect_nowait())
+
 
     # def merge_into(self, obj: U) -> bool:
     #     """merge_into"""

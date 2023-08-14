@@ -10,8 +10,8 @@ from pyflake_client.models.assets.role_inheritance import (
     RoleInheritance as RoleInheritanceAsset,
 )
 from pyflake_client.models.assets.user import User as UserAsset
-from pyflake_client.models.describables.grant import Grant as GrantDescribable
-from pyflake_client.models.describables.user import User as DescribablesUser
+from pyflake_client.models.describables.user_grant import UserGrant as UserGrantDescribable
+from pyflake_client.models.describables.user import User as UserDescribable
 from pyflake_client.models.describables.user import User as UserDescribable
 from pyflake_client.models.entities.user import User as EntitiesUser
 from pyflake_client.models.entities.user_grant import UserGrant as UserGrantEntity
@@ -30,7 +30,7 @@ def test_create_user(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         flake.register_asset_async(user, assets_queue).wait()
 
         ### Act ###
-        sf_user = flake.describe_async(DescribablesUser(user.name)).deserialize_one(EntitiesUser)
+        sf_user = flake.describe_async(UserDescribable(user.name)).deserialize_one(EntitiesUser)
         ### Assert ###
         assert sf_user is not None
         assert sf_user.name == user.name
@@ -47,7 +47,7 @@ def test_get_user(flake: PyflakeClient):
     ### Act ###
     user_id = os.environ.get("SNOWFLAKE_UID")
     assert user_id is not None
-    user = flake.describe_async(DescribablesUser(user_id)).deserialize_one(EntitiesUser)
+    user = flake.describe_async(UserDescribable(user_id)).deserialize_one(EntitiesUser)
 
     ### Assert ###
     assert user is not None
@@ -57,7 +57,7 @@ def test_get_user(flake: PyflakeClient):
 def test_get_user_that_does_not_exist(flake: PyflakeClient):
     """test_get_user_that_does_not_exist"""
     ### Act ###
-    user = flake.describe_async(DescribablesUser("I_SURELY_DO_NOT_EXIST")).deserialize_one(EntitiesUser)
+    user = flake.describe_async(UserDescribable("I_SURELY_DO_NOT_EXIST")).deserialize_one(EntitiesUser)
 
     ### Assert ###
     assert user is None
@@ -77,7 +77,7 @@ def test_user_zero_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 
         ### Act ###
         user_grants = flake.describe_async(
-            describable=GrantDescribable(
+            describable=UserGrantDescribable(
                 principal=UserDescribable(user.name),
             )
         ).deserialize_many(UserGrantEntity)
@@ -110,7 +110,7 @@ def test_user_with_role_grant(flake: PyflakeClient, assets_queue: queue.LifoQueu
 
         ### Act ###
         user_grants = flake.describe_async(
-            describable=GrantDescribable(
+            describable=UserGrantDescribable(
                 principal=UserDescribable(user.name),
             )
         ).deserialize_many(UserGrantEntity)
@@ -158,7 +158,7 @@ def test_user_with_multiple_role_grants(flake: PyflakeClient, assets_queue: queu
 
         ### Act ###
         user_grants = flake.describe_async(
-            describable=GrantDescribable(
+            describable=UserGrantDescribable(
                 principal=UserDescribable(user.name),
             )
         ).deserialize_many(UserGrantEntity)

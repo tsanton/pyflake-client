@@ -34,7 +34,14 @@ TABLE_COLUMN_DEFINITION = [
 
 @dataclass
 class MergableEntity(ISnowflakeMergable):
-    """RoleRelationshipEntity"""
+    """MergableEntity"""
+
+    def configure(self, db_name:str, schema_name:str, table_name: str):
+        self._db_name = db_name
+        self._schema_name = schema_name
+        self._table_name = table_name
+
+        return self
 
     the_primary_key: str
     enabled: Union[bool, None] = None
@@ -42,11 +49,11 @@ class MergableEntity(ISnowflakeMergable):
     valid_to: Union[datetime, None] = None
     id: Union[int, None] = None
 
-    def merge_into_statement(self, db_name: str, schema_name: str) -> str:
+    def merge_into_statement(self) -> str:
         """merge_into_statement"""
         now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z")
         return f"""
-        merge into {db_name}.{schema_name}.{TABLE_NAME} tar using
+        merge into {self._db_name}.{self._schema_name}.{self._table_name} tar using
         (
             select
                 '{self.the_primary_key}' THE_PRIMARY_KEY,
@@ -59,7 +66,7 @@ class MergableEntity(ISnowflakeMergable):
                 s.enabled,
                 s.valid_from,
                 '{now}'::timestamp_ntz(2) valid_to
-            from {db_name}.{schema_name}.{TABLE_NAME} s
+            from {self._db_name}.{self._schema_name}.{self._table_name} s
             where
                 s.THE_PRIMARY_KEY = '{self.the_primary_key}'
                 and s.VALID_TO::date = '9999-12-31'
@@ -81,11 +88,11 @@ class MergableEntity(ISnowflakeMergable):
         );
         """
 
-    def select_statement(self, db_name: str, schema_name: str) -> str:
+    def select_statement(self) -> str:
         """select_statement"""
         return f"""
         select
             *
-        from {db_name}.{schema_name}.{TABLE_NAME} s
+        from {self._db_name}.{self._schema_name}.{self._table_name} s
         where s.the_primary_key = '{self.the_primary_key}' and valid_to::date = '9999-12-31'
         """

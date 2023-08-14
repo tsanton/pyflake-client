@@ -41,6 +41,8 @@ class AsyncAssetJob(AsyncAwaitable):
         while True:
             status = self._conn.get_query_status(self._query_id)
             if status == QueryStatus.SUCCESS:
+                if self._queue is not None:
+                    self._queue.put(self._asset)
                 return
             elif self._conn.is_an_error(status):
                 raise ProgrammingError(status)

@@ -3,7 +3,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Union
+from typing import Any, Callable, Dict, List, Union
 
 import dacite
 
@@ -11,7 +11,7 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
 )
 from pyflake_client.models.enums.column_type import ColumnType
-
+from pyflake_client.models.entities.procedure import Procedure as ProcedureEntity
 
 @dataclass(frozen=True)
 class Procedure(ISnowflakeDescribable):
@@ -57,11 +57,12 @@ call show_procedures('%(str1)s', '%(str2)s', '%(str3)s');
         """is_procedure"""
         return True
 
-    def get_dacite_config(self) -> Union[dacite.Config, None]:
-        """get_dacite_config"""
-        return dacite.Config(
-            type_hooks={
+    @classmethod
+    def get_deserializer(cls) -> Callable[[Dict[str, Any]], ProcedureEntity]:
+        def deserialize(data:Dict[str, Any]) -> ProcedureEntity:
+            return dacite.from_dict(ProcedureEntity, data, dacite.Config(type_hooks={
                 datetime: lambda v: datetime.fromisoformat(v),
                 List[ColumnType]: lambda data: [ColumnType(x) for x in data],
-            }
-        )
+            }))
+
+        return deserialize

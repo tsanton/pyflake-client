@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from dataclasses import dataclass
-from typing import Union
+from datetime import datetime
+from typing import Any, Callable, Dict
 
-from dacite import Config
+import dacite
 
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
 )
+
+from pyflake_client.models.entities.warehouse import Warehouse as WarehouseEntity
 
 
 @dataclass(frozen=True)
@@ -23,6 +26,12 @@ class Warehouse(ISnowflakeDescribable):
         """is_procedure"""
         return False
 
-    def get_dacite_config(self) -> Union[Config, None]:
-        """get_dacite_config"""
-        return None
+    @classmethod
+    def get_deserializer(cls) -> Callable[[Dict[str, Any]], WarehouseEntity]:
+        def deserialize(data:Dict[str, Any]) -> WarehouseEntity:
+            return dacite.from_dict(WarehouseEntity, data, dacite.Config(type_hooks={
+                int: lambda v: int(v),
+            }))
+
+        return deserialize
+

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from dataclasses import dataclass
-from typing import Union
+from typing import Any, Callable, Dict
 
 import dacite
-from dacite import Config
 
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
 )
+
+from pyflake_client.models.entities.schema import Schema as SchemaEntity
 
 
 @dataclass(frozen=True)
@@ -25,5 +26,11 @@ class Schema(ISnowflakeDescribable):
         """is_procedure"""
         return False
 
-    def get_dacite_config(self) -> Union[Config, None]:
-        return dacite.Config(type_hooks={int: lambda v: int(v)})
+    @classmethod
+    def get_deserializer(cls) -> Callable[[Dict[str, Any]], SchemaEntity]:
+        def deserialize(data:Dict[str, Any]) -> SchemaEntity:
+            return dacite.from_dict(SchemaEntity, data, dacite.Config(type_hooks={
+                int: lambda v: int(v)
+            }))
+
+        return deserialize

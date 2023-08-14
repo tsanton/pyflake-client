@@ -23,8 +23,8 @@ class AsyncCallJob:
                 raise TimeoutError(f"Job did not complete after {timeout} seconds.")
             time.sleep(0.1)
 
-    def fetch_one(self, _: Type[T], deserializer: Union[Callable[[Any], T], None] = None) -> Union[T, None]:
-        if deserializer is None and self._deserializer is None:
+    def fetch_one(self, _: Type[T], deserializer: Callable[[Any], T]) -> Union[T, None]:
+        if deserializer is None:
             raise ValueError("cannot fetch_one without any deserializer")
         try:
             rows: List[Row] = self._original.result()
@@ -35,7 +35,7 @@ class AsyncCallJob:
             return None
         return deserializer(rows[0][0])
 
-    def fetch_many(self, _: Type[T], deserializer: Union[Callable[[Any], T], None] = None) -> List[T]:
+    def fetch_many(self, _: Type[T], deserializer: Callable[[Any], T]) -> List[T]:
         if deserializer is None:
             raise ValueError("cannot fetch_all without any deserializer")
         try:
