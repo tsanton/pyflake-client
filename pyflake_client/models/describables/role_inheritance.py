@@ -76,7 +76,7 @@ class RoleInheritance(ISnowflakeDescribable):
 with show_inherited_role as procedure(parent_principal_identifier varchar, parent_principal_type varchar, child_role_identifier varchar, child_role_type varchar)
     returns variant
     language python
-    runtime_version = '3.8'
+    runtime_version = '3.10'
     packages = ('snowflake-snowpark-python')
     handler = 'show_inherited_role_py'
 as $$

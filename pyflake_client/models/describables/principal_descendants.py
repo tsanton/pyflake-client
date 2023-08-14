@@ -25,7 +25,6 @@ class PrincipalDescendants(ISnowflakeDescribable):
 
     def get_describe_statement(self) -> str:
         """get_describe_statement"""
-        """get_describe_statement"""
         if isinstance(self.principal, RoleDescribable):
             principal_type = "ROLE"
             principal_identifier = self.principal.name
@@ -39,7 +38,7 @@ class PrincipalDescendants(ISnowflakeDescribable):
 with show_direct_descendants_from_principal as procedure(principal_type varchar, principal_identifier varchar)
     returns variant not null
     language python
-    runtime_version = '3.8'
+    runtime_version = '3.10'
     packages = ('snowflake-snowpark-python')
     handler = 'show_direct_descendants_from_principal_py'
 as $$

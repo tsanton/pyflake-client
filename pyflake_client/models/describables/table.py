@@ -25,7 +25,7 @@ class Table(ISnowflakeDescribable):
 with show_table_description as procedure(db_name varchar, schema_name varchar, table_name varchar)
     returns variant not null
     language python
-    runtime_version = '3.8'
+    runtime_version = '3.10'
     packages = ('snowflake-snowpark-python')
     handler = 'show_table_description_py'
 as $$

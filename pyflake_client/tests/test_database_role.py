@@ -72,7 +72,7 @@ def test_get_database_role_async(flake: PyflakeClient, assets_queue: queue.LifoQ
         assert r.name == role.name
         assert r.comment == role.comment
         assert r.owner == "USERADMIN"
-        assert r.granted_roles == 0
+        assert r.granted_roles == None
         assert r.created_on.date() == date.today()
     finally:
         ### Cleanup ###

@@ -4,23 +4,34 @@
 # pylint: disable=too-many-locals
 
 import queue
+import secrets
+from datetime import date
+from typing import Tuple
 
 from pyflake_client.client import PyflakeClient
+from pyflake_client.models.assets.database import Database
+from pyflake_client.models.assets.database_role import DatabaseRole
 from pyflake_client.models.assets.procedure import Procedure as ProcedureAsset
+from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.describables.procedure import (
     Procedure as ProcedureDescribable,
 )
 from pyflake_client.models.entities.procedure import Procedure as ProcedureEntity
 from pyflake_client.models.enums.column_type import ColumnType
-from pyflake_client.tests.utilities import _spawn_with_rwc_privileges, compare
+from pyflake_client.tests.utilities import compare
 
 
-def test_create_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+def test_create_procedure_zero_args(
+    flake: PyflakeClient,
+    proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
+    assets_queue: queue.LifoQueue,
+):
     """test_create_procedure_zero_args"""
     ### Arrange ###
-    db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
+    db, s, _, _, _ = proc_db
+    proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()
     sql: str = f"""
-    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.TEST_PROC()
+    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.{proc_name}()
         RETURNS VARCHAR(16777216)
         LANGUAGE SQL
         EXECUTE AS CALLER
@@ -30,14 +41,13 @@ def test_create_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.Li
         END
     $$;
     """
-    proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, "TEST_PROC", [], sql)
+    proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, proc_name, [], sql)
 
     try:
-        flake.register_asset(proc, assets_queue)
-        sf_proc = flake.describe_one(
+        flake.register_asset_async(proc, assets_queue).wait()
+        sf_proc = flake.describe_async(
             ProcedureDescribable(proc.database_name, proc.schema_name, proc.name),
-            ProcedureEntity,
-        )
+        ).deserialize_one(ProcedureEntity)
         ### Assert ###
         assert sf_proc is not None
         assert sf_proc.name == proc.name
@@ -50,12 +60,17 @@ def test_create_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.Li
         flake.delete_assets(assets_queue)
 
 
-def test_create_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+def test_create_procedure_one_arg(
+    flake: PyflakeClient,
+    proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
+    assets_queue: queue.LifoQueue,
+):
     """test_create_procedure_one_arg"""
     ### Arrange ###
-    db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
+    db, s, _, _, _ = proc_db
+    proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()
     sql: str = f"""
-    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.TEST_PROC(NAME VARCHAR(16777216))
+    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.{proc_name}(NAME VARCHAR(16777216))
         RETURNS VARCHAR(16777216)
         LANGUAGE SQL
         EXECUTE AS CALLER
@@ -65,19 +80,19 @@ def test_create_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.Lifo
         END
     $$;
     """
-    proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, "TEST_PROC", [ColumnType.VARCHAR], sql)
+    proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, proc_name, [ColumnType.VARCHAR], sql)
 
     try:
-        flake.register_asset(proc, assets_queue)
-        sf_proc = flake.describe_one(
+        flake.register_asset_async(proc, assets_queue)
+        sf_proc = flake.describe_async(
             ProcedureDescribable(proc.database_name, proc.schema_name, proc.name),
-            ProcedureEntity,
-        )
+        ).deserialize_one(ProcedureEntity)
         ### Assert ###
         assert sf_proc is not None
         assert sf_proc.name == proc.name
         assert sf_proc.catalog_name == proc.database_name
         assert sf_proc.schema_name == proc.schema_name
+        assert sf_proc.created_on.date() == date.today()
         assert compare(sf_proc.procedure_args, proc.args)
 
     finally:
@@ -85,12 +100,17 @@ def test_create_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.Lifo
         flake.delete_assets(assets_queue)
 
 
-def test_create_procedure_multiple_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+def test_create_procedure_multiple_args(
+    flake: PyflakeClient,
+    proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
+    assets_queue: queue.LifoQueue,
+):
     """test_create_procedure_multiple_args"""
     ### Arrange ###
-    db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
+    db, s, _, _, _ = proc_db
+    proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()
     sql: str = f"""
-    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.TEST_PROC(MESSAGE VARCHAR(16777216), NAME VARCHAR(16777216))
+    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.{proc_name}(MESSAGE VARCHAR(16777216), NAME VARCHAR(16777216))
         RETURNS VARCHAR(16777216)
         LANGUAGE SQL
         EXECUTE AS CALLER
@@ -103,22 +123,22 @@ def test_create_procedure_multiple_args(flake: PyflakeClient, assets_queue: queu
     proc: ProcedureAsset = ProcedureAsset(
         db.db_name,
         s.schema_name,
-        "TEST_PROC",
+        proc_name,
         [ColumnType.VARCHAR, ColumnType.VARCHAR],
         sql,
     )
 
     try:
-        flake.register_asset(proc, assets_queue)
-        sf_proc = flake.describe_one(
-            ProcedureDescribable(proc.database_name, proc.schema_name, proc.name),
-            ProcedureEntity,
-        )
+        flake.register_asset_async(proc, assets_queue)
+        sf_proc = flake.describe_async(
+            ProcedureDescribable(proc.database_name, proc.schema_name, proc.name)
+        ).deserialize_one(ProcedureEntity)
         ### Assert ###
         assert sf_proc is not None
         assert sf_proc.name == proc.name
         assert sf_proc.catalog_name == proc.database_name
         assert sf_proc.schema_name == proc.schema_name
+        assert sf_proc.created_on.date() == date.today()
         assert compare(sf_proc.procedure_args, proc.args)
 
     finally:

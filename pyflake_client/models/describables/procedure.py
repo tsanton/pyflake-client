@@ -2,13 +2,15 @@
 # pylint: disable=line-too-long
 
 from dataclasses import dataclass
-from typing import Union
+from datetime import datetime
+from typing import List, Union
 
 import dacite
 
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
 )
+from pyflake_client.models.enums.column_type import ColumnType
 
 
 @dataclass(frozen=True)
@@ -26,7 +28,7 @@ class Procedure(ISnowflakeDescribable):
 with show_procedures as procedure(db_name varchar, schema_name varchar, procedure_name varchar)
     returns variant not null
     language python
-    runtime_version = '3.8'
+    runtime_version = '3.10'
     packages = ('snowflake-snowpark-python')
     handler = 'show_procedure_py'
 as $$
@@ -57,4 +59,9 @@ call show_procedures('%(str1)s', '%(str2)s', '%(str3)s');
 
     def get_dacite_config(self) -> Union[dacite.Config, None]:
         """get_dacite_config"""
-        return None
+        return dacite.Config(
+            type_hooks={
+                datetime: lambda v: datetime.fromisoformat(v),
+                List[ColumnType]: lambda data: [ColumnType(x) for x in data],
+            }
+        )

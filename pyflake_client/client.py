@@ -8,6 +8,7 @@ from snowflake.connector import SnowflakeConnection
 from snowflake.snowpark import Session
 
 from pyflake_client.async_asset_job import AsyncAssetJob, AsyncAwaitable
+from pyflake_client.async_call_job import AsyncCallJob
 from pyflake_client.async_describe_job import AsyncDescribeJob
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 from pyflake_client.models.describables.snowflake_describable_interface import (
@@ -32,25 +33,8 @@ class PyflakeClient:
         for waiter in waiters:
             waiter.wait()
 
-    # def execute_scalar(self, query: str) -> Any:
-    #     """execute_scalar"""
-    #     with self._conn.cursor() as cur:
-    #         cur.execute(query)
-    #         row = cur.fetchone()
-    #         if not row:
-    #             return None
-    #         return row[0]
-
-    # def execute(self, executable: ISnowflakeExecutable) -> Any:
-    #     """execute"""
-    #     with self._conn.cursor() as cur:
-    #         cur.execute(executable.get_call_statement())
-    #         data = cur.fetchall()
-    #         if not data:
-    #             return None
-    #         if len(data) == 1:
-    #             return data[0][0]
-    #         return [x[0] for x in data]
+    def call_async(self, statement: str) -> AsyncCallJob:
+        return AsyncCallJob(original=self._session.sql(statement).collect_nowait())
 
     def create_asset_async(self, obj: ISnowflakeAsset) -> AsyncAssetJob:
         """create_asset"""

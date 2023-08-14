@@ -6,21 +6,28 @@
 
 import queue
 from datetime import date
+from typing import Tuple
 
 from pyflake_client.client import PyflakeClient
+from pyflake_client.models.assets.database import Database
+from pyflake_client.models.assets.database_role import DatabaseRole
+from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.assets.table import Table
 from pyflake_client.tests.models.mergable_entity import (
     TABLE_COLUMN_DEFINITION,
     TABLE_NAME,
     MergableEntity,
 )
-from pyflake_client.tests.utilities import _spawn_with_rwc_privileges
 
 
-def test_merge_into(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+def test_merge_into(
+    flake: PyflakeClient,
+    proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
+    assets_queue: queue.LifoQueue,
+):
     """test_merge_into"""
     ### Arrange ###
-    db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
+    db, s, _, _, _ = proc_db
     t = Table(db.db_name, s.schema_name, TABLE_NAME, TABLE_COLUMN_DEFINITION)
 
     try:

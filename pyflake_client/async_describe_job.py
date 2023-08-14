@@ -27,8 +27,6 @@ class AsyncDescribeJob:
             if time.time() - start_time > timeout:
                 raise TimeoutError(f"Job did not complete after {timeout} seconds.")
             time.sleep(0.1)
-        res = self._original.result()
-        print(res)
 
     def deserialize_one(self, entity: Type[T], config: Union[dacite.Config, None] = None) -> Union[T, None]:
         data: Dict[str, Any] = {}
@@ -47,7 +45,7 @@ class AsyncDescribeJob:
             data = rows[0].as_dict()
         return entity.deserialize(data=data, config=config if config is not None else self._config)
 
-    def deserialize_many(self, entity: Type[T], config: Union[dacite.Config, None] = None) -> Union[List[T], None]:
+    def deserialize_many(self, entity: Type[T], config: Union[dacite.Config, None] = None) -> List[T]:
         try:
             rows: List[Row] = self._original.result()
         except ProgrammingError as e:
@@ -57,7 +55,7 @@ class AsyncDescribeJob:
             return []
         if self._is_procedure:
             data = [json.loads(r) for r in rows[0]][0]
-            if data in ({}, []):
+            if data in ({}, []) or data is None:
                 return []
             return [entity.deserialize(data=x, config=config if config is not None else self._config) for x in data]
         return [

@@ -28,7 +28,7 @@ class FutureGrant(ISnowflakeDescribable):
 with show_grants_to_database_role as procedure(database_name varchar, database_role_name varchar)
     returns variant not null
     language python
-    runtime_version = '3.8'
+    runtime_version = '3.10'
     packages = ('snowflake-snowpark-python')
     handler = 'show_grants_to_database_role_py'
 as $$

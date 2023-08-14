@@ -38,7 +38,7 @@ class PrincipalAscendants(ISnowflakeDescribable):
 with show_all_roles_that_inherit_source as procedure(principal_type varchar, principal_identifier varchar)
     returns variant not null
     language python
-    runtime_version = '3.8'
+    runtime_version = '3.10'
     packages = ('snowflake-snowpark-python')
     handler = 'main_py'
 as $$
