@@ -19,12 +19,11 @@ from pyflake_client.models.entities.grant import Grant as GrantEntity
 from pyflake_client.tests.utilities import find
 
 
-
 def test_get_descendant_roles(flake: PyflakeClient):
     """test_get_descendant_roles: we know that ACCOUNTADMIN is the parent of both SECURITYADMIN and SYSADMIN"""
     ### Act ###
-    descendants = flake.describe_many(RoleDescendantsDescribable(RoleDescribable("ACCOUNTADMIN")), GrantEntity)
-
+    descendants = flake.describe_async(RoleDescendantsDescribable(RoleDescribable("ACCOUNTADMIN"))).deserialize_many(GrantEntity)
+    
     assert descendants is not None
     
     sec_admin = find(descendants, lambda x: x.granted_identifier == "SECURITYADMIN")
@@ -51,11 +50,12 @@ def test_role_to_role_descendants(flake: PyflakeClient, assets_queue: queue.Lifo
     rel = RoleInheritance(child_role, parent_role)
 
     try:
-        flake.register_asset(child_role, assets_queue)
-        flake.register_asset(parent_role, assets_queue)
-        flake.register_asset(rel, assets_queue)
+        w1 = flake.register_asset_async(child_role, assets_queue)
+        w2 = flake.register_asset_async(parent_role, assets_queue)
+        flake.wait_all([w1, w2])
+        flake.register_asset_async(rel, assets_queue).wait()
 
-        descendants = flake.describe_many(RoleDescendantsDescribable(RoleDescribable(parent_role.name)), GrantEntity)
+        descendants = flake.describe_async(RoleDescendantsDescribable(RoleDescribable(parent_role.name))).deserialize_many(GrantEntity)
 
         assert descendants is not None
         assert len(descendants) == 1
@@ -82,13 +82,15 @@ def test_role_to_roles_descendants(flake: PyflakeClient, assets_queue: queue.Lif
     rel_2 = RoleInheritance(child_role_2, parent_role)
 
     try:
-        flake.register_asset(child_role_1, assets_queue)
-        flake.register_asset(child_role_2, assets_queue)
-        flake.register_asset(parent_role, assets_queue)
-        flake.register_asset(rel_1, assets_queue)
-        flake.register_asset(rel_2, assets_queue)
+        w1 = flake.register_asset_async(child_role_1, assets_queue)
+        w2 = flake.register_asset_async(child_role_2, assets_queue)
+        w3 = flake.register_asset_async(parent_role, assets_queue)
+        flake.wait_all([w1, w2, w3])
+        w4 = flake.register_asset_async(rel_1, assets_queue)
+        w5 = flake.register_asset_async(rel_2, assets_queue)
+        flake.wait_all([w4, w5])
 
-        descendants = flake.describe_many(RoleDescendantsDescribable(RoleDescribable(parent_role.name)), GrantEntity)
+        descendants = flake.describe_async(RoleDescendantsDescribable(RoleDescribable(parent_role.name))).deserialize_many(GrantEntity)
 
         assert descendants is not None
         assert len(descendants) == 2
@@ -124,14 +126,16 @@ def test_role_to_role_and_database_role_descendants(flake: PyflakeClient, assets
     rel_2 = RoleInheritance(child_role_2, parent_role)
 
     try:
-        flake.register_asset(db, assets_queue)
-        flake.register_asset(child_role_1, assets_queue)
-        flake.register_asset(child_role_2, assets_queue)
-        flake.register_asset(parent_role, assets_queue)
-        flake.register_asset(rel_1, assets_queue)
-        flake.register_asset(rel_2, assets_queue)
+        w1 = flake.register_asset_async(db, assets_queue)
+        w2 = flake.register_asset_async(child_role_1, assets_queue)
+        w3 = flake.register_asset_async(parent_role, assets_queue)
+        flake.wait_all([w1, w2, w3])
+        w4 = flake.register_asset_async(child_role_2, assets_queue)
+        w5 = flake.register_asset_async(rel_1, assets_queue)
+        flake.wait_all([w4, w5])
+        flake.register_asset_async(rel_2, assets_queue).wait()
 
-        descendants = flake.describe_many(RoleDescendantsDescribable(RoleDescribable(parent_role.name)), GrantEntity)
+        descendants = flake.describe_async(RoleDescendantsDescribable(RoleDescribable(parent_role.name))).deserialize_many(GrantEntity)
 
         assert descendants is not None
         assert len(descendants) == 2
@@ -166,14 +170,16 @@ def test_database_role_to_database_roles_descendants(flake: PyflakeClient, asset
     rel_2 = RoleInheritance(child_role_2, parent_role)
 
     try:
-        flake.register_asset(db, assets_queue)
-        flake.register_asset(child_role_1, assets_queue)
-        flake.register_asset(child_role_2, assets_queue)
-        flake.register_asset(parent_role, assets_queue)
-        flake.register_asset(rel_1, assets_queue)
-        flake.register_asset(rel_2, assets_queue)
+        flake.register_asset_async(db, assets_queue).wait()
+        w1 = flake.register_asset_async(child_role_1, assets_queue)
+        w2 = flake.register_asset_async(child_role_2, assets_queue)
+        w3 = flake.register_asset_async(parent_role, assets_queue)
+        flake.wait_all([w1, w2, w3])
+        w4 = flake.register_asset_async(rel_1, assets_queue)
+        w5 = flake.register_asset_async(rel_2, assets_queue)
+        flake.wait_all([w4, w5])
 
-        descendants = flake.describe_many(RoleDescendantsDescribable(DatabaseRoleDescribable(parent_role.name, parent_role.database_name)), GrantEntity)
+        descendants = flake.describe_async(RoleDescendantsDescribable(DatabaseRoleDescribable(parent_role.name, parent_role.database_name))).deserialize_many(GrantEntity)
 
         assert descendants is not None
         assert len(descendants) == 2

@@ -16,9 +16,7 @@ class ClassificationTag:
     tag_value: Union[str, None] = None
 
     @classmethod
-    def load_from_sf(
-        cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None
-    ) -> ClassificationTag:
+    def deserialize(cls, data: Dict[str, Any], config: Union[dacite.Config, None]) -> ClassificationTag:
         return ClassificationTag(
             tag_database_name=data["TAG_DATABASE"],
             tag_schema_name=data["TAG_SCHEMA"],

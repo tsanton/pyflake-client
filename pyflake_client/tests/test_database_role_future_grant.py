@@ -28,13 +28,13 @@ def test_describe_future_grant_for_non_existing_database_role(flake: PyflakeClie
     sys_admin = RoleAsset("SYSADMIN")
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin)
     try:
-            flake.register_asset(database, assets_queue)
+            flake.register_asset_async(database, assets_queue).wait()
             ### Act ###
-            grants = flake.describe_many(describable=FutureGrantDescribable(principal=DatabaseRoleDescribable(name="NON_EXISTING_DATABASE_ROLE", db_name=database.db_name)), entity=FutureGrantEntity)
+            grants = flake.describe_async(describable=FutureGrantDescribable(principal=DatabaseRoleDescribable(name="NON_EXISTING_DATABASE_ROLE", db_name=database.db_name))).deserialize_many(FutureGrantEntity)
 
             ### Assert ###
 
-            assert grants is None
+            assert grants == []
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
@@ -44,11 +44,11 @@ def test_describe_future_grant_for_non_existing_database_role(flake: PyflakeClie
 def test_describe_future_grant_for_database_role_in_non_existing_database(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     """test_describe_future_grant_for_database_role_in_non_existing_database"""
     ### Act ###
-    grants = flake.describe_many(describable=FutureGrantDescribable(principal=DatabaseRoleDescribable(name="NON_EXISTING_DATABASE_ROLE", db_name="I_DONT_EXIST_EITHER_DATABASE")), entity=FutureGrantEntity)
+    grants = flake.describe_async(describable=FutureGrantDescribable(principal=DatabaseRoleDescribable(name="NON_EXISTING_DATABASE_ROLE", db_name="I_DONT_EXIST_EITHER_DATABASE"))).deserialize_many(FutureGrantEntity)
 
     ### Assert ###
 
-    assert grants is None
+    assert grants == []
 
 
 
@@ -62,12 +62,12 @@ def test_database_role_future_database_object_grant(flake: PyflakeClient, assets
     grant = GrantAction(db_role, DatabaseObjectFutureGrant(database_name=database.db_name, grant_target=ObjectType.TABLE), [Privilege.SELECT, Privilege.REFERENCES])
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(db_role, assets_queue)
-        flake.register_asset(grant, assets_queue)
+        flake.register_asset_async(database, assets_queue).wait()
+        flake.register_asset_async(db_role, assets_queue).wait()
+        flake.register_asset_async(grant, assets_queue).wait()
 
         ### Act ###
-        grants = flake.describe_many(describable=FutureGrantDescribable(principal=DatabaseRoleDescribable(name=db_role.name, db_name=database.db_name)), entity=FutureGrantEntity)
+        grants = flake.describe_async(describable=FutureGrantDescribable(principal=DatabaseRoleDescribable(name=db_role.name, db_name=database.db_name))).deserialize_many(FutureGrantEntity)
 
         ### Assert ###
         assert grants is not None
@@ -103,13 +103,14 @@ def test_database_role_schema_object_future_grant(flake: PyflakeClient, assets_q
     grant = GrantAction(db_role, SchemaObjectFutureGrant(database_name=database.db_name, schema_name=schema.schema_name, grant_target=ObjectType.TABLE), [Privilege.SELECT, Privilege.REFERENCES])
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(schema, assets_queue)
-        flake.register_asset(db_role, assets_queue)
-        flake.register_asset(grant, assets_queue)
+        flake.register_asset_async(database, assets_queue).wait()
+        w1 = flake.register_asset_async(schema, assets_queue)
+        w2 = flake.register_asset_async(db_role, assets_queue)
+        flake.wait_all([w1, w2])
+        flake.register_asset_async(grant, assets_queue).wait()
 
         ### Act ###
-        grants = flake.describe_many(describable=FutureGrantDescribable(principal=DatabaseRoleDescribable(name=db_role.name, db_name=database.db_name)), entity=FutureGrantEntity)
+        grants = flake.describe_async(describable=FutureGrantDescribable(principal=DatabaseRoleDescribable(name=db_role.name, db_name=database.db_name))).deserialize_many(FutureGrantEntity)
 
         ### Assert ###
         assert grants is not None

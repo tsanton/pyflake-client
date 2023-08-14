@@ -31,7 +31,7 @@ class RoleInheritance(ISnowflakeEntity):
         }
 
     @classmethod
-    def load_from_sf(cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None) -> RoleInheritance:
+    def deserialize(cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None) -> RoleInheritance:
         for old_key, new_key in cls.map_key_names().items():
             data[new_key] = data.pop(old_key)
         return RoleInheritance(**{k: data[k] for k in cls.__dataclass_fields__})

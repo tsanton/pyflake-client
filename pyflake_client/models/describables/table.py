@@ -19,8 +19,6 @@ class Table(ISnowflakeDescribable):
     name: str
 
     def get_describe_statement(self) -> str:
-        # TODO formatting with .format
-
         return """
 with show_table_description as procedure(db_name varchar, schema_name varchar, table_name varchar)
     returns variant not null
@@ -66,6 +64,7 @@ call show_table_description('%(s1)s', '%(s2)s', '%(s3)s');
     def get_dacite_config(self) -> Union[Config, None]:
         return Config(
             type_hooks={
-                datetime: lambda v: datetime.strptime(v, "%Y-%m-%d %H:%M:%S.%f%z")
+                datetime: lambda v: datetime.strptime(v, "%Y-%m-%d %H:%M:%S.%f%z"),
+                int: lambda i: int(i)
             },
         )

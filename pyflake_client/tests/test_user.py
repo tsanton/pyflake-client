@@ -17,7 +17,7 @@ from pyflake_client.models.entities.user_grant import UserGrant as UserGrantEnti
 
 
 def test_create_user(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_role"""
+    """test_create_user"""
     ### Arrange ###
     user = UserAsset(
         name="IGT_CREATE_USER",
@@ -26,16 +26,15 @@ def test_create_user(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     )
 
     try:
-        flake.register_asset(user, assets_queue)
+        flake.register_asset_async(user, assets_queue).wait()
 
         ### Act ###
-        sf_user = flake.describe_one(DescribablesUser(user.name), EntitiesUser)
+        sf_user = flake.describe_async(DescribablesUser(user.name)).deserialize_one(EntitiesUser)
         ### Assert ###
         assert sf_user is not None
         assert sf_user.name == user.name
         assert sf_user.comment == user.comment
         assert sf_user.owner == "USERADMIN"
-        assert sf_user.created_on is not None
         assert sf_user.created_on.date() == date.today()
     finally:
         ### Cleanup ###
@@ -43,11 +42,11 @@ def test_create_user(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 
 
 def test_get_user(flake: PyflakeClient):
-    """test_get_role"""
+    """test_get_user"""
     ### Act ###
     user_id = os.environ.get("SNOWFLAKE_UID")
     assert user_id is not None
-    user = flake.describe_one(DescribablesUser(user_id), EntitiesUser)
+    user = flake.describe_async(DescribablesUser(user_id)).deserialize_one(EntitiesUser)
 
     ### Assert ###
     assert user is not None
@@ -55,9 +54,9 @@ def test_get_user(flake: PyflakeClient):
 
 
 def test_get_user_that_does_not_exist(flake: PyflakeClient):
-    """test_get_role_that_does_not_exist"""
+    """test_get_user_that_does_not_exist"""
     ### Act ###
-    user = flake.describe_one(DescribablesUser("I_SURELY_DO_NOT_EXIST"), EntitiesUser)
+    user = flake.describe_async(DescribablesUser("I_SURELY_DO_NOT_EXIST")).deserialize_one(EntitiesUser)
 
     ### Assert ###
     assert user is None
@@ -73,15 +72,13 @@ def test_user_zero_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         comment=comment,
     )
     try:
-        flake.register_asset(user, assets_queue)
+        flake.register_asset_async(user, assets_queue).wait()
 
         ### Act ###
-        user_grants = flake.describe_many(
+        user_grants = flake.describe_async(
             describable=GrantDescribable(
                 principal=UserDescribable(user.name),
-            ),
-            entity=UserGrantEntity,
-        )
+            )).deserialize_many(UserGrantEntity)
         ### Assert ###
         assert user_grants == []
     finally:
@@ -104,17 +101,16 @@ def test_user_with_role_grant(flake: PyflakeClient, assets_queue: queue.LifoQueu
     )
     inheritance = RoleInheritanceAsset(child_principal=role, parent_principal=user)
     try:
-        flake.register_asset(user, assets_queue)
-        flake.register_asset(role, assets_queue)
-        flake.register_asset(inheritance, assets_queue)
+        w1 = flake.register_asset_async(user, assets_queue)
+        w2 = flake.register_asset_async(role, assets_queue)
+        flake.wait_all([w1, w2])
+        flake.register_asset_async(inheritance, assets_queue).wait
 
         ### Act ###
-        user_grants = flake.describe_many(
+        user_grants = flake.describe_async(
             describable=GrantDescribable(
                 principal=UserDescribable(user.name),
-            ),
-            entity=UserGrantEntity,
-        )
+            )).deserialize_many(UserGrantEntity)
 
         ### Assert ###
         assert user_grants is not None
@@ -149,19 +145,19 @@ def test_user_with_multiple_role_grants(flake: PyflakeClient, assets_queue: queu
     inheritance_1 = RoleInheritanceAsset(child_principal=role_1, parent_principal=user)
     inheritance_2 = RoleInheritanceAsset(child_principal=role_2, parent_principal=user)
     try:
-        flake.register_asset(user, assets_queue)
-        flake.register_asset(role_1, assets_queue)
-        flake.register_asset(role_2, assets_queue)
-        flake.register_asset(inheritance_1, assets_queue)
-        flake.register_asset(inheritance_2, assets_queue)
+        w1 = flake.register_asset_async(user, assets_queue)
+        w2 = flake.register_asset_async(role_1, assets_queue)
+        w3 = flake.register_asset_async(role_2, assets_queue)
+        flake.wait_all([w1, w2, w3])
+        w4 = flake.register_asset_async(inheritance_1, assets_queue)
+        w5 = flake.register_asset_async(inheritance_2, assets_queue)
+        flake.wait_all([w4, w5])
 
         ### Act ###
-        user_grants = flake.describe_many(
+        user_grants = flake.describe_async(
             describable=GrantDescribable(
                 principal=UserDescribable(user.name),
-            ),
-            entity=UserGrantEntity,
-        )
+            )).deserialize_many(UserGrantEntity)
 
         ### Assert ###
         assert user_grants is not None

@@ -29,7 +29,7 @@ def flake() -> Generator:
         autocommit=True,
     )
 
-    cli = PyflakeClient(conn, "IGT_DEMO", "MGMT")
+    cli = PyflakeClient(conn)
 
     yield cli
 
@@ -47,14 +47,6 @@ def database() -> DatabaseAsset:
     database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
     return database
 
-
 @pytest.fixture(scope="session")
-def existing_database() -> str:
-    """return a database we are certain exists"""
-    return "SNOWFLAKE"
-
-
-@pytest.fixture(scope="session")
-def existing_database_role() -> str:
-    """return a database role that we are certain exists in SNOWFLAKE database"""
-    return "ALERT_VIEWER"
+def comment() -> str:
+    return f"pyflake_client_test_{uuid.uuid4()}"

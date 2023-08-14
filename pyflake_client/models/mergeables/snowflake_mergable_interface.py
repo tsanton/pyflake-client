@@ -6,9 +6,9 @@ class ISnowflakeMergable(ABC):
     """ISnowflakeMergable"""
 
     @abstractmethod
-    def merge_into_statement(self, db_name: str, schema_name: str) -> str:
+    def merge_into_statement(self) -> str:
         """merge_into_statement"""
 
     @abstractmethod
-    def select_statement(self, db_name: str, schema_name: str) -> str:
+    def select_statement(self) -> str:
         """select_statement"""

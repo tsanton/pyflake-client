@@ -75,10 +75,13 @@ with show_inherited_role as procedure(parent_principal_identifier varchar, paren
     handler = 'show_inherited_role_py'
 as $$
 def show_inherited_role_py(snowpark_session, parent_principal_identifier_py:str, parent_principal_type_py:str, child_role_identifier_py:str, child_role_type_py:str):
-    for row in snowpark_session.sql(f'SHOW GRANTS TO {parent_principal_type_py} {parent_principal_identifier_py}'.upper()).to_local_iterator():
-        if row['granted_on'] == child_role_type_py and row['name'] == child_role_identifier_py and row['privilege'] == 'USAGE':
-            return row.as_dict()
-    raise ValueError('Role relationship does not exist or not authorized')
+    try:
+        for row in snowpark_session.sql(f'SHOW GRANTS TO {parent_principal_type_py} {parent_principal_identifier_py}'.upper()).to_local_iterator():
+            if row['granted_on'] == child_role_type_py and row['name'] == child_role_identifier_py and row['privilege'] == 'USAGE':
+                return row.as_dict()
+        return None
+    except:
+        return None
 $$
 call show_inherited_role('%(s1)s', '%(s2)s', '%(s3)s', '%(s4)s');
 """ % {

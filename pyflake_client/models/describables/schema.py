@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Union
 
 from dacite import Config
+import dacite
 
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
@@ -28,4 +29,8 @@ class Schema(ISnowflakeDescribable):
         return False
 
     def get_dacite_config(self) -> Union[Config, None]:
-        return None
+        return dacite.Config(
+            type_hooks={
+                int: lambda v: int(v)
+            }
+        )

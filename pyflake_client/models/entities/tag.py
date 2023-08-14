@@ -19,7 +19,7 @@ class Tag(ISnowflakeEntity):
     created_on: datetime
 
     @classmethod
-    def load_from_sf(
+    def deserialize(
         cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None
     ) -> Tag:
         return Tag(

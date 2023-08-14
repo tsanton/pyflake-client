@@ -10,14 +10,14 @@ from pyflake_client.models.describables.snowflake_describable_interface import (
 
 
 @dataclass(frozen=True)
-class Database(ISnowflakeDescribable):
+class Queryable(ISnowflakeDescribable):
     """Database"""
 
-    name: str
+    query: str
 
     def get_describe_statement(self) -> str:
         """get_describe_statement"""
-        return f"SHOW DATABASES LIKE '{self.name}'".upper()
+        return self.query
 
     def is_procedure(self) -> bool:
         """is_procedure"""
@@ -25,8 +25,4 @@ class Database(ISnowflakeDescribable):
 
     def get_dacite_config(self) -> Union[dacite.Config, None]:
         """get_dacite_config"""
-        return dacite.Config(
-            type_hooks={
-                int: lambda v: int(v)
-            }
-        )
+        return None

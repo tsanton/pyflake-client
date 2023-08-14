@@ -25,23 +25,23 @@ class Table(ISnowflakeEntity):
     tags: List[ClassificationTag]
     rows: int
     owner: str
-    retention_time: str #TODO: int
+    retention_time: int
     created_on: datetime
 
     @classmethod
-    def load_from_sf(cls, data: Dict[str, Any], config: Union[dacite.Config, None]) -> Table:
-        columns = [ColumnEntity.load_from_sf(c) for c in data["columns"]]
-        tags = [ClassificationTag.load_from_sf(t) for t in data["tags"]]
-        return Table(
-            name=data["name"],
-            database_name=data["database_name"],
-            schema_name=data["schema_name"],
-            kind=data["kind"],
-            columns=columns,
-            comment=data["comment"],
-            tags=tags,
-            rows=data["rows"],
-            owner=data["owner"],
-            retention_time=data["retention_time"],
-            created_on=data["created_on"],
-        )
+    def deserialize(cls, data: Dict[str, Any], config: Union[dacite.Config, None]) -> Table:
+        columns = [ColumnEntity.deserialize(c, None) for c in data["columns"]]
+        tags = [ClassificationTag.deserialize(t, None) for t in data["tags"]]
+        return dacite.from_dict(Table, {
+            "name": data["name"],
+            "database_name": data["database_name"],
+            "schema_name": data["schema_name"],
+            "kind": data["kind"],
+            "columns": columns,
+            "comment": data["comment"],
+            "tags": tags,
+            "rows": data["rows"],
+            "owner": data["owner"],
+            "retention_time": data["retention_time"],
+            "created_on": data["created_on"],
+        }, config)

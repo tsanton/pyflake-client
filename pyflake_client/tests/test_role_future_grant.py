@@ -21,15 +21,16 @@ from pyflake_client.models.enums.privilege import Privilege
 from pyflake_client.models.enums.object_type import ObjectType
 
 def test_describe_future_grant_for_non_existing_role(flake: PyflakeClient):
-    """test_describe_grant_for_non_existing_role"""
+    """test_describe_future_grant_for_non_existing_role"""
     ### Act ###
-    grants = flake.describe_many(describable=FutureGrantDescribable(principal=RoleDescribable(name="NON_EXISTING_ROLE")), entity=FutureGrantEntity)
+    grants = flake.describe_async(describable=FutureGrantDescribable(principal=RoleDescribable(name="NON_EXISTING_ROLE"))).deserialize_many(FutureGrantEntity)
 
     ### Assert ###
-    assert grants is None
+    assert grants == []
 
 
 def test_role_database_object_future_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    """test_role_database_object_future_grant"""
     ### Arrange ###
     snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
     database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
@@ -37,12 +38,13 @@ def test_role_database_object_future_grant(flake: PyflakeClient, assets_queue: q
     grant = GrantAction(role, DatabaseObjectFutureGrant(database_name=database.db_name, grant_target=ObjectType.TABLE), [Privilege.SELECT, Privilege.REFERENCES])
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(role, assets_queue)
-        flake.register_asset(grant, assets_queue)
+        w1 =  flake.register_asset_async(database, assets_queue)
+        w2 =  flake.register_asset_async(role, assets_queue)
+        flake.wait_all([w1, w2])
+        flake.register_asset_async(grant, assets_queue).wait()
 
         ### Act ###
-        grants = flake.describe_many(describable=FutureGrantDescribable(principal=RoleDescribable(name=role.name)), entity=FutureGrantEntity)
+        grants = flake.describe_async(describable=FutureGrantDescribable(principal=RoleDescribable(name=role.name))).deserialize_many(FutureGrantEntity)
 
         ### Assert ###
         assert grants is not None
@@ -73,13 +75,14 @@ def test_role_schema_object_future_grant(flake: PyflakeClient, assets_queue: que
     role = RoleAsset("IGT_CREATE_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
     grant = GrantAction(role, SchemaObjectFutureGrant(database_name=database.db_name, schema_name=schema.schema_name, grant_target=ObjectType.TABLE), [Privilege.SELECT, Privilege.REFERENCES])
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(schema, assets_queue)
-        flake.register_asset(role, assets_queue)
-        flake.register_asset(grant, assets_queue)
+        w1 = flake.register_asset_async(database, assets_queue)
+        w2 = flake.register_asset_async(role, assets_queue)
+        flake.wait_all([w1, w2])
+        flake.register_asset_async(schema, assets_queue).wait()
+        flake.register_asset_async(grant, assets_queue).wait()
 
         ### Act ###
-        grants = flake.describe_many(describable=FutureGrantDescribable(principal=RoleDescribable(name=role.name)), entity=FutureGrantEntity)
+        grants = flake.describe_async(describable=FutureGrantDescribable(principal=RoleDescribable(name=role.name))).deserialize_many(FutureGrantEntity)
 
         ### Assert ###
         assert grants is not None

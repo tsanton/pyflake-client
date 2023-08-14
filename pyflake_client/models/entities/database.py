@@ -13,5 +13,7 @@ class Database(ISnowflakeEntity):
     owner: str
     origin: str
     comment: str
-    retention_time: str #TODO: int
+    retention_time: int
     created_on: datetime
+
+

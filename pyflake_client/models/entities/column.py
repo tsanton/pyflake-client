@@ -37,13 +37,13 @@ class Column(ISnowflakeEntity, ABC):
         }
 
     @classmethod
-    def load_from_sf(
+    def deserialize(
         cls, data: Dict[str, Any], config: Union[dacite.Config, None] = None
     ) -> Column:
         for old_key, new_key in cls.map_key_names().items():
             data[new_key] = data.pop(old_key)
 
-        data["tags"] = [ClassificationTag.load_from_sf(tag) for tag in data["tags"]]
+        data["tags"] = [ClassificationTag.deserialize(tag, config) for tag in data["tags"]]
         data["primary_key"] = data["primary_key"] == "Y"
         data["unique_key"] = data["unique_key"] == "Y"
         data["nullable"] = data["nullable"] == "Y"

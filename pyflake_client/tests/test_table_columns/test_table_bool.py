@@ -32,19 +32,18 @@ def test_table_bool(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     )
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(schema, assets_queue)
-        flake.register_asset(table, assets_queue)
+        flake.register_asset_async(database, assets_queue).wait()
+        flake.register_asset_async(schema, assets_queue).wait()
+        flake.register_asset_async(table, assets_queue).wait()
 
         ### Act ###
-        sf_table = flake.describe_one(
+        sf_table = flake.describe_async(
             TableDescribable(
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 name=table.table_name,
-            ),
-            TableEntity,
-        )
+            )).deserialize_one(TableEntity)
+        
         ### Assert ###
         assert sf_table is not None
         assert sf_table.name == table.table_name
@@ -84,19 +83,18 @@ def test_table_bool_primary_key(flake: PyflakeClient, assets_queue: queue.LifoQu
     )
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(schema, assets_queue)
-        flake.register_asset(table, assets_queue)
+        flake.register_asset_async(database, assets_queue).wait()
+        flake.register_asset_async(schema, assets_queue).wait()
+        flake.register_asset_async(table, assets_queue).wait()
 
         ### Act ###
-        sf_table = flake.describe_one(
+        sf_table = flake.describe_async(
             TableDescribable(
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 name=table.table_name,
-            ),
-            TableEntity,
-        )
+            )).deserialize_one(TableEntity)
+        
         ### Assert ###
         assert sf_table is not None
         assert sf_table.name == table.table_name

@@ -25,11 +25,11 @@ def test_create_database_role(flake: PyflakeClient, assets_queue: queue.LifoQueu
     )
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(role, assets_queue)
+        flake.register_asset_async(database, assets_queue).wait()
+        flake.register_asset_async(role, assets_queue).wait()
 
         ### Act ###
-        sf_role = flake.describe_one(DescribablesRole(name=role.name, db_name=database.db_name),EntitiesRole)
+        sf_role = flake.describe_async(DescribablesRole(name=role.name, db_name=database.db_name)).deserialize_one(EntitiesRole)
 
         ### Assert ###
         assert sf_role is not None
@@ -42,17 +42,38 @@ def test_create_database_role(flake: PyflakeClient, assets_queue: queue.LifoQueu
         ### Cleanup ###
         flake.delete_assets(assets_queue)
 
+def test_get_database_role_async(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+    """test_create_role"""
+    snowflake_comment:str = f"pyflake_client_test_{uuid.uuid4()}"
+    ### Arrange ###
+    database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
+    role: DatabaseRole = DatabaseRole(
+        name="IGT_ROLE",
+        database_name=database.db_name,
+        comment=snowflake_comment,
+        owner=RoleAsset("USERADMIN"),
+    )
 
-def test_get_database_role(flake: PyflakeClient,existing_database_role: str, existing_database: str):
-    sf_role = flake.describe_one(DescribablesRole(name=existing_database_role, db_name=existing_database), EntitiesRole)
-    assert sf_role is not None
-    assert sf_role.name == existing_database_role
-    assert sf_role.owner == ""
-    assert sf_role.comment == ""
+    try:
+        flake.register_asset_async(database, assets_queue).wait()
+        flake.create_asset_async(role).wait()
 
+        ### Act ###
+        r = flake.describe_async(DescribablesRole(name=role.name, db_name=database.db_name)).deserialize_one(EntitiesRole)
 
-def test_get_database_role_from_db_not_exists(flake: PyflakeClient, existing_database_role: str):
-    sf_role = flake.describe_one(DescribablesRole(name=existing_database_role, db_name="I_SURELY_DO_NOT_EXIST_DATABASE"), EntitiesRole)
+        ### Assert ###
+        assert r is not None
+        assert r.name == role.name
+        assert r.comment == role.comment
+        assert r.owner == "USERADMIN"
+        assert r.granted_roles == 0
+        assert r.created_on.date() == date.today()
+    finally:
+        ### Cleanup ###
+        flake.delete_assets(assets_queue)
+
+def test_get_database_role_from_db_not_exists(flake: PyflakeClient):
+    sf_role = flake.describe_async(DescribablesRole(name="SNOWFLAKE", db_name="I_SURELY_DO_NOT_EXIST_DATABASE")).deserialize_one(EntitiesRole)
     assert sf_role is None
 
 
@@ -61,8 +82,8 @@ def test_get_database_role_not_exists(flake: PyflakeClient, assets_queue: queue.
     try:
         database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
 
-        flake.register_asset(database, assets_queue)
-        sf_role = flake.describe_one(DescribablesRole(name="I_SURELY_DO_NOT_EXIST_DATABASE_ROLE", db_name=database.db_name), EntitiesRole)
+        flake.register_asset_async(database, assets_queue).wait()
+        sf_role = flake.describe_async(DescribablesRole(name="I_SURELY_DO_NOT_EXIST_DATABASE_ROLE", db_name=database.db_name)).deserialize_one(EntitiesRole)
         assert sf_role is None
     finally:
         flake.delete_assets(assets_queue)

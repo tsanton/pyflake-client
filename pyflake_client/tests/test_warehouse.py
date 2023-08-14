@@ -24,10 +24,10 @@ def test_create_warehouse_with_role_owner(flake: PyflakeClient, assets_queue: qu
     warehouse = WarehouseAsset("IGT_DEMO_WH", snowflake_comment, owner=RoleAsset("SYSADMIN"))
 
     try:
-        flake.register_asset(warehouse, assets_queue)
+        flake.register_asset_async(warehouse, assets_queue).wait()
 
         ### Act ###
-        sf_wh: WarehouseEntity = flake.describe_one(WarehouseDescribable(warehouse.warehouse_name), WarehouseEntity)
+        sf_wh: WarehouseEntity = flake.describe_async(WarehouseDescribable(warehouse.warehouse_name)).deserialize_one(WarehouseEntity)
         
         ### Assert ###
         assert sf_wh.name == warehouse.warehouse_name
@@ -43,4 +43,4 @@ def test_create_warehouse_with_database_role_owner(flake: PyflakeClient, assets_
     """test_create_database_with_database_role_owner"""
     snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     with pytest.raises(NotImplementedError):
-        flake.register_asset(WarehouseAsset("IGT_DEMO_WH", snowflake_comment, owner=DatabaseRoleAsset("DATABASE_ROLE", "CANT_OWN_DATABASES")), assets_queue)
+        flake.register_asset_async(WarehouseAsset("IGT_DEMO_WH", snowflake_comment, owner=DatabaseRoleAsset("DATABASE_ROLE", "CANT_OWN_DATABASES")), assets_queue).wait()

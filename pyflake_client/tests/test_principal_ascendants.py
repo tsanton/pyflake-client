@@ -23,7 +23,7 @@ from pyflake_client.tests.utilities import find
 def test_get_principal_ascendants(flake: PyflakeClient):
     """test_get_principal_ascendants: we know that USERADMIN -> SECURITYADMIN -> ACCOUNTADMIN"""
     ### Act ###
-    ascendants: List[PrincipalAscendant] = flake.describe_many(RoleAscendantsDescribable(RoleDescribable("USERADMIN")), PrincipalAscendant)
+    ascendants: List[PrincipalAscendant] = flake.describe_async(RoleAscendantsDescribable(RoleDescribable("USERADMIN"))).deserialize_many(PrincipalAscendant)
 
     sec_admin = find(ascendants, lambda x: x.grantee_identifier == "SECURITYADMIN" and x.granted_identifier == "USERADMIN")
     acc_admin = find(ascendants, lambda x: x.grantee_identifier == "ACCOUNTADMIN" and x.granted_identifier == "SECURITYADMIN")
@@ -61,23 +61,25 @@ def test_create_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
     grandparent2_parent_relationship = RoleInheritance(parent_role, grandparent2_role)
     great_grandparent_role = Role("IGT_GREAT_GRANDPARENT_ROLE", snowflake_comment, user_admin_role)
     great_grandparent_grandparent_relationship = RoleInheritance(child_principal=grandparent1_role, parent_principal=great_grandparent_role)
-    sysadmin_great_grandparent_relationship = RoleInheritance(child_principal=great_grandparent_role, parent_principal=sys_admin_role )
+    sysadmin_great_grandparent_relationship = RoleInheritance(child_principal=great_grandparent_role, parent_principal=sys_admin_role)
     try:
-        flake.register_asset(child1_role, assets_queue)
-        flake.register_asset(child2_role, assets_queue)
-        flake.register_asset(parent_role, assets_queue)
-        flake.register_asset(parent_child1_relationship, assets_queue)
-        flake.register_asset(parent_child2_relationship, assets_queue)
-        flake.register_asset(grandparent1_role, assets_queue)
-        flake.register_asset(grandparent2_role, assets_queue)
-        flake.register_asset(grandparent1_parent_relationship, assets_queue)
-        flake.register_asset(grandparent2_parent_relationship, assets_queue)
-        flake.register_asset(great_grandparent_role, assets_queue)
-        flake.register_asset(great_grandparent_grandparent_relationship, assets_queue)
-        flake.register_asset(sysadmin_great_grandparent_relationship, assets_queue)
+        w1 = flake.register_asset_async(child1_role, assets_queue)
+        w2 = flake.register_asset_async(child2_role, assets_queue)
+        w3 = flake.register_asset_async(parent_role, assets_queue)
+        w4 = flake.register_asset_async(grandparent1_role, assets_queue)
+        w5 = flake.register_asset_async(grandparent2_role, assets_queue)
+        w6 = flake.register_asset_async(great_grandparent_role, assets_queue)
+        flake.wait_all([w1, w2, w3, w4, w5, w6])
+        w7 = flake.register_asset_async(parent_child1_relationship, assets_queue)
+        w8 = flake.register_asset_async(parent_child2_relationship, assets_queue)
+        w9 = flake.register_asset_async(grandparent1_parent_relationship, assets_queue)
+        w10 = flake.register_asset_async(grandparent2_parent_relationship, assets_queue)
+        w11 = flake.register_asset_async(great_grandparent_grandparent_relationship, assets_queue)
+        w12 = flake.register_asset_async(sysadmin_great_grandparent_relationship, assets_queue)
+        flake.wait_all([w7, w8, w9, w10, w11, w12])
 
-        ### Act ###
-        ascendants: List[PrincipalAscendant] = flake.describe_many(RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE")), PrincipalAscendant)
+        ### ctregister_asset_async
+        ascendants: List[PrincipalAscendant] = flake.describe_async(RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE"))).deserialize_many(PrincipalAscendant)
 
         parent = find(ascendants, lambda x: x.grantee_identifier == parent_role.name)
         grandparent1 = find(ascendants, lambda x: x.grantee_identifier == grandparent1_role.name)
@@ -140,19 +142,21 @@ def test_broken_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
         parent_principal=user_admin_role
     )
     try:
-        flake.register_asset(child1_role, assets_queue)
-        flake.register_asset(child2_role, assets_queue)
-        flake.register_asset(parent_role, assets_queue)
-        flake.register_asset(parent_child1_relationship, assets_queue)
-        flake.register_asset(parent_child2_relationship, assets_queue)
-        flake.register_asset(grandparent_role, assets_queue)
-        flake.register_asset(grandparent_parent_relationship, assets_queue)
-        flake.register_asset(great_grandparent_role, assets_queue)
+        w1 = flake.register_asset_async(child1_role, assets_queue)
+        w2 = flake.register_asset_async(child2_role, assets_queue)
+        w3 = flake.register_asset_async(parent_role, assets_queue)
+        w4 = flake.register_asset_async(grandparent_role, assets_queue)
+        w5 = flake.register_asset_async(great_grandparent_role, assets_queue)
+        flake.wait_all([w1, w2, w3, w4, w5])
+        w6 = flake.register_asset_async(parent_child1_relationship, assets_queue)
+        w7 = flake.register_asset_async(parent_child2_relationship, assets_queue)
+        w8 = flake.register_asset_async(grandparent_parent_relationship, assets_queue)
         # Removing the link between great grandparent and grandparent # flake.register_asset(great_grandparent_grandparent_relationship, assets_queue)
-        flake.register_asset(sysadmin_great_grandparent_relationship, assets_queue)
+        w9 = flake.register_asset_async(sysadmin_great_grandparent_relationship, assets_queue)
+        flake.wait_all([w6, w7, w8, w9])
 
         ### Act ###
-        ascendants: List[PrincipalAscendant] = flake.describe_many(RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE")), PrincipalAscendant)
+        ascendants: List[PrincipalAscendant] = flake.describe_async(RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE"))).deserialize_many(PrincipalAscendant)
         parent = find(ascendants, lambda x: x.grantee_identifier == parent_role.name)
         grandparent = find(ascendants, lambda x: x.grantee_identifier == grandparent_role.name)
         great_grandparent = find(ascendants, lambda x: x.grantee_identifier == great_grandparent_role.name)
@@ -198,19 +202,20 @@ def test_ascendants_with_database_roles(flake: PyflakeClient, assets_queue: queu
     rel4 = RoleInheritance(dr_r, dr_rw)
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(dr_sys, assets_queue)
-        flake.register_asset(dr_rwc, assets_queue)
-        flake.register_asset(dr_rw, assets_queue)
-        flake.register_asset(dr_r, assets_queue)
-
-        flake.register_asset(rel1, assets_queue)
-        flake.register_asset(rel2, assets_queue)
-        flake.register_asset(rel3, assets_queue)
-        flake.register_asset(rel4, assets_queue)
+        flake.register_asset_async(database, assets_queue).wait()
+        w1 = flake.register_asset_async(dr_sys, assets_queue)
+        w2 = flake.register_asset_async(dr_rwc, assets_queue)
+        w3 = flake.register_asset_async(dr_rw, assets_queue)
+        w4 = flake.register_asset_async(dr_r, assets_queue)
+        flake.wait_all([w1, w2, w3, w4])
+        w5 = flake.register_asset_async(rel1, assets_queue)
+        w6 = flake.register_asset_async(rel2, assets_queue)
+        w7 = flake.register_asset_async(rel3, assets_queue)
+        w8 = flake.register_asset_async(rel4, assets_queue)
+        flake.wait_all([w5, w6, w7, w8])
 
         ### Act ###
-        ascendants: List[PrincipalAscendant] = flake.describe_many(RoleAscendantsDescribable(DatabaseRoleDescribable(dr_r.name, dr_r.database_name)),PrincipalAscendant)
+        ascendants: List[PrincipalAscendant] = flake.describe_async(RoleAscendantsDescribable(DatabaseRoleDescribable(dr_r.name, dr_r.database_name))).deserialize_many(PrincipalAscendant)
         db_rw = find(ascendants, lambda x: x.grantee_identifier == dr_rw.get_identifier())
         db_rwc = find(ascendants, lambda x: x.grantee_identifier == dr_rwc.get_identifier())
         db_sysadmin = find(ascendants, lambda x: x.grantee_identifier == dr_sys.get_identifier())

@@ -19,9 +19,3 @@ class ISnowflakeDescribable(ABC):
     @abstractmethod
     def get_dacite_config(self) -> Union[dacite.Config, None]:
         """get_dacite_config"""
-
-    @staticmethod
-    def load_from_sf(
-        cls_, data: Dict[str, Any], config: Union[dacite.Config, None]
-    ) -> ISnowflakeDescribable:
-        return dacite.from_dict(data_class=cls_, data=data, config=config)

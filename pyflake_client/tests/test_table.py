@@ -1,4 +1,5 @@
 """test_table"""
+from datetime import date
 import queue
 import uuid
 
@@ -29,15 +30,14 @@ def test_create_table_with_owner(flake: PyflakeClient, assets_queue: queue.LifoQ
     table = TableAsset(db_name=database.db_name, schema_name=schema.schema_name, table_name="TEST", columns=columns, owner=RoleAsset("SYSADMIN"))
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(schema, assets_queue)
-        flake.register_asset(table, assets_queue)
+        flake.register_asset_async(database, assets_queue).wait()
+        flake.register_asset_async(schema, assets_queue).wait()
+        flake.register_asset_async(table, assets_queue).wait()
 
         ### Act ###
-        t = flake.describe_one(
+        t = flake.describe_async(
             TableDescribable(database.db_name, schema.schema_name, table.table_name),
-            TableEntity,
-        )
+        ).deserialize_one(TableEntity)
 
         ### Assert ###
         assert t is not None
@@ -46,7 +46,8 @@ def test_create_table_with_owner(flake: PyflakeClient, assets_queue: queue.LifoQ
         assert t.schema_name == schema.schema_name
         assert t.kind == "TABLE"
         assert t.owner == "SYSADMIN"
-        assert t.retention_time == "1"
+        assert t.retention_time == 1
+        assert t.created_on.date() == date.today()
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
@@ -69,15 +70,14 @@ def test_create_table_without_owner(flake: PyflakeClient, assets_queue: queue.Li
     table = TableAsset(db_name=database.db_name, schema_name=schema.schema_name, table_name="TEST", columns=columns)
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(schema, assets_queue)
-        flake.register_asset(table, assets_queue)
+        flake.register_asset_async(database, assets_queue).wait()
+        flake.register_asset_async(schema, assets_queue).wait()
+        flake.register_asset_async(table, assets_queue).wait()
 
         ### Act ###
-        t = flake.describe_one(
-            TableDescribable(database.db_name, schema.schema_name, table.table_name),
-            TableEntity,
-        )
+        t = flake.describe_async(
+            TableDescribable(database.db_name, schema.schema_name, table.table_name)
+        ).deserialize_one(TableEntity)
 
         ### Assert ###
         assert t is not None
@@ -86,7 +86,8 @@ def test_create_table_without_owner(flake: PyflakeClient, assets_queue: queue.Li
         assert t.schema_name == schema.schema_name
         assert t.kind == "TABLE"
         assert t.owner == "ACCOUNTADMIN"
-        assert t.retention_time == "1"
+        assert t.retention_time == 1
+        assert t.created_on.date() == date.today()
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
