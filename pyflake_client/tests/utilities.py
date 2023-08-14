@@ -6,7 +6,6 @@
 import collections
 from typing import Callable, List, Optional, TypeVar
 
-
 T = TypeVar("T")
 
 
