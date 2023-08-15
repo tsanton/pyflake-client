@@ -12,16 +12,12 @@ from pyflake_client.models.entities.warehouse import Warehouse as WarehouseEntit
 
 @dataclass(frozen=True)
 class Warehouse(ISnowflakeDescribable):
-    """Warehouse"""
-
     name: str
 
     def get_describe_statement(self) -> str:
-        """get_describe_statement"""
         return f"SHOW WAREHOUSES LIKE '{self.name}'".upper()
 
     def is_procedure(self) -> bool:
-        """is_procedure"""
         return False
 
     @classmethod

@@ -25,17 +25,13 @@ from pyflake_client.models.enums.privilege import Privilege
 
 @dataclass(frozen=True)
 class RoleInheritance(ISnowflakeDescribable):
-    """RoleInheritance"""
-
     inherited_principal: ISnowflakeGrantPrincipal
     parent_principal: ISnowflakeGrantPrincipal
 
     def is_procedure(self) -> bool:
-        """is_procedure"""
         return True
 
     def get_describe_statement(self) -> str:
-        """get_describe_statement"""
         inherited_type = None
         inherited_identifier = None
         if isinstance(self.inherited_principal, RoleDescribable):

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 import queue
-import uuid
 from datetime import date
 
 import pytest
@@ -15,7 +14,6 @@ from pyflake_client.models.entities.database import Database as DatabaseEntity
 
 
 def test_get_database(flake: PyflakeClient):
-    """test_get_database"""
     ### Act ###
     database = flake.describe_async(DatabaseDescribable("SNOWFLAKE")).deserialize_one(DatabaseEntity)
 
@@ -27,7 +25,6 @@ def test_get_database(flake: PyflakeClient):
 
 
 def test_get_database_that_does_not_exist(flake: PyflakeClient):
-    """test_get_database_does_not_exist"""
     ### Act ###
     database = flake.describe_async(DatabaseDescribable("I_DO_NOT_EXIST")).deserialize_one(DatabaseEntity)
 
@@ -35,11 +32,11 @@ def test_get_database_that_does_not_exist(flake: PyflakeClient):
     assert database is None
 
 
-def test_create_database_with_role_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str):
-    """test_create_database"""
-
+def test_create_database_with_role_owner(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
-    database: DatabaseAsset = DatabaseAsset("IGT_DEMO", comment, owner=RoleAsset("SYSADMIN"))
+    database: DatabaseAsset = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
 
     try:
         flake.register_asset_async(database, assets_queue).wait()
@@ -58,14 +55,15 @@ def test_create_database_with_role_owner(flake: PyflakeClient, assets_queue: que
         flake.delete_assets(assets_queue)
 
 
-def test_create_database_with_database_role_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_database_with_database_role_owner"""
+def test_create_database_with_database_role_owner(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     with pytest.raises(NotImplementedError):
         flake.register_asset_async(
             DatabaseAsset(
-                "IGT_DEMO",
-                f"pyflake_client_test_{uuid.uuid4()}",
-                owner=DatabaseRoleAsset("DATABASE_ROLE", "CANT_OWN_DATABASES"),
+                f"PYFLAKE_CLIENT_TEST_DB_{rand_str}",
+                comment,
+                owner=DatabaseRoleAsset(f"PYFLAKE_CLIENT_TEST_DB_ROLE_{rand_str}", "CANT_OWN_DATABASES"),
             ),
             assets_queue,
         ).wait()

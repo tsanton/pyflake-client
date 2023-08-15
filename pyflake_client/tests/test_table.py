@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import queue
-import uuid
 from datetime import date
 
 from pyflake_client.client import PyflakeClient
@@ -13,14 +12,13 @@ from pyflake_client.models.describables.table import Table as TableDescribable
 from pyflake_client.models.entities.table import Table as TableEntity
 
 
-def test_create_table_with_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_table"""
+def test_create_table_with_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
-    schema: Schema = Schema(
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
+    schema = Schema(
         db_name=database.db_name,
-        schema_name="SOME_SCHEMA",
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        schema_name="TEST_SCHEMA",
+        comment=comment,
         owner=RoleAsset("SYSADMIN"),
     )
     columns = [
@@ -59,14 +57,13 @@ def test_create_table_with_owner(flake: PyflakeClient, assets_queue: queue.LifoQ
         flake.delete_assets(assets_queue)
 
 
-def test_create_table_without_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_table"""
+def test_create_table_without_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
-    schema: Schema = Schema(
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
+    schema = Schema(
         db_name=database.db_name,
-        schema_name="SOME_SCHEMA",
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        schema_name="TEST_SCHEMA",
+        comment=comment,
         owner=RoleAsset("SYSADMIN"),
     )
     columns = [

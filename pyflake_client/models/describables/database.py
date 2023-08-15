@@ -12,16 +12,12 @@ from pyflake_client.models.entities.database import Database as DatabaseEntity
 
 @dataclass(frozen=True)
 class Database(ISnowflakeDescribable):
-    """Database"""
-
     name: str
 
     def get_describe_statement(self) -> str:
-        """get_describe_statement"""
         return f"SHOW DATABASES LIKE '{self.name}'".upper()
 
     def is_procedure(self) -> bool:
-        """is_procedure"""
         return False
 
     @classmethod

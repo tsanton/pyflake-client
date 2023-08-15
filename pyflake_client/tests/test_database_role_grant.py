@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import queue
-import uuid
 
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as DatabaseAsset
@@ -22,11 +21,12 @@ from pyflake_client.models.enums.privilege import Privilege
 # TODO: test_describe_grant_for_non_existing_database_role
 
 
-def test_describe_grant_for_non_existing_database_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_describe_grant_for_non_existing_database_role"""
+def test_describe_grant_for_non_existing_database_role(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
     sys_admin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin)
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin)
     try:
         flake.register_asset_async(database, assets_queue).wait()
         ### Act ###
@@ -44,13 +44,14 @@ def test_describe_grant_for_non_existing_database_role(flake: PyflakeClient, ass
         flake.delete_assets(assets_queue)
 
 
-def test_database_role_database_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_database_role_database_grant"""
+def test_database_role_database_grant(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
     user_admin = RoleAsset("USERADMIN")
     sys_admin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin)
-    db_role = DatabaseRoleAsset("IGT_DB_ROLE", database.db_name, f"pyflake_client_test_{uuid.uuid4()}", user_admin)
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin)
+    db_role = DatabaseRoleAsset("PYFLAKE_CLIENT_TEST_DB_ROLE", database.db_name, comment, user_admin)
     grant = GrantAction(
         db_role,
         DatabaseGrant(database_name=database.db_name),
@@ -102,14 +103,13 @@ def test_database_role_database_grant(flake: PyflakeClient, assets_queue: queue.
         flake.delete_assets(assets_queue)
 
 
-def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_database_role_schema_grant"""
+def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     ### Arrange ###
     user_admin = RoleAsset("USERADMIN")
     sys_admin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin)
-    schema = SchemaAsset(database.db_name, "IGT_SCHEMA", f"pyflake_client_test_{uuid.uuid4()}", sys_admin)
-    db_role = DatabaseRoleAsset("IGT_DB_ROLE", database.db_name, f"pyflake_client_test_{uuid.uuid4()}", user_admin)
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin)
+    schema = SchemaAsset(database.db_name, "TEST_SCHEMA", comment, sys_admin)
+    db_role = DatabaseRoleAsset("PYFLAKE_CLIENT_TEST_DB_ROLE", database.db_name, comment, user_admin)
     grant = GrantAction(
         db_role,
         SchemaGrant(database_name=database.db_name, schema_name=schema.schema_name),

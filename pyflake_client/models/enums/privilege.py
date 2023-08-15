@@ -3,8 +3,6 @@ from enum import Enum
 
 
 class Privilege(str, Enum):
-    """Privilege"""
-
     SELECT = "SELECT"
     INSERT = "INSERT"
     UPDATE = "UPDATE"

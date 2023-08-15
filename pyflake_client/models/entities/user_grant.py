@@ -9,8 +9,6 @@ from pyflake_client.models.entities.snowflake_entity_interface import ISnowflake
 
 @dataclass(frozen=True)
 class UserGrant(ISnowflakeEntity):
-    """UserGrant"""
-
     grantee_identifier: str
     grantee_type: str
     granted_identifier: str

@@ -10,13 +10,10 @@ from pyflake_client.models.enums.principal import Principal
 
 @dataclass(frozen=True)
 class RoleInheritance(ISnowflakeAsset):
-    """RoleInheritance: the child role is granted to the parent"""
-
     child_principal: ISnowflakePrincipal
     parent_principal: ISnowflakePrincipal
 
     def get_create_statement(self):
-        """get_create_statement"""
         child_principal_type = None
         parent_principal_type = None
 
@@ -55,7 +52,6 @@ class RoleInheritance(ISnowflakeAsset):
         return grant_statement
 
     def get_delete_statement(self):
-        """get_delete_statement"""
         revoke_statement = "REVOKE"
 
         child_principal_type = self.child_principal.get_snowflake_type()

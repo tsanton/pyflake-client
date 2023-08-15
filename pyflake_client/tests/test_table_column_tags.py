@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import queue
-import uuid
 
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as DatabaseAsset
@@ -18,15 +17,16 @@ from pyflake_client.models.describables.table import Table as TableDescribable
 from pyflake_client.models.entities.table import Table as TableEntity
 
 
-def test_create_column_with_tag_without_value(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_table"""
+def test_create_column_with_tag_without_value(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
     sysadmin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sysadmin)
-    schema: Schema = Schema(
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_GOVERNANCE_DB_{rand_str}", comment, owner=sysadmin)
+    schema = Schema(
         db_name=database.db_name,
-        schema_name="SOME_SCHEMA",
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        schema_name="TEST_SCHEMA",
+        comment=comment,
         owner=sysadmin,
     )
 
@@ -84,15 +84,16 @@ def test_create_column_with_tag_without_value(flake: PyflakeClient, assets_queue
         flake.delete_assets(assets_queue)
 
 
-def test_create_column_with_tag_with_value(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_table"""
+def test_create_column_with_tag_with_value(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
     sysadmin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sysadmin)
-    schema: Schema = Schema(
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sysadmin)
+    schema = Schema(
         db_name=database.db_name,
-        schema_name="SOME_SCHEMA",
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        schema_name="TEST_SCHEMA",
+        comment=comment,
         owner=sysadmin,
     )
     tag_asset = TagAsset(
@@ -145,15 +146,16 @@ def test_create_column_with_tag_with_value(flake: PyflakeClient, assets_queue: q
         flake.delete_assets(assets_queue)
 
 
-def test_create_table_with_multiple_tags(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_table"""
+def test_create_table_with_multiple_tags(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
     sysadmin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sysadmin)
-    schema: Schema = Schema(
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sysadmin)
+    schema = Schema(
         db_name=database.db_name,
-        schema_name="SOME_SCHEMA",
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        schema_name="TEST_SCHEMA",
+        comment=comment,
         owner=sysadmin,
     )
     tag_asset_1 = TagAsset(

@@ -3,7 +3,6 @@
 # pylint: disable=too-many-locals
 
 import queue
-import uuid
 
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as DatabaseAsset
@@ -43,12 +42,10 @@ def test_get_descendant_roles(flake: PyflakeClient):
     assert sys_admin.granted_on == "ROLE"
 
 
-def test_role_to_role_descendants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_role_to_role_descendants"""
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
+def test_role_to_role_descendants(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     user_admin_role = RoleAsset("USERADMIN")
-    child_role = RoleAsset("IGT_CHILD_ROLE", snowflake_comment, user_admin_role)
-    parent_role = RoleAsset("IGT_PARENT_ROLE", snowflake_comment, user_admin_role)
+    child_role = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_CHILD_{rand_str}", comment, user_admin_role)
+    parent_role = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_PARENT_{rand_str}", comment, user_admin_role)
     rel = RoleInheritance(child_role, parent_role)
 
     try:
@@ -74,13 +71,11 @@ def test_role_to_role_descendants(flake: PyflakeClient, assets_queue: queue.Lifo
         flake.delete_assets(assets_queue)
 
 
-def test_role_to_roles_descendants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """ "test_role_to_roles_descendants"""
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
+def test_role_to_roles_descendants(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     user_admin_role = RoleAsset("USERADMIN")
-    child_role_1 = RoleAsset("IGT_CHILD_ROLE_1", snowflake_comment, user_admin_role)
-    child_role_2 = RoleAsset("IGT_CHILD_ROLE_2", snowflake_comment, user_admin_role)
-    parent_role = RoleAsset("IGT_PARENT_ROLE", snowflake_comment, user_admin_role)
+    child_role_1 = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_CHILD_1_{rand_str}", comment, user_admin_role)
+    child_role_2 = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_CHILD_2_{rand_str}", comment, user_admin_role)
+    parent_role = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_PARENT_{rand_str}", comment, user_admin_role)
     rel_1 = RoleInheritance(child_role_1, parent_role)
     rel_2 = RoleInheritance(child_role_2, parent_role)
 
@@ -119,13 +114,14 @@ def test_role_to_roles_descendants(flake: PyflakeClient, assets_queue: queue.Lif
         flake.delete_assets(assets_queue)
 
 
-def test_role_to_role_and_database_role_descendants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
+def test_role_to_role_and_database_role_descendants(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     user_admin = RoleAsset("USERADMIN")
-    db = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
-    child_role_1 = RoleAsset("IGT_CHILD_ROLE_1", snowflake_comment, user_admin)
-    child_role_2 = DatabaseRoleAsset("IGT_CHILD_ROLE_2", db.db_name, snowflake_comment, user_admin)
-    parent_role = RoleAsset("IGT_PARENT_ROLE", snowflake_comment, user_admin)
+    db = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
+    child_role_1 = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_CHILD_1_{rand_str}", comment, user_admin)
+    child_role_2 = DatabaseRoleAsset("PYFLAKE_CLIENT_TEST_ROLE_CHILD_2", db.db_name, comment, user_admin)
+    parent_role = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_PARENT_{rand_str}", comment, user_admin)
     rel_1 = RoleInheritance(child_role_1, parent_role)
     rel_2 = RoleInheritance(child_role_2, parent_role)
 
@@ -165,13 +161,14 @@ def test_role_to_role_and_database_role_descendants(flake: PyflakeClient, assets
         flake.delete_assets(assets_queue)
 
 
-def test_database_role_to_database_roles_descendants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
+def test_database_role_to_database_roles_descendants(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     user_admin_role = RoleAsset("USERADMIN")
-    db = DatabaseAsset("IGT_DEMO", snowflake_comment, RoleAsset("SYSADMIN"))
-    child_role_1 = DatabaseRoleAsset("IGT_CHILD_ROLE_1", db.db_name, snowflake_comment, user_admin_role)
-    child_role_2 = DatabaseRoleAsset("IGT_CHILD_ROLE_2", db.db_name, snowflake_comment, user_admin_role)
-    parent_role = DatabaseRoleAsset("IGT_PARENT_ROLE", db.db_name, snowflake_comment, user_admin_role)
+    db = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, RoleAsset("SYSADMIN"))
+    child_role_1 = DatabaseRoleAsset("PYFLAKE_CLIENT_TEST_DB_ROLE_CHILD_1", db.db_name, comment, user_admin_role)
+    child_role_2 = DatabaseRoleAsset("PYFLAKE_CLIENT_TEST_DB_ROLE_CHILD_2", db.db_name, comment, user_admin_role)
+    parent_role = DatabaseRoleAsset("PYFLAKE_CLIENT_TEST_DB_ROLE_PARENT", db.db_name, comment, user_admin_role)
     rel_1 = RoleInheritance(child_role_1, parent_role)
     rel_2 = RoleInheritance(child_role_2, parent_role)
 

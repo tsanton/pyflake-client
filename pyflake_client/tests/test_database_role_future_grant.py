@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import queue
-import uuid
 
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as DatabaseAsset
@@ -25,11 +24,12 @@ from pyflake_client.models.enums.object_type import ObjectType
 from pyflake_client.models.enums.privilege import Privilege
 
 
-def test_describe_future_grant_for_non_existing_database_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_describe_grant_for_non_existing_database_role"""
+def test_describe_future_grant_for_non_existing_database_role(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
     sys_admin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin)
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin)
     try:
         flake.register_asset_async(database, assets_queue).wait()
         ### Act ###
@@ -48,7 +48,6 @@ def test_describe_future_grant_for_non_existing_database_role(flake: PyflakeClie
 
 
 def test_describe_future_grant_for_database_role_in_non_existing_database(flake: PyflakeClient):
-    """test_describe_future_grant_for_database_role_in_non_existing_database"""
     ### Act ###
     grants = flake.describe_async(
         describable=FutureGrantDescribable(
@@ -63,13 +62,14 @@ def test_describe_future_grant_for_database_role_in_non_existing_database(flake:
     assert grants == []
 
 
-def test_database_role_future_database_object_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_database_role_future_database_object_grant"""
+def test_database_role_future_database_object_grant(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
     user_admin = RoleAsset("USERADMIN")
     sys_admin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin)
-    db_role = DatabaseRoleAsset("IGT_DB_ROLE", database.db_name, f"pyflake_client_test_{uuid.uuid4()}", user_admin)
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin)
+    db_role = DatabaseRoleAsset("PYFLAKE_CLIENT_TEST_DB_ROLE", database.db_name, comment, user_admin)
     grant = GrantAction(
         db_role,
         DatabaseObjectFutureGrant(database_name=database.db_name, grant_target=ObjectType.TABLE),
@@ -78,8 +78,8 @@ def test_database_role_future_database_object_grant(flake: PyflakeClient, assets
 
     try:
         flake.register_asset_async(database, assets_queue).wait()
-        flake.register_asset_async(db_role, assets_queue).wait()
-        flake.register_asset_async(grant, assets_queue).wait()
+        flake.create_asset_async(db_role).wait()
+        flake.create_asset_async(grant).wait()
 
         ### Act ###
         grants = flake.describe_async(
@@ -111,14 +111,15 @@ def test_database_role_future_database_object_grant(flake: PyflakeClient, assets
         flake.delete_assets(assets_queue)
 
 
-def test_database_role_schema_object_future_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_database_role_schema_object_future_grant"""
+def test_database_role_schema_object_future_grant(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
     user_admin = RoleAsset("USERADMIN")
     sys_admin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", sys_admin)
-    schema = SchemaAsset(database.db_name, "IGT_SCHEMA", f"pyflake_client_test_{uuid.uuid4()}", sys_admin)
-    db_role = DatabaseRoleAsset("IGT_DB_ROLE", database.db_name, f"pyflake_client_test_{uuid.uuid4()}", user_admin)
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, sys_admin)
+    schema = SchemaAsset(database.db_name, "TEST_SCHEMA", comment, sys_admin)
+    db_role = DatabaseRoleAsset("PYFLAKE_CLIENT_TEST_DB_ROLE", database.db_name, comment, user_admin)
     grant = GrantAction(
         db_role,
         SchemaObjectFutureGrant(
@@ -129,10 +130,10 @@ def test_database_role_schema_object_future_grant(flake: PyflakeClient, assets_q
 
     try:
         flake.register_asset_async(database, assets_queue).wait()
-        w1 = flake.register_asset_async(schema, assets_queue)
-        w2 = flake.register_asset_async(db_role, assets_queue)
+        w1 = flake.create_asset_async(schema)
+        w2 = flake.create_asset_async(db_role)
         flake.wait_all([w1, w2])
-        flake.register_asset_async(grant, assets_queue).wait()
+        flake.create_asset_async(grant).wait()
 
         ### Act ###
         grants = flake.describe_async(

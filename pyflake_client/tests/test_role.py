@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import queue
-import uuid
 from datetime import date
 
 from pyflake_client.client import PyflakeClient
@@ -9,13 +8,12 @@ from pyflake_client.models.describables.role import Role as RoleDescribable
 from pyflake_client.models.entities.role import Role as RoleEntity
 
 
-def test_create_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_role"""
+def test_create_role(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     ### Arrange ###
-    role: RoleAsset = RoleAsset(
-        name="IGT_CREATE_ROLE",
+    role = RoleAsset(
+        name=f"PYFLAKE_CLIENT_TEST_ROLE_{rand_str}",
         owner=RoleAsset("USERADMIN"),
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        comment=comment,
     )
 
     try:
@@ -35,7 +33,6 @@ def test_create_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 
 
 def test_get_role(flake: PyflakeClient):
-    """test_get_role"""
     ### Act ###
     role = flake.describe_async(RoleDescribable("ACCOUNTADMIN")).deserialize_one(RoleEntity)
 
@@ -46,7 +43,6 @@ def test_get_role(flake: PyflakeClient):
 
 
 def test_get_role_that_does_not_exist(flake: PyflakeClient):
-    """test_get_role_that_does_not_exist"""
     ### Act ###
     role = flake.describe_async(RoleDescribable("I_SURELY_DO_NOT_EXIST")).deserialize_one(RoleEntity)
 

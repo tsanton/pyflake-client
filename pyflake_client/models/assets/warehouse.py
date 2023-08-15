@@ -11,8 +11,6 @@ from pyflake_client.models.assets.snowflake_principal_interface import (
 
 @dataclass(frozen=True)
 class Warehouse(ISnowflakeAsset):
-    """Warehouse"""
-
     warehouse_name: str
     comment: str
     size: str = "XSMALL"  # TODO: Enum
@@ -23,7 +21,6 @@ class Warehouse(ISnowflakeAsset):
     owner: Union[ISnowflakePrincipal, None] = None
 
     def get_create_statement(self):
-        """get_create_statement"""
         if self.owner is None:
             raise ValueError("Create statement not supported for owner-less warehouses")
 
@@ -35,5 +32,4 @@ class Warehouse(ISnowflakeAsset):
                    GRANT OWNERSHIP ON WAREHOUSE {self.warehouse_name} TO {snowflake_principal_type} {self.owner.get_identifier()} REVOKE CURRENT GRANTS;"""
 
     def get_delete_statement(self):
-        """get_delete_statement"""
         return f"DROP WAREHOUSE IF EXISTS {self.warehouse_name};"

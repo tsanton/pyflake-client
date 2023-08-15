@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import queue
-import uuid
 
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as DatabaseAsset
@@ -23,7 +22,6 @@ from pyflake_client.models.enums.privilege import Privilege
 
 
 def test_describe_future_grant_for_non_existing_role(flake: PyflakeClient):
-    """test_describe_future_grant_for_non_existing_role"""
     ### Act ###
     grants = flake.describe_async(
         describable=FutureGrantDescribable(principal=RoleDescribable(name="NON_EXISTING_ROLE"))
@@ -33,12 +31,12 @@ def test_describe_future_grant_for_non_existing_role(flake: PyflakeClient):
     assert grants == []
 
 
-def test_role_database_object_future_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_role_database_object_future_grant"""
+def test_role_database_object_future_grant(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
-    database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
-    role = RoleAsset("IGT_CREATE_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
+    role = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_{rand_str}", comment, RoleAsset("USERADMIN"))
     grant = GrantAction(
         role,
         DatabaseObjectFutureGrant(database_name=database.db_name, grant_target=ObjectType.TABLE),
@@ -77,12 +75,13 @@ def test_role_database_object_future_grant(flake: PyflakeClient, assets_queue: q
         flake.delete_assets(assets_queue)
 
 
-def test_role_schema_object_future_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue):
+def test_role_schema_object_future_grant(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
-    database = DatabaseAsset("IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
-    schema = SchemaAsset(database.db_name, "IGT_DEMO", snowflake_comment, owner=RoleAsset("SYSADMIN"))
-    role = RoleAsset("IGT_CREATE_ROLE", snowflake_comment, RoleAsset("USERADMIN"))
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
+    schema = SchemaAsset(database.db_name, "TEST_SCHEMA", comment, owner=RoleAsset("SYSADMIN"))
+    role = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_{rand_str}", comment, RoleAsset("USERADMIN"))
     grant = GrantAction(
         role,
         SchemaObjectFutureGrant(

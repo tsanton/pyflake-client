@@ -26,7 +26,6 @@ def test_merge_into(
     proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
     assets_queue: queue.LifoQueue,
 ):
-    """test_merge_into"""
     ### Arrange ###
     db, s, _, _, _ = proc_db
     t = Table(db.db_name, s.schema_name, TABLE_NAME, TABLE_COLUMN_DEFINITION)
@@ -36,8 +35,10 @@ def test_merge_into(
 
         ### Act ###
         ins = MergableEntity("TEST", True).configure(db.db_name, s.schema_name, TABLE_NAME)
-        flake.insert_async(ins.merge_into_statement()).wait()
-        entity = flake.describe_async(Queryable(ins.select_statement())).deserialize_one(MergableEntity)
+        flake.execute_async(ins.merge_into_statement()).wait()
+        entity: MergableEntity = flake.describe_async(Queryable(ins.select_statement())).deserialize_one(
+            MergableEntity, MergableEntity.get_deserializer()
+        )
 
         ### Assert ###
         assert entity is not None
@@ -53,34 +54,70 @@ def test_merge_into(
         flake.delete_assets(assets_queue)
 
 
-def test_merge_into_and_update(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_merge_into_and_update"""
+def test_merge_into_and_update(
+    flake: PyflakeClient,
+    proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
+    assets_queue: queue.LifoQueue,
+):
     ### Arrange ###
-    db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
+    db, s, _, _, _ = proc_db
     t = Table(db.db_name, s.schema_name, TABLE_NAME, TABLE_COLUMN_DEFINITION)
 
     try:
-        flake.register_asset(t, assets_queue)
+        flake.register_asset_async(t, assets_queue).wait()
 
         ### Act ###
-        ins_create = MergableEntity("TEST", True)
-        ins_update = MergableEntity("TEST", False)
-        success_create = flake.merge_into(ins_create)
-        success_update = flake.merge_into(ins_update)
-        entity = flake.get_mergeable(MergableEntity(the_primary_key=ins_update.the_primary_key))
-        inserted = flake.execute_scalar(f"select count(1) from {flake.gov_db}.{flake.mgmt_schema}.{TABLE_NAME}")
+        ins = MergableEntity("TEST", True).configure(db.db_name, s.schema_name, TABLE_NAME)
+        flake.execute_async(ins.merge_into_statement()).wait()
+        ins.enabled = False
+        flake.execute_async(ins.merge_into_statement()).wait()
+        entity: MergableEntity = flake.describe_async(Queryable(ins.select_statement())).deserialize_one(
+            MergableEntity, MergableEntity.get_deserializer()
+        )
+        inserted = flake.execute_async(f"select count(1) from {db.db_name}.{s.schema_name}.{TABLE_NAME}").fetch_one(
+            int, lambda x: int(x)
+        )
 
         ### Assert ###
-        assert success_create is True
-        assert success_update is True
         assert inserted == 2
-        assert entity.the_primary_key == ins_update.the_primary_key
-        assert entity.enabled == ins_update.enabled
+        assert entity.the_primary_key == ins.the_primary_key
+        assert entity.enabled == ins.enabled
         assert entity.id == 2
         assert entity.valid_from is not None
         assert entity.valid_to is not None
         assert entity.valid_from.date() == date.today()
         assert entity.valid_to.date() == date(9999, 12, 31)
+    finally:
+        ### Cleanup ###
+        flake.delete_assets(assets_queue)
+
+
+def test_merge_into_and_delete(
+    flake: PyflakeClient,
+    proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
+    assets_queue: queue.LifoQueue,
+):
+    ### Arrange ###
+    db, s, _, _, _ = proc_db
+    t = Table(db.db_name, s.schema_name, TABLE_NAME, TABLE_COLUMN_DEFINITION)
+
+    try:
+        flake.register_asset_async(t, assets_queue).wait()
+
+        ### Act ###
+        ins = MergableEntity("TEST", True).configure(db.db_name, s.schema_name, TABLE_NAME)
+        flake.execute_async(ins.merge_into_statement()).wait()
+        inserted = flake.execute_async(f"select count(1) from {db.db_name}.{s.schema_name}.{TABLE_NAME}").fetch_one(
+            int, lambda x: int(x)
+        )
+        flake.execute_async(f"delete from {db.db_name}.{s.schema_name}.{TABLE_NAME}").wait()
+        deleted = flake.execute_async(f"select count(1) from {db.db_name}.{s.schema_name}.{TABLE_NAME}").fetch_one(
+            int, lambda x: int(x) if x != None else 0
+        )
+
+        ### Assert ###
+        assert inserted == 1
+        assert deleted == 0
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)

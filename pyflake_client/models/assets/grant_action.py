@@ -14,8 +14,6 @@ from pyflake_client.models.enums.privilege import Privilege
 
 @dataclass
 class GrantAction(ISnowflakeAsset):
-    """GrantAction"""
-
     principal: ISnowflakePrincipal
     target: ISnowflakeGrantAsset
     privileges: List[Privilege]

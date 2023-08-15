@@ -3,7 +3,7 @@
 import os
 import queue
 import secrets
-import uuid
+from datetime import datetime
 from typing import Generator, Tuple
 
 import pytest
@@ -27,8 +27,6 @@ from pyflake_client.models.enums.privilege import Privilege
 # https://docs.pytest.org/en/6.2.x/fixture.html#fixture-scopes
 @pytest.fixture(scope="session")
 def flake() -> Generator[PyflakeClient, None, None]:
-    """flake"""
-
     conn: SnowflakeConnection = snowflake.connector.connect(
         host=os.getenv("SNOWFLAKE_HOST"),
         account=os.getenv("SNOWFLAKE_ACCOUNT"),
@@ -48,38 +46,42 @@ def flake() -> Generator[PyflakeClient, None, None]:
 
 @pytest.fixture(scope="function")
 def assets_queue() -> queue.LifoQueue:
-    """assets_queue"""
     return queue.LifoQueue()
 
 
 @pytest.fixture(scope="session")
 def comment() -> str:
-    return f"pyflake_client_test_{uuid.uuid4()}"
+    return f"pyflake_test_client_{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}"
+
+
+@pytest.fixture(scope="function")
+def rand_str() -> str:
+    return secrets.token_hex(5).upper()
 
 
 @pytest.fixture(scope="session")
 def proc_db(
     flake: PyflakeClient,
+    comment,
 ) -> Generator[Tuple[DatabaseAsset, SchemaAsset, DatabaseRole, DatabaseRole, DatabaseRole], None, None]:
     """bootstrap utility function"""
     asset_queue = queue.LifoQueue()
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
-    db_name = f"PYFLAKE_CLIENT_DB_{secrets.token_hex(5)}".upper()
+    db_name = f"PYFLAKE_CLIENT_TEST_DB_{secrets.token_hex(5)}".upper()
     schema_name = "CONFIG"
     user_admin_role = RoleAsset("USERADMIN")
     sys_admin_role = RoleAsset("SYSADMIN")
-    db: DatabaseAsset = DatabaseAsset(db_name, snowflake_comment, sys_admin_role)
-    db_sys_admin = DatabaseRole(f"{db_name}_SYS_ADMIN", db.db_name, snowflake_comment, user_admin_role)
-    db_usr_admin = DatabaseRole(f"{db_name}_USER_ADMIN", db.db_name, snowflake_comment, user_admin_role)
+    db: DatabaseAsset = DatabaseAsset(db_name, comment, sys_admin_role)
+    db_sys_admin = DatabaseRole(f"{db_name}_SYS_ADMIN", db.db_name, comment, user_admin_role)
+    db_usr_admin = DatabaseRole(f"{db_name}_USER_ADMIN", db.db_name, comment, user_admin_role)
     rel1 = RoleInheritance(db_sys_admin, sys_admin_role)
-    r = DatabaseRole(f"{db.db_name}_{schema_name}_ACCESS_ROLE_R", db.db_name, snowflake_comment, user_admin_role)
-    rw = DatabaseRole(f"{db.db_name}_{schema_name}_ACCESS_ROLE_RW", db.db_name, snowflake_comment, user_admin_role)
-    rwc = DatabaseRole(f"{db.db_name}_{schema_name}_ACCESS_ROLE_RWC", db.db_name, snowflake_comment, user_admin_role)
+    r = DatabaseRole(f"{db.db_name}_{schema_name}_ACCESS_ROLE_R", db.db_name, comment, user_admin_role)
+    rw = DatabaseRole(f"{db.db_name}_{schema_name}_ACCESS_ROLE_RW", db.db_name, comment, user_admin_role)
+    rwc = DatabaseRole(f"{db.db_name}_{schema_name}_ACCESS_ROLE_RWC", db.db_name, comment, user_admin_role)
     rel2 = RoleInheritance(r, rw)
     rel3 = RoleInheritance(rw, rwc)
     rel4 = RoleInheritance(rwc, db_sys_admin)
     rel5 = RoleInheritance(db_sys_admin, sys_admin_role)
-    s = SchemaAsset(db_name=db.db_name, schema_name=schema_name, comment=snowflake_comment, owner=db_sys_admin)
+    s = SchemaAsset(db_name=db.db_name, schema_name=schema_name, comment=comment, owner=db_sys_admin)
 
     table_privilege_r = GrantAction(
         r,

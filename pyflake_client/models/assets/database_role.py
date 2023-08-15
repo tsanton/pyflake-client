@@ -11,15 +11,12 @@ from pyflake_client.models.enums.principal import Principal
 
 @dataclass(frozen=True)
 class DatabaseRole(ISnowflakeAsset, ISnowflakePrincipal):
-    """DatabaseRole"""
-
     name: str
     database_name: str
     comment: str = ""
     owner: Union[ISnowflakePrincipal, None] = None
 
     def get_create_statement(self) -> str:
-        """get_create_statement"""
         if self.owner is None:
             raise ValueError("Create statement not supported for owner-less roles")
 
@@ -32,7 +29,6 @@ class DatabaseRole(ISnowflakeAsset, ISnowflakePrincipal):
                    REVOKE CURRENT GRANTS;"""
 
     def get_delete_statement(self) -> str:
-        """get_delete_statement"""
         return f"DROP DATABASE ROLE IF EXISTS {self.database_name}.{self.name}"
 
     def get_identifier(self) -> str:

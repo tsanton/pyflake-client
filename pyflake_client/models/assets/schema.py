@@ -10,15 +10,12 @@ from pyflake_client.models.assets.snowflake_principal_interface import (
 
 @dataclass(frozen=True)
 class Schema(ISnowflakeAsset):
-    """schema class"""
-
     db_name: str
     schema_name: str
     comment: str
     owner: ISnowflakePrincipal
 
     def get_create_statement(self):
-        """get_create_statement"""
         if self.owner is None:
             raise ValueError("Create statement not supported for owner-less schemas")
 
@@ -30,5 +27,4 @@ class Schema(ISnowflakeAsset):
                    GRANT OWNERSHIP ON SCHEMA {self.db_name}.{self.schema_name} to {snowflake_principal_type} {self.owner.get_identifier()} REVOKE CURRENT GRANTS;"""
 
     def get_delete_statement(self):
-        """get_delete_statement"""
         return f"DROP SCHEMA IF EXISTS {self.db_name}.{self.schema_name} CASCADE;"

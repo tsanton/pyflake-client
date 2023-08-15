@@ -25,7 +25,6 @@ from pyflake_client.models.entities.role_inheritance import (
 
 
 def test_get_role_inheritance(flake: PyflakeClient):
-    """test_get_role_inheritance"""
     ### Act ###
     role: RoleInheritanceEntity = flake.describe_async(
         RoleInheritanceDescribable(RoleDescribable("SYSADMIN"), RoleDescribable("ACCOUNTADMIN"))
@@ -39,11 +38,10 @@ def test_get_role_inheritance(flake: PyflakeClient):
     assert role.granted_by == ""
 
 
-def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str):
-    """test_create_role_inheritance"""
+def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     ### Arrange ###
-    child_role = RoleAsset("IGT_CHILD_ROLE", comment, RoleAsset("USERADMIN"))
-    parent_role = RoleAsset("IGT_PARENT_ROLE", comment, RoleAsset("USERADMIN"))
+    child_role = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_CHILD_{rand_str}", comment, RoleAsset("USERADMIN"))
+    parent_role = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_PARENT_{rand_str}", comment, RoleAsset("USERADMIN"))
     try:
         w1 = flake.register_asset_async(child_role, assets_queue)
         w2 = flake.register_asset_async(parent_role, assets_queue)
@@ -67,11 +65,10 @@ def test_create_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQ
         flake.delete_assets(assets_queue)
 
 
-def test_delete_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str):
-    """test_delete_role_inheritance"""
+def test_delete_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     ### Arrange ###
-    child_role = RoleAsset("IGT_CHILD_ROLE", comment, RoleAsset("USERADMIN"))
-    parent_role = RoleAsset("IGT_PARENT_ROLE", comment, RoleAsset("USERADMIN"))
+    child_role = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_CHILD_{rand_str}", comment, RoleAsset("USERADMIN"))
+    parent_role = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_PARENT_{rand_str}", comment, RoleAsset("USERADMIN"))
     relationship = RoleInheritanceAsset(child_role, parent_role)
 
     relationship_describable = RoleInheritanceDescribable(
@@ -107,7 +104,7 @@ def test_delete_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQ
 
 
 def test_get_non_existing_role_inheritance(flake: PyflakeClient):
-    """test_get_non_existing_role_inheritance: both roles exists, but ACCOUNTADMIN is not granted to SYSADMIN; it's the other way around"""
+    """both roles exists, but ACCOUNTADMIN is not granted to SYSADMIN; it's the other way around"""
     ### Act ###
     role: RoleInheritanceEntity = flake.describe_async(
         RoleInheritanceDescribable(RoleDescribable("ACCOUNTADMIN"), RoleDescribable("SYSADMIN"))
@@ -118,7 +115,6 @@ def test_get_non_existing_role_inheritance(flake: PyflakeClient):
 
 
 def test_get_role_inheritance_non_existing_child_role(flake: PyflakeClient):
-    """test_get_role_inheritance_non_existing_child_role"""
     ### Act ###
     role: RoleInheritanceEntity = flake.describe_async(
         RoleInheritanceDescribable(RoleDescribable("I_MOST_CERTAINLY_DO_NOT_EXIST"), RoleDescribable("SYSADMIN"))
@@ -129,7 +125,6 @@ def test_get_role_inheritance_non_existing_child_role(flake: PyflakeClient):
 
 
 def test_get_role_inheritance_non_existing_parent_role(flake: PyflakeClient):
-    """test_get_role_inheritance_non_existing_parent_role"""
     ### Act ###
     role: RoleInheritanceEntity = flake.describe_async(
         RoleInheritanceDescribable(RoleDescribable("SYSADMIN"), RoleDescribable("I_MOST_CERTAINLY_DO_NOT_EXIST"))
@@ -143,10 +138,9 @@ def test_get_role_inheritance_non_existing_parent_role(flake: PyflakeClient):
 
 
 def test_show_role_to_database_role_inheritance_in_non_existing_database(
-    flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
 ):
-    """test_show_role_to_database_role_inheritance_in_non_existing_database"""
-    r1 = RoleAsset("TEST_SNOWPLOW_ROLE_1", comment, RoleAsset("USERADMIN"))
+    r1 = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_{rand_str}", comment, RoleAsset("USERADMIN"))
     relationship_describable = RoleInheritanceDescribable(
         DatabaseRoleDescribable("I_DONT_EXIST_ROLE", "I_DONT_EXIST_EITHER_DATABASE"), RoleDescribable(r1.name)
     )
@@ -160,13 +154,12 @@ def test_show_role_to_database_role_inheritance_in_non_existing_database(
         flake.delete_assets(assets_queue)
 
 
-def test_show_role_to_database_role_inheritance(flake: PyflakeClient, comment: str):
-    """test_show_role_to_database_role_inheritance"""
+def test_show_role_to_database_role_inheritance(flake: PyflakeClient, rand_str: str, comment: str):
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", comment, RoleAsset("SYSADMIN"))
-    r1 = RoleAsset("TEST_SNOWPLOW_ROLE", comment, RoleAsset("USERADMIN"))
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, RoleAsset("SYSADMIN"))
+    r1 = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_{rand_str}", comment, RoleAsset("USERADMIN"))
     dr1 = DatabaseRoleAsset(
-        name="TEST_SNOWPLOW_DATABASE_ROLE",
+        name="PYFLAKE_CLIENT_TEST_DB_ROLE",
         database_name=database.db_name,
         comment=comment,
         owner=RoleAsset("USERADMIN"),
@@ -184,13 +177,14 @@ def test_show_role_to_database_role_inheritance(flake: PyflakeClient, comment: s
 # region database role to role inheritance
 
 
-def test_show_database_role_to_role_inheritance(flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str):
-    """test_show_database_role_to_role_inheritance"""
+def test_show_database_role_to_role_inheritance(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", comment, owner=RoleAsset("SYSADMIN"))
-    r1 = RoleAsset("TEST_SNOWPLOW_ROLE", comment, RoleAsset("USERADMIN"))
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
+    r1 = RoleAsset(f"PYFLAKE_CLIENT_TEST_ROLE_{rand_str}", comment, RoleAsset("USERADMIN"))
     dr1 = DatabaseRoleAsset(
-        name="TEST_SNOWPLOW_DATABASE_ROLE",
+        name="PYFLAKE_CLIENT_TEST_DB_ROLE",
         database_name=database.db_name,
         owner=RoleAsset("USERADMIN"),
         comment=comment,
@@ -227,17 +221,18 @@ def test_show_database_role_to_role_inheritance(flake: PyflakeClient, assets_que
 def test_show_database_role_to_database_role_same_database_inheritance(
     flake: PyflakeClient, assets_queue: queue.LifoQueue, comment: str
 ):
-    """test_show_database_role_to_database_role_inheritance"""
     ### Arrange ###
-    database = DatabaseAsset(f"PYFLAKE_CLIENT_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN"))
+    database = DatabaseAsset(
+        f"PYFLAKE_CLIENT_TEST_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN")
+    )
     dr1 = DatabaseRoleAsset(
-        name="TEST_SNOWPLOW_DATABASE_ROLE_1",
+        name="PYFLAKE_CLIENT_TEST_DB_ROLE_1",
         database_name=database.db_name,
         comment=comment,
         owner=RoleAsset("USERADMIN"),
     )
     dr2 = DatabaseRoleAsset(
-        name="TEST_SNOWPLOW_DATABASE_ROLE_2",
+        name="PYFLAKE_CLIENT_TEST_DB_ROLE_2",
         database_name=database.db_name,
         comment=comment,
         owner=RoleAsset("USERADMIN"),
@@ -266,20 +261,21 @@ def test_show_database_role_to_database_role_same_database_inheritance(
 
 
 def test_show_database_role_to_database_role_cross_database_inheritance(flake: PyflakeClient, comment: str):
-    """test_show_database_role_to_database_role_inheritance"""
     ### Arrange ###
-    database = DatabaseAsset(f"PYFLAKE_CLIENT_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN"))
+    database = DatabaseAsset(
+        f"PYFLAKE_CLIENT_TEST_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN")
+    )
     database2 = DatabaseAsset(
-        f"PYFLAKE_CLIENT_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN")
+        f"PYFLAKE_CLIENT_TEST_DB_{secrets.token_hex(5)}".upper(), comment, owner=RoleAsset("SYSADMIN")
     )
     dr1 = DatabaseRoleAsset(
-        name="TEST_SNOWPLOW_DATABASE_ROLE_1",
+        name="PYFLAKE_CLIENT_TEST_DB_ROLE_1",
         database_name=database.db_name,
         comment=comment,
         owner=RoleAsset("USERADMIN"),
     )
     dr2 = DatabaseRoleAsset(
-        name="TEST_SNOWPLOW_DATABASE_ROLE_2",
+        name="PYFLAKE_CLIENT_TEST_DB_ROLE_2",
         database_name=database2.db_name,
         comment=comment,
         owner=RoleAsset("USERADMIN"),

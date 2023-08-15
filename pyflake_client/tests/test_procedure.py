@@ -26,7 +26,6 @@ def test_create_procedure_zero_args(
     proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
     assets_queue: queue.LifoQueue,
 ):
-    """test_create_procedure_zero_args"""
     ### Arrange ###
     db, s, _, _, _ = proc_db
     proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()
@@ -65,7 +64,6 @@ def test_create_procedure_one_arg(
     proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
     assets_queue: queue.LifoQueue,
 ):
-    """test_create_procedure_one_arg"""
     ### Arrange ###
     db, s, _, _, _ = proc_db
     proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()
@@ -105,7 +103,6 @@ def test_create_procedure_multiple_args(
     proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
     assets_queue: queue.LifoQueue,
 ):
-    """test_create_procedure_multiple_args"""
     ### Arrange ###
     db, s, _, _, _ = proc_db
     proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()

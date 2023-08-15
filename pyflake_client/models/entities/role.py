@@ -8,8 +8,6 @@ from pyflake_client.models.entities.snowflake_entity_interface import ISnowflake
 
 @dataclass(frozen=True)
 class Role(ISnowflakeEntity):
-    """Role"""
-
     name: str
     owner: Union[str, None] = None
     assigned_to_users: Union[int, None] = None

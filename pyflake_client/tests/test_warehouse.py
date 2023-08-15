@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 import queue
-import uuid
 from datetime import date
 
 import pytest
@@ -16,11 +15,11 @@ from pyflake_client.models.describables.warehouse import (
 from pyflake_client.models.entities.warehouse import Warehouse as WarehouseEntity
 
 
-def test_create_warehouse_with_role_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_warehouse"""
+def test_create_warehouse_with_role_owner(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
-    warehouse = WarehouseAsset("IGT_DEMO_WH", snowflake_comment, owner=RoleAsset("SYSADMIN"))
+    warehouse = WarehouseAsset(f"PYFLAKE_CLIENT_TEST_WH_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
 
     try:
         flake.register_asset_async(warehouse, assets_queue).wait()
@@ -40,13 +39,15 @@ def test_create_warehouse_with_role_owner(flake: PyflakeClient, assets_queue: qu
         flake.delete_assets(assets_queue)
 
 
-def test_create_warehouse_with_database_role_owner(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_database_with_database_role_owner"""
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
+def test_create_warehouse_with_database_role_owner(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     with pytest.raises(NotImplementedError):
         flake.register_asset_async(
             WarehouseAsset(
-                "IGT_DEMO_WH", snowflake_comment, owner=DatabaseRoleAsset("DATABASE_ROLE", "CANT_OWN_DATABASES")
+                f"PYFLAKE_CLIENT_TEST_WH_{rand_str}",
+                comment,
+                owner=DatabaseRoleAsset("DATABASE_ROLE", "CANT_OWN_DATABASES"),
             ),
             assets_queue,
         ).wait()

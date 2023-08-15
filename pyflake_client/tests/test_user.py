@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import queue
-import uuid
 from datetime import date
 
 from pyflake_client.client import PyflakeClient
@@ -18,13 +17,12 @@ from pyflake_client.models.entities.user import User as EntitiesUser
 from pyflake_client.models.entities.user_grant import UserGrant as UserGrantEntity
 
 
-def test_create_user(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_user"""
+def test_create_user(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     ### Arrange ###
     user = UserAsset(
-        name="IGT_CREATE_USER",
+        name=f"PYFLAKE_CLIENT_TEST_USER_{rand_str}",
         owner=RoleAsset("USERADMIN"),
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        comment=comment,
     )
 
     try:
@@ -44,7 +42,6 @@ def test_create_user(flake: PyflakeClient, assets_queue: queue.LifoQueue):
 
 
 def test_get_user(flake: PyflakeClient):
-    """test_get_user"""
     ### Act ###
     user_id = os.environ.get("SNOWFLAKE_UID")
     assert user_id is not None
@@ -56,7 +53,6 @@ def test_get_user(flake: PyflakeClient):
 
 
 def test_get_user_that_does_not_exist(flake: PyflakeClient):
-    """test_get_user_that_does_not_exist"""
     ### Act ###
     user = flake.describe_async(UserDescribable("I_SURELY_DO_NOT_EXIST")).deserialize_one(EntitiesUser)
 
@@ -64,12 +60,10 @@ def test_get_user_that_does_not_exist(flake: PyflakeClient):
     assert user is None
 
 
-def test_user_zero_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_user_zero_grants"""
-    comment = f"pyflake_client_test_{uuid.uuid4()}"
+def test_user_zero_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     user_admin = RoleAsset("USERADMIN")
     user = UserAsset(
-        name="IGT_CREATE_USER",
+        name=f"PYFLAKE_CLIENT_TEST_USER_{rand_str}",
         owner=user_admin,
         comment=comment,
     )
@@ -89,17 +83,15 @@ def test_user_zero_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         flake.delete_assets(assets_queue)
 
 
-def test_user_with_role_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_user_with_role_grant"""
-    comment = f"pyflake_client_test_{uuid.uuid4()}"
+def test_user_with_role_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     user_admin = RoleAsset("USERADMIN")
     user = UserAsset(
-        name="IGT_CREATE_USER",
+        name=f"PYFLAKE_CLIENT_TEST_USER_{rand_str}",
         owner=user_admin,
         comment=comment,
     )
     role = RoleAsset(
-        name=f"IGT_CREATE_ROLE",
+        name=user.name,
         owner=user_admin,
     )
     inheritance = RoleInheritanceAsset(child_principal=role, parent_principal=user)
@@ -129,21 +121,21 @@ def test_user_with_role_grant(flake: PyflakeClient, assets_queue: queue.LifoQueu
         flake.delete_assets(assets_queue)
 
 
-def test_user_with_multiple_role_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_user_with_multiple_role_grants"""
-    comment = f"pyflake_client_test_{uuid.uuid4()}"
+def test_user_with_multiple_role_grants(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     user_admin = RoleAsset("USERADMIN")
     user = UserAsset(
-        name="IGT_CREATE_USER",
+        name=f"PYFLAKE_CLIENT_TEST_USER_{rand_str}",
         owner=user_admin,
         comment=comment,
     )
     role_1 = RoleAsset(
-        name=f"IGT_CREATE_ROLE_1",
+        name=f"PYFLAKE_CLIENT_TEST_ROLE_1_{rand_str}",
         owner=user_admin,
     )
     role_2 = RoleAsset(
-        name=f"IGT_CREATE_ROLE_2",
+        name=f"PYFLAKE_CLIENT_TEST_ROLE_2_{rand_str}",
         owner=user_admin,
     )
     inheritance_1 = RoleInheritanceAsset(child_principal=role_1, parent_principal=user)

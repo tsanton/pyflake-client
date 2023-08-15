@@ -12,17 +12,13 @@ from pyflake_client.models.entities.schema import Schema as SchemaEntity
 
 @dataclass(frozen=True)
 class Schema(ISnowflakeDescribable):
-    """Schema"""
-
     name: str
     database_name: str
 
     def get_describe_statement(self) -> str:
-        """get_describe_statement"""
         return f"SHOW SCHEMAS LIKE '{self.name}' IN DATABASE {self.database_name}".upper()
 
     def is_procedure(self) -> bool:
-        """is_procedure"""
         return False
 
     @classmethod

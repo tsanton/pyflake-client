@@ -16,7 +16,6 @@ from pyflake_client.tests.utilities import Plo, compare
 
 
 def test_call_anonymous_procedure_one_arg(flake: PyflakeClient):
-    """test_call_procedure_one_arg"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure(name VARCHAR)
@@ -33,13 +32,12 @@ $$
     proc_exec = AnonymousProcedureExec("anonymous_procedure", sql, [ProcedureArg(1, ColumnType.VARCHAR, "Tullebukk")])
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_one(str, lambda row: row)
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(str, lambda row: row)
     ### Assert ###
     assert res == "Hello Tullebukk"
 
 
 def test_call_anonymous_procedure_multiple_args(flake: PyflakeClient):
-    """test_call_anonymous_procedure_multiple_args"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure(greeting VARCHAR, name VARCHAR)
@@ -63,14 +61,13 @@ $$
     )
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_one(str, lambda row: row)
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(str, lambda row: row)
 
     ### Assert ###
     assert res == "Oh hello Tullebukk"
 
 
 def test_call_anonymous_procedure_fetch_one_varchar(flake: PyflakeClient):
-    """test_call_procedure_zero_args"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure()
@@ -87,13 +84,12 @@ $$
     proc_exec = AnonymousProcedureExec("anonymous_procedure", sql, [])
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_one(str, lambda row: row)
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(str, lambda row: row)
     ### Assert ###
     assert res == "Hello you!"
 
 
 def test_call_anonymous_procedure_fetch_one_bool(flake: PyflakeClient):
-    """test_call_anonymous_procedure_fetch_one_bool"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure()
@@ -110,13 +106,12 @@ $$
     proc_exec = AnonymousProcedureExec("anonymous_procedure", sql, [])
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_one(bool, lambda row: bool(row))
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(bool, lambda row: bool(row))
     ### Assert ###
     assert res is True
 
 
 def test_call_anonymous_procedure_fetch_one_integer(flake: PyflakeClient):
-    """test_call_anonymous_procedure_fetch_one_integer"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure()
@@ -133,13 +128,12 @@ $$
     proc_exec = AnonymousProcedureExec("anonymous_procedure", sql, [])
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_one(int, lambda row: int(row))
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(int, lambda row: int(row))
     ### Assert ###
     assert res == 12
 
 
 def test_call_anonymous_procedure_fetch_one_number(flake: PyflakeClient):
-    """test_call_anonymous_procedure_fetch_one_integer"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure()
@@ -156,13 +150,12 @@ $$
     proc_exec = AnonymousProcedureExec("anonymous_procedure", sql, [])
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_one(float, lambda row: float(round(row, 4)))
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(float, lambda row: float(round(row, 4)))
     ### Assert ###
     assert res == 12.1234
 
 
 def test_call_anonymous_procedure_fetch_one_simple_dict(flake: PyflakeClient):
-    """test_call_anonymous_procedure_fetch_one_integer"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure()
@@ -179,7 +172,7 @@ $$
     proc_exec = AnonymousProcedureExec("anonymous_procedure", sql, [])
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_one(dict[str, str], lambda row: json.loads(row))
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(dict[str, str], lambda row: json.loads(row))
     ### Assert ###
     assert res is not None
     assert "foo" in res
@@ -189,7 +182,6 @@ $$
 
 
 def test_call_anonymous_procedure_fetch_one_class(flake: PyflakeClient):
-    """test_call_anonymous_procedure_fetch_one_integer"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure()
@@ -211,7 +203,7 @@ $$
         bar: str
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_one(Anon, lambda row: Anon(**json.loads(row)))
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(Anon, lambda row: Anon(**json.loads(row)))
     ### Assert ###
     assert res is not None
     res.foo = "bar"
@@ -219,7 +211,6 @@ $$
 
 
 def test_call_anonymous_procedure_fetch_many_varchars(flake: PyflakeClient):
-    """test_call_anonymous_procedure_fetch_many_varchars"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure()
@@ -236,13 +227,12 @@ $$
     proc_exec = AnonymousProcedureExec("anonymous_procedure", sql, [])
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_many(str, lambda row: row)
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_many(str, lambda row: row)
     ### Assert ###
     assert compare(["foo", "bar"], res)
 
 
 def test_call_anonymous_procedure_fetch_many_bools(flake: PyflakeClient):
-    """test_call_anonymous_procedure_fetch_many_bools"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure()
@@ -259,13 +249,12 @@ $$
     proc_exec = AnonymousProcedureExec("anonymous_procedure", sql, [])
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_many(bool, lambda row: bool(row))
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_many(bool, lambda row: bool(row))
     ### Assert ###
     assert compare([True, False, True, False], res)
 
 
 def test_call_anonymous_procedure_fetch_many_integers(flake: PyflakeClient):
-    """test_call_anonymous_procedure_fetch_many_integers"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure()
@@ -282,13 +271,12 @@ $$
     proc_exec = AnonymousProcedureExec("anonymous_procedure", sql, [])
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_many(int, lambda row: int(row))
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_many(int, lambda row: int(row))
     ### Assert ###
     assert compare([10, 11, 12], res)
 
 
 def test_call_anonymous_procedure_fetch_many_numbers(flake: PyflakeClient):
-    """test_call_anonymous_procedure_fetch_many_numbers"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure()
@@ -305,13 +293,12 @@ $$
     proc_exec = AnonymousProcedureExec("anonymous_procedure", sql, [])
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_many(float, lambda row: float(round(row, 3)))
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_many(float, lambda row: float(round(row, 3)))
     ### Assert ###
     assert compare([10.123, 11.234, 12.345], res)
 
 
 def test_call_anonymous_procedure_fetch_many_simple_dicts(flake: PyflakeClient):
-    """test_call_anonymous_procedure_fetch_many_simple_dicts"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure()
@@ -328,7 +315,7 @@ $$
     proc_exec = AnonymousProcedureExec("anonymous_procedure", sql, [])
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_many(dict[str, str], lambda row: row)
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_many(dict[str, str], lambda row: row)
 
     ### Assert ###
     expected = [{"foo": "bar1", "bar": "baz1"}, {"foo": "bar2", "bar": "baz2"}]
@@ -338,7 +325,6 @@ $$
 
 
 def test_call_anonymous_procedure_fetch_many_classes(flake: PyflakeClient):
-    """test_call_anonymous_procedure_fetch_many_classes"""
     ### Arrange ###
     sql: str = """
 with anonymous_procedure AS procedure()
@@ -360,7 +346,7 @@ $$
         bar: str
 
     ### Act ###
-    res = flake.call_async(proc_exec.get_call_statement()).fetch_many(Anon, lambda row: Anon(**row))
+    res = flake.execute_async(proc_exec.get_call_statement()).fetch_many(Anon, lambda row: Anon(**row))
     ### Assert ###
     expected = [Anon(foo="bar1", bar="baz1"), Anon(foo="bar2", bar="baz2")]
 

@@ -2,7 +2,7 @@
 # pylint: disable=line-too-long
 # pylint: disable=invalid-name
 import queue
-from typing import List, TypeVar, Union
+from typing import List, Union
 
 from snowflake.connector import SnowflakeConnection
 from snowflake.snowpark import Session
@@ -10,22 +10,13 @@ from snowflake.snowpark import Session
 from pyflake_client.async_asset_job import AsyncAssetJob, AsyncAwaitable
 from pyflake_client.async_call_job import AsyncCallJob
 from pyflake_client.async_describe_job import AsyncDescribeJob
-from pyflake_client.async_insert_job import AsyncInsertJob
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
 )
-from pyflake_client.models.mergeables.snowflake_mergable_interface import (
-    ISnowflakeMergable,
-)
-
-U = TypeVar("U", bound=ISnowflakeMergable)
-V = TypeVar("V")
 
 
 class PyflakeClient:
-    """PyflakeClient"""
-
     def __init__(self, conn: SnowflakeConnection) -> None:
         self._conn: SnowflakeConnection = conn
         self._session = Session.builder.config("connection", conn).create()
@@ -34,34 +25,31 @@ class PyflakeClient:
         for waiter in waiters:
             waiter.wait()
 
-    def call_async(self, statement: str) -> AsyncCallJob:
+    def execute_async(self, statement: str) -> AsyncCallJob:
         return AsyncCallJob(original=self._session.sql(statement).collect_nowait())
 
     def create_asset_async(self, obj: ISnowflakeAsset) -> AsyncAssetJob:
-        """create_asset"""
         return self._create_asset_async(obj, None)
 
     def register_asset_async(self, obj: ISnowflakeAsset, asset_queue: queue.LifoQueue) -> AsyncAssetJob:
-        """register_asset"""
         return self._create_asset_async(obj, asset_queue)
 
     def _create_asset_async(self, obj: ISnowflakeAsset, asset_queue: Union[queue.LifoQueue, None]) -> AsyncAssetJob:
-        """create_asset"""
         cur = self._conn.cursor()
         cur.execute(obj.get_create_statement().strip(), num_statements=0, _exec_async=True)
         return AsyncAssetJob(conn=self._conn, cursor=cur, query_id=cur.sfqid, asset=obj, queue=asset_queue)
 
     def delete_asset_async(self, obj: ISnowflakeAsset) -> AsyncAssetJob:
-        """delete_asset"""
         return self._delete_asset_async(obj)
 
-    def delete_assets(self, asset_queue: queue.LifoQueue) -> None:
-        """delete_asset"""
+    def delete_assets(self, asset_queue: queue.LifoQueue[ISnowflakeAsset]) -> None:
+        statements = []
         while not asset_queue.empty():
-            self._delete_asset_async(asset_queue.get()).wait()
+            statements.append(asset_queue.get().get_delete_statement().strip())
+        with self._conn.cursor() as cur:
+            cur.execute(";\n".join(statements), num_statements=0)
 
     def _delete_asset_async(self, obj: ISnowflakeAsset) -> AsyncAssetJob:
-        """delete_asset"""
         cur = self._conn.cursor()
         statement = obj.get_delete_statement().strip()
         cur.execute(statement, num_statements=0, _exec_async=True)
@@ -74,32 +62,3 @@ class PyflakeClient:
             is_procedure=describable.is_procedure(),
             deserializer=describable.get_deserializer(),
         )
-
-    def insert_async(self, statement: str) -> AsyncInsertJob:
-        return AsyncInsertJob(original=self._session.sql(statement).collect_nowait())
-
-    # def merge_into(self, obj: U) -> bool:
-    #     """merge_into"""
-    #     try:
-    #         self._conn.execute_string(obj.merge_into_statement())
-    #         return True
-    #     except Exception as e:
-    #         # print(e)
-    #         print("merge_into threw an exception!")
-    #     return False
-
-    # def get_mergeable(self, obj: U) -> U:
-    #     """get_mergeable"""
-    #     module = importlib.import_module(obj.__module__)
-    #     class_ = getattr(module, obj.__class__.__name__)
-    #     with self._conn.cursor() as cur:
-    #         cur.execute(obj.select_statement(self.gov_db, self.mgmt_schema))
-    #         row = cur.fetchone()
-    #         raw_data = dict(zip([c[0].lower() for c in cur.description], row))
-    #         data = {}
-    #         for k, v in raw_data.items():
-    #             if isinstance(v, str) and (v.startswith("{") or v.startswith("[")):
-    #                 data[k] = json.loads(v)
-    #             else:
-    #                 data[k] = v
-    #         return from_dict(data_class=class_, data=data, config=None)

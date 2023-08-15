@@ -3,7 +3,6 @@
 # pylint: disable=too-many-locals
 
 import queue
-import uuid
 from typing import List
 
 from pyflake_client.client import PyflakeClient
@@ -52,22 +51,20 @@ def test_get_principal_ascendants(flake: PyflakeClient):
     assert acc_admin.grantee_identifier == "ACCOUNTADMIN"
 
 
-def test_create_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_role_ascendants"""
+def test_create_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     ### Arrange ###
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     user_admin_role = Role("USERADMIN")
     sys_admin_role = Role("SYSADMIN")
-    child1_role = Role("IGT_CHILD1_ROLE", snowflake_comment, user_admin_role)
-    child2_role = Role("IGT_CHILD2_ROLE", snowflake_comment, user_admin_role)
-    parent_role = Role("IGT_PARENT_ROLE", snowflake_comment, user_admin_role)
+    child1_role = Role(f"PYFLAKE_CLIENT_TEST_ROLE_CHILD_1_{rand_str}", comment, user_admin_role)
+    child2_role = Role(f"PYFLAKE_CLIENT_TEST_ROLE_CHILD_2_{rand_str}", comment, user_admin_role)
+    parent_role = Role(f"PYFLAKE_CLIENT_TEST_ROLE_PARENT_{rand_str}", comment, user_admin_role)
     parent_child1_relationship = RoleInheritance(child1_role, parent_role)
     parent_child2_relationship = RoleInheritance(child2_role, parent_role)
-    grandparent1_role = Role("IGT_GRANDPARENT1_ROLE", snowflake_comment, user_admin_role)
-    grandparent2_role = Role("IGT_GRANDPARENT2_ROLE", snowflake_comment, user_admin_role)
+    grandparent1_role = Role(f"PYFLAKE_CLIENT_TEST_ROLE_GRANDPARENT_1_{rand_str}", comment, user_admin_role)
+    grandparent2_role = Role(f"PYFLAKE_CLIENT_TEST_ROLE_GRANDPARENT_2_{rand_str}", comment, user_admin_role)
     grandparent1_parent_relationship = RoleInheritance(parent_role, grandparent1_role)
     grandparent2_parent_relationship = RoleInheritance(parent_role, grandparent2_role)
-    great_grandparent_role = Role("IGT_GREAT_GRANDPARENT_ROLE", snowflake_comment, user_admin_role)
+    great_grandparent_role = Role(f"PYFLAKE_CLIENT_TEST_ROLE_GREAT_GRANDPARENT_{rand_str}", comment, user_admin_role)
     great_grandparent_grandparent_relationship = RoleInheritance(
         child_principal=grandparent1_role, parent_principal=great_grandparent_role
     )
@@ -92,7 +89,7 @@ def test_create_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
 
         ### ctregister_asset_async
         ascendants: List[PrincipalAscendant] = flake.describe_async(
-            RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE"))
+            RoleAscendantsDescribable(RoleDescribable(child1_role.name))
         ).deserialize_many(PrincipalAscendant)
 
         parent = find(ascendants, lambda x: x.grantee_identifier == parent_role.name)
@@ -135,20 +132,18 @@ def test_create_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
         flake.delete_assets(assets_queue)
 
 
-def test_broken_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_broken_role_ascendants"""
+def test_broken_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     ### Arrange ###
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     user_admin_role = Role("USERADMIN")
     # sys_admin_role = Role("SYSADMIN")
-    child1_role = Role("IGT_CHILD1_ROLE", snowflake_comment, user_admin_role)
-    child2_role = Role("IGT_CHILD2_ROLE", snowflake_comment, user_admin_role)
-    parent_role = Role("IGT_PARENT_ROLE", snowflake_comment, user_admin_role)
+    child1_role = Role(f"PYFLAKE_CLIENT_TEST_ROLE_CHILD_1_{rand_str}", comment, user_admin_role)
+    child2_role = Role(f"PYFLAKE_CLIENT_TEST_ROLE_CHILD_2_{rand_str}", comment, user_admin_role)
+    parent_role = Role(f"PYFLAKE_CLIENT_TEST_ROLE_PARENT_{rand_str}", comment, user_admin_role)
     parent_child1_relationship = RoleInheritance(child1_role, parent_role)
     parent_child2_relationship = RoleInheritance(child2_role, parent_role)
-    grandparent_role = Role("IGT_GRANDPARENT_ROLE", snowflake_comment, user_admin_role)
+    grandparent_role = Role(f"PYFLAKE_CLIENT_TEST_ROLE_GRANDPARENT_{rand_str}", comment, user_admin_role)
     grandparent_parent_relationship = RoleInheritance(child_principal=parent_role, parent_principal=grandparent_role)
-    great_grandparent_role = Role("IGT_GREAT_GRANDPARENT_ROLE", snowflake_comment, user_admin_role)
+    great_grandparent_role = Role(f"PYFLAKE_CLIENT_TEST_ROLE_GREAT_GRANDPARENT_{rand_str}", comment, user_admin_role)
     # Removing the link between great grandparent and grandparent #great_grandparent_grandparent_relationship = RoleRelationship(grandparent_role.name, great_grandparent_role.name)
     sysadmin_great_grandparent_relationship = RoleInheritance(
         child_principal=great_grandparent_role, parent_principal=user_admin_role
@@ -169,7 +164,7 @@ def test_broken_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
 
         ### Act ###
         ascendants: List[PrincipalAscendant] = flake.describe_async(
-            RoleAscendantsDescribable(RoleDescribable("IGT_CHILD1_ROLE"))
+            RoleAscendantsDescribable(RoleDescribable(child1_role.name))
         ).deserialize_many(PrincipalAscendant)
         parent = find(ascendants, lambda x: x.grantee_identifier == parent_role.name)
         grandparent = find(ascendants, lambda x: x.grantee_identifier == grandparent_role.name)
@@ -200,17 +195,17 @@ def test_broken_role_ascendants(flake: PyflakeClient, assets_queue: queue.LifoQu
         flake.delete_assets(assets_queue)
 
 
-def test_ascendants_with_database_roles(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_create_role_ascendants"""
+def test_ascendants_with_database_roles(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
-    snowflake_comment: str = f"pyflake_client_test_{uuid.uuid4()}"
     user_admin_role = Role("USERADMIN")
     sys_admin_role = Role("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", snowflake_comment, sys_admin_role)
-    dr_sys = DatabaseRole("IGT_DEMO_DB_SYS_ADMIN", database.db_name, snowflake_comment, user_admin_role)
-    dr_rwc = DatabaseRole("IGT_DEMO_RWC", database.db_name, snowflake_comment, user_admin_role)
-    dr_rw = DatabaseRole("IGT_DEMO_RW", database.db_name, snowflake_comment, user_admin_role)
-    dr_r = DatabaseRole("IGT_DEMO_R", database.db_name, snowflake_comment, user_admin_role)
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, sys_admin_role)
+    dr_sys = DatabaseRole("PYFLAKE_CLIENT_TEST_DB_SYS_ADMIN", database.db_name, comment, user_admin_role)
+    dr_rwc = DatabaseRole("PYFLAKE_CLIENT_TEST_DB_RWC", database.db_name, comment, user_admin_role)
+    dr_rw = DatabaseRole("PYFLAKE_CLIENT_TEST_DB_RW", database.db_name, comment, user_admin_role)
+    dr_r = DatabaseRole("PYFLAKE_CLIENT_TEST_DB_R", database.db_name, comment, user_admin_role)
 
     rel1 = RoleInheritance(dr_sys, sys_admin_role)
     rel2 = RoleInheritance(dr_rwc, dr_sys)

@@ -15,16 +15,12 @@ from pyflake_client.models.entities.user import User as UserEntity
 
 @dataclass(frozen=True)
 class User(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
-    """User"""
-
     name: str
 
     def get_describe_statement(self) -> str:
-        """get_describe_statement"""
         return f"SHOW USERS LIKE '{self.name}'".upper()
 
     def is_procedure(self) -> bool:
-        """is_procedure"""
         return False
 
     @classmethod
@@ -44,5 +40,4 @@ class User(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
 
     @staticmethod
     def get_snowflake_type() -> str:
-        """get_snowflake_type"""
         return "USER"

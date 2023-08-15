@@ -17,7 +17,7 @@ from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAss
 class AsyncAwaitable(ABC):
     @abstractmethod
     def wait(self, timeout: int = 60) -> None:
-        """wait"""
+        ...
 
 
 class AsyncAssetJob(AsyncAwaitable):
@@ -41,7 +41,7 @@ class AsyncAssetJob(AsyncAwaitable):
         while True:
             status = self._conn.get_query_status(self._query_id)
             if status == QueryStatus.SUCCESS:
-                if self._queue is not None:
+                if self._queue is not None and self._asset != None:
                     self._queue.put(self._asset)
                 return
             elif self._conn.is_an_error(status):

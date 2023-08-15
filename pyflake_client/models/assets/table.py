@@ -15,8 +15,6 @@ from pyflake_client.models.describables.snowflake_grant_principal import (
 
 @dataclass(frozen=True)
 class Table(ISnowflakeAsset, ISnowflakeGrantPrincipal):
-    """Table"""
-
     db_name: str
     schema_name: str
     table_name: str
@@ -53,5 +51,4 @@ class Table(ISnowflakeAsset, ISnowflakeGrantPrincipal):
         return table_definition
 
     def get_delete_statement(self) -> str:
-        """get_delete_ddl"""
         return f"drop table if exists {self.db_name}.{self.schema_name}.{self.table_name}"

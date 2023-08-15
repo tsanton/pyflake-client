@@ -16,14 +16,11 @@ from pyflake_client.models.enums.column_type import ColumnType
 
 @dataclass(frozen=True)
 class Procedure(ISnowflakeDescribable):
-    """Procedure"""
-
     database_name: str
     schema_name: str
     name: str
 
     def get_describe_statement(self) -> str:
-        """get_describe_statement"""
         # TODO: flawed logic in case of polymorphic procedures -> only first is returned
         return """
 with show_procedures as procedure(db_name varchar, schema_name varchar, procedure_name varchar)
@@ -55,7 +52,6 @@ call show_procedures('%(str1)s', '%(str2)s', '%(str3)s');
         }
 
     def is_procedure(self) -> bool:
-        """is_procedure"""
         return True
 
     @classmethod

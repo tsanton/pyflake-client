@@ -10,8 +10,6 @@ from pyflake_client.models.enums.privilege import Privilege
 
 @dataclass(frozen=True)
 class RoleGrant(ISnowflakeEntity):
-    """Grant"""
-
     grantee_identifier: str
     grantee_type: str
     granted_on: str

@@ -9,8 +9,6 @@ from pyflake_client.models.enums.column_type import ColumnType
 
 @dataclass(frozen=True)
 class Procedure(ISnowflakeEntity):
-    """Procedure"""
-
     catalog_name: str
     schema_name: str
     name: str

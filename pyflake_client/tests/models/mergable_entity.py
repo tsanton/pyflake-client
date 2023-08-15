@@ -5,7 +5,9 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Union
+from typing import Any, Callable, Dict, Union
+
+import dacite
 
 from pyflake_client.models.assets.table_columns import (
     Bool,
@@ -34,8 +36,6 @@ TABLE_COLUMN_DEFINITION = [
 
 @dataclass
 class MergableEntity(ISnowflakeMergable):
-    """MergableEntity"""
-
     def configure(self, db_name: str, schema_name: str, table_name: str):
         self._db_name = db_name
         self._schema_name = schema_name
@@ -50,7 +50,6 @@ class MergableEntity(ISnowflakeMergable):
     id: Union[int, None] = None
 
     def merge_into_statement(self) -> str:
-        """merge_into_statement"""
         now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z")
         return f"""
         merge into {self._db_name}.{self._schema_name}.{self._table_name} tar using
@@ -89,10 +88,26 @@ class MergableEntity(ISnowflakeMergable):
         """
 
     def select_statement(self) -> str:
-        """select_statement"""
         return f"""
         select
             *
         from {self._db_name}.{self._schema_name}.{self._table_name} s
         where s.the_primary_key = '{self.the_primary_key}' and valid_to::date = '9999-12-31'
         """
+
+    @classmethod
+    def get_deserializer(cls) -> Callable[[Dict[str, Any]], "MergableEntity"]:
+        def deserializer(data: Dict[str, Any]) -> MergableEntity:
+            return dacite.from_dict(
+                MergableEntity,
+                {k.lower(): v for k, v in data.items()},
+                dacite.Config(
+                    type_hooks={
+                        int: lambda v: int(v),
+                        datetime: lambda d: datetime.fromisoformat(d) if type(d) == str else d,
+                        bool: lambda b: bool(b),
+                    }
+                ),
+            )
+
+        return deserializer

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import queue
-import uuid
 
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as DatabaseAsset
@@ -13,12 +12,12 @@ from pyflake_client.models.entities.column import Timestamp as TimestampEntity
 from pyflake_client.models.entities.table import Table as TableEntity
 
 
-def test_table_timestamp(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+def test_table_timestamp(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         db_name=database.db_name,
         schema_name="TEST_SCHEMA",
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        comment=comment,
         owner=RoleAsset("SYSADMIN"),
     )
     columns = [
@@ -67,12 +66,12 @@ def test_table_timestamp(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         flake.delete_assets(assets_queue)
 
 
-def test_table_timestamp_primary_key(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+def test_table_timestamp_primary_key(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         db_name=database.db_name,
         schema_name="TEST_SCHEMA",
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        comment=comment,
         owner=RoleAsset("SYSADMIN"),
     )
     columns = [

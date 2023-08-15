@@ -10,8 +10,6 @@ from pyflake_client.models.enums.privilege import Privilege
 
 @dataclass(frozen=True)
 class RoleInheritance(ISnowflakeEntity):
-    """RoleInheritance"""
-
     principal_identifier: str
     principal_type: str
     inherited_role_identifier: str

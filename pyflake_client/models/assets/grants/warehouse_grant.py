@@ -15,12 +15,9 @@ from pyflake_client.models.enums.privilege import Privilege
 
 @dataclass(frozen=True)
 class WarehouseGrant(ISnowflakeGrantAsset):
-    """WarehouseGrant"""
-
     warehouse_name: str
 
     def get_grant_statement(self, principal: ISnowflakePrincipal, privileges: List[Privilege]) -> str:
-        """get_grant_statement"""
         privs = ", ".join(privileges)
         if isinstance(principal, RoleAsset):
             return f"GRANT {privs} ON WAREHOUSE {self.warehouse_name} TO ROLE {principal.get_identifier()}"
@@ -28,7 +25,6 @@ class WarehouseGrant(ISnowflakeGrantAsset):
             raise NotImplementedError(f"Can't generate grant statement for asset of type {self.__class__}")
 
     def get_revoke_statement(self, principal: ISnowflakePrincipal, privileges: List[Privilege]) -> str:
-        """get_revoke_statement"""
         privs = ", ".join(privileges)
         if isinstance(principal, RoleAsset):
             return f"REVOKE {privs} ON WAREHOUSE {self.warehouse_name} FROM ROLE {principal.get_identifier()} CASCADE;"

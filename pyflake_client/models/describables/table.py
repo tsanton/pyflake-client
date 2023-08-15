@@ -31,8 +31,6 @@ from pyflake_client.models.entities.table import Table as TableEntity
 
 @dataclass(frozen=True)
 class Table(ISnowflakeDescribable):
-    """Table"""
-
     database_name: str
     schema_name: str
     name: str
@@ -77,7 +75,6 @@ call show_table_description('%(s1)s', '%(s2)s', '%(s3)s');
         }
 
     def is_procedure(self) -> bool:
-        """is_procedure"""
         return True
 
     @classmethod

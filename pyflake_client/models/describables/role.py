@@ -15,16 +15,12 @@ from pyflake_client.models.entities.role import Role as RoleEntity
 
 @dataclass(frozen=True)
 class Role(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
-    """Role"""
-
     name: str
 
     def get_describe_statement(self) -> str:
-        """get_describe_statement"""
         return f"SHOW ROLES LIKE '{self.name}'".upper()
 
     def is_procedure(self) -> bool:
-        """is_procedure"""
         return False
 
     @classmethod
@@ -36,5 +32,4 @@ class Role(ISnowflakeDescribable, ISnowflakeGrantPrincipal):
 
     @staticmethod
     def get_snowflake_type() -> str:
-        """get_snowflake_type"""
         return "ROLE"

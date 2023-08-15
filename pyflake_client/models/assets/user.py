@@ -14,14 +14,11 @@ from pyflake_client.models.enums.principal import Principal
 
 @dataclass(frozen=True)
 class User(ISnowflakeAsset, ISnowflakePrincipal, ISnowflakeGrantPrincipal):
-    """User"""
-
     name: str
     comment: str = ""
     owner: Union[ISnowflakePrincipal, None] = None
 
     def get_create_statement(self) -> str:
-        """get_create_statement"""
         if self.owner is None:
             raise ValueError("Create statement not supported for owner-less users")
 
@@ -33,7 +30,6 @@ class User(ISnowflakeAsset, ISnowflakePrincipal, ISnowflakeGrantPrincipal):
                    GRANT OWNERSHIP ON USER {self.name} to {snowflake_principal_type} {self.owner.get_identifier()} REVOKE CURRENT GRANTS;"""
 
     def get_delete_statement(self):
-        """get_delete_statement"""
         return f"DROP USER IF EXISTS {self.name};"
 
     def get_identifier(self):

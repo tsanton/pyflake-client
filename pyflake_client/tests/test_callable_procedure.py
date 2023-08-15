@@ -24,7 +24,6 @@ def test_call_procedure_zero_args_string_scalar_return(
     proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
     assets_queue: queue.LifoQueue,
 ):
-    """test_call_procedure_zero_args_string_scalar_return"""
     ### Arrange ###
     db, s, _, _, _ = proc_db
     proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()
@@ -49,7 +48,7 @@ def test_call_procedure_zero_args_string_scalar_return(
         def deserializer_func(data: Row) -> str:
             return data
 
-        res = flake.call_async(proc_exec.get_call_statement()).fetch_one(str, deserializer_func)
+        res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(str, deserializer_func)
         ### Assert ###
         assert res == "Hello you"
 
@@ -63,7 +62,6 @@ def test_call_procedure_one_arg_string_scalar_return(
     proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
     assets_queue: queue.LifoQueue,
 ):
-    """test_call_procedure_one_arg_string_scalar_return"""
     ### Arrange ###
     db, s, _, _, _ = proc_db
     proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()
@@ -88,7 +86,7 @@ def test_call_procedure_one_arg_string_scalar_return(
             return data
 
         ### Act ###
-        res = flake.call_async(proc_exec.get_call_statement()).fetch_one(str, deserializer_func)
+        res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(str, deserializer_func)
         ### Assert ###
         assert res == "Hello Tullebukk"
 
@@ -102,7 +100,6 @@ def test_call_procedure_multiple_args_string_scalar_return(
     proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
     assets_queue: queue.LifoQueue,
 ):
-    """test_call_procedure_multiple_args"""
     ### Arrange ###
     db, s, _, _, _ = proc_db
     proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()
@@ -134,7 +131,7 @@ def test_call_procedure_multiple_args_string_scalar_return(
         flake.register_asset_async(proc, assets_queue).wait()
 
         ### Act ###
-        res = flake.call_async(proc_exec.get_call_statement()).fetch_one(str, lambda x: x)
+        res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(str, lambda x: x)
         ### Assert ###
         assert res == "Hello you Tullebukk"
 

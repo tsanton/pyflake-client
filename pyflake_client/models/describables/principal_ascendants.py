@@ -26,7 +26,6 @@ class PrincipalAscendants(ISnowflakeDescribable):
     principal: ISnowflakeGrantPrincipal
 
     def get_describe_statement(self) -> str:
-        """get_describe_statement"""
         if isinstance(self.principal, RoleDescribable):
             principal_type = "ROLE"
             principal_identifier = self.principal.name
@@ -81,7 +80,6 @@ call show_all_roles_that_inherit_source('%(s1)s', '%(s2)s');""" % {
         return query
 
     def is_procedure(self) -> bool:
-        """is_procedure"""
         return True
 
     @classmethod

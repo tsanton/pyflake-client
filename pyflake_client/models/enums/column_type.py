@@ -3,8 +3,6 @@ from enum import Enum
 
 
 class ColumnType(str, Enum):
-    """ColumnType"""
-
     NUMBER = "NUMBER"
     INTEGER = "INTEGER"
     FLOAT = "FLOAT"
