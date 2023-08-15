@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from dataclasses import dataclass
-from typing import Union
-
-import dacite
+from typing import Any, Callable, Dict, Union
 
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
@@ -14,6 +12,7 @@ class Queryable(ISnowflakeDescribable):
     """Queryable"""
 
     query: str
+    is_procedure: bool = False
 
     def get_describe_statement(self) -> str:
         """get_describe_statement"""
@@ -21,8 +20,8 @@ class Queryable(ISnowflakeDescribable):
 
     def is_procedure(self) -> bool:
         """is_procedure"""
-        return False
+        return self.is_procedure
 
-    def get_dacite_config(self) -> Union[dacite.Config, None]:
-        """get_dacite_config"""
+    @classmethod
+    def get_deserializer(cls) -> Union[Callable[[Dict[str, Any]], Any], None]:
         return None

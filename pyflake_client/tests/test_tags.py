@@ -11,8 +11,8 @@ from pyflake_client.models.assets.role_inheritance import (
 )
 from pyflake_client.models.assets.schema import Schema as SchemaAsset
 from pyflake_client.models.assets.tag import Tag as TagAsset
-from pyflake_client.models.describables.tag import Tag as DescribablesTag
-from pyflake_client.models.entities.tag import Tag as EntitiesTag
+from pyflake_client.models.describables.tag import Tag as TagDescribable
+from pyflake_client.models.entities.tag import Tag as TagEntity
 
 
 def test_describe_non_existing_tag(flake: PyflakeClient, assets_queue: queue.LifoQueue):
@@ -31,12 +31,12 @@ def test_describe_non_existing_tag(flake: PyflakeClient, assets_queue: queue.Lif
 
         ### Act ###
         tag = flake.describe_async(
-            describable=DescribablesTag(
+            describable=TagDescribable(
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 tag_name="I_DONT_EXIST_TAG",
             )
-        ).deserialize_one(EntitiesTag)
+        ).deserialize_one(TagEntity)
         ### Assert ###
         assert tag is None
     finally:
@@ -68,12 +68,12 @@ def test_create_tag_without_tag_values(flake: PyflakeClient, assets_queue: queue
         flake.register_asset_async(tag, asset_queue=assets_queue).wait()
         ### Act ###
         sf_tag = flake.describe_async(
-            describable=DescribablesTag(
+            describable=TagDescribable(
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 tag_name=tag.tag_name,
             )
-        ).deserialize_one(EntitiesTag)
+        ).deserialize_one(TagEntity)
         ### Assert ###
         assert sf_tag is not None
         assert sf_tag.name == tag.tag_name
@@ -107,12 +107,12 @@ def test_create_tag_with_tag_values(flake: PyflakeClient, assets_queue: queue.Li
         flake.register_asset_async(tag, asset_queue=assets_queue).wait()
         ### Act ###
         sf_tag = flake.describe_async(
-            describable=DescribablesTag(
+            describable=TagDescribable(
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 tag_name=tag.tag_name,
             )
-        ).deserialize_one(EntitiesTag)
+        ).deserialize_one(TagEntity)
         ### Assert ###
         assert sf_tag is not None
         assert sf_tag.name == tag.tag_name
@@ -157,14 +157,14 @@ def test_create_tag_with_database_role_owner(flake: PyflakeClient, assets_queue:
         w1 = flake.register_asset_async(db_role, asset_queue=assets_queue)
         w2 = flake.register_asset_async(schema, asset_queue=assets_queue)
         flake.wait_all([w1, w2])
-        w3 = flake.register_asset_async(rel, asset_queue=assets_queue)
+        w3 = flake.create_asset_async(rel)
         w4 = flake.register_asset_async(tag, asset_queue=assets_queue)
         flake.wait_all([w3, w4])
 
         ### Act ###
         sf_tag = flake.describe_async(
-            DescribablesTag(database_name=database.db_name, schema_name=schema.schema_name, tag_name=tag.tag_name)
-        ).deserialize_one(EntitiesTag)
+            TagDescribable(database_name=database.db_name, schema_name=schema.schema_name, tag_name=tag.tag_name)
+        ).deserialize_one(TagEntity)
 
         ### Assert ###
         assert sf_tag is not None
