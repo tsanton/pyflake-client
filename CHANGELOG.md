@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.10.0](https://github.com/Tsanton/pyflake-client/compare/v0.9.0...v0.10.0) (2023-08-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* table, tags and columns refactored to async pattern
+* moved deserializer into describable
+* procedure callables made
+* all assets use async methods
+
+### Features
+
+* SHOW FUTURE GRANTS TO DATABASE ROLE instead of procedure ([f1a2fc1](https://github.com/Tsanton/pyflake-client/commit/f1a2fc1bc62a339c1d61710f7d59934ca1b3b170))
+
+
+### Documentation
+
+* added readme ([042fe48](https://github.com/Tsanton/pyflake-client/commit/042fe48bcfd37e2b1d564a6af9a93b6a5e0cfd41))
+
+
+### Code Refactoring
+
+* all assets use async methods ([9b5114b](https://github.com/Tsanton/pyflake-client/commit/9b5114b8ac114ed92a3995b09481e7dc19d00835))
+* moved deserializer into describable ([b54b987](https://github.com/Tsanton/pyflake-client/commit/b54b987dd9d3540a9569384bb778da7225de1c7e))
+* procedure callables made ([a9acd9b](https://github.com/Tsanton/pyflake-client/commit/a9acd9b28a12e6bf34de5caead8d4ddc21fe62ed))
+* table, tags and columns refactored to async pattern ([146b16f](https://github.com/Tsanton/pyflake-client/commit/146b16f31fb0abc63f5fa915ef46f4e3ece49ba9))
+
 ## [0.9.0](https://github.com/Tsanton/pyflake-client/compare/v0.8.0...v0.9.0) (2023-08-09)
 
 
