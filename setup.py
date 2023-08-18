@@ -20,7 +20,6 @@ setuptools.setup(
     url="https://github.com/Tsanton/pyflake-client",
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Intended Audience :: Developers",
@@ -29,5 +28,5 @@ setuptools.setup(
     ],
     install_requires=required,
     packages=setuptools.find_packages(exclude=["*tests*"]),
-    python_requires=">=3.8",
+    python_requires=">=3.9, <3.11",
 )
