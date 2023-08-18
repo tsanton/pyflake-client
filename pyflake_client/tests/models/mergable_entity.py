@@ -1,21 +1,23 @@
-"""mergable_entity"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 # pylint: disable=invalid-name
 # pylint: disable=too-many-locals
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Union
+from typing import Any, Callable, Dict, Union
 
+import dacite
+
+from pyflake_client.models.assets.table_columns import (
+    Bool,
+    Identity,
+    Integer,
+    Timestamp,
+    Varchar,
+)
 from pyflake_client.models.mergeables.snowflake_mergable_interface import (
     ISnowflakeMergable,
-)
-from pyflake_client.models.assets.table_columns import (
-    Integer,
-    Varchar,
-    Identity,
-    Bool,
-    Timestamp,
 )
 
 # --------------------------------------------------------
@@ -34,7 +36,12 @@ TABLE_COLUMN_DEFINITION = [
 
 @dataclass
 class MergableEntity(ISnowflakeMergable):
-    """RoleRelationshipEntity"""
+    def configure(self, db_name: str, schema_name: str, table_name: str):
+        self._db_name = db_name
+        self._schema_name = schema_name
+        self._table_name = table_name
+
+        return self
 
     the_primary_key: str
     enabled: Union[bool, None] = None
@@ -42,11 +49,10 @@ class MergableEntity(ISnowflakeMergable):
     valid_to: Union[datetime, None] = None
     id: Union[int, None] = None
 
-    def merge_into_statement(self, db_name: str, schema_name: str) -> str:
-        """merge_into_statement"""
+    def merge_into_statement(self) -> str:
         now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z")
         return f"""
-        merge into {db_name}.{schema_name}.{TABLE_NAME} tar using
+        merge into {self._db_name}.{self._schema_name}.{self._table_name} tar using
         (
             select
                 '{self.the_primary_key}' THE_PRIMARY_KEY,
@@ -59,7 +65,7 @@ class MergableEntity(ISnowflakeMergable):
                 s.enabled,
                 s.valid_from,
                 '{now}'::timestamp_ntz(2) valid_to
-            from {db_name}.{schema_name}.{TABLE_NAME} s
+            from {self._db_name}.{self._schema_name}.{self._table_name} s
             where
                 s.THE_PRIMARY_KEY = '{self.the_primary_key}'
                 and s.VALID_TO::date = '9999-12-31'
@@ -81,11 +87,27 @@ class MergableEntity(ISnowflakeMergable):
         );
         """
 
-    def select_statement(self, db_name: str, schema_name: str) -> str:
-        """select_statement"""
+    def select_statement(self) -> str:
         return f"""
         select
             *
-        from {db_name}.{schema_name}.{TABLE_NAME} s
+        from {self._db_name}.{self._schema_name}.{self._table_name} s
         where s.the_primary_key = '{self.the_primary_key}' and valid_to::date = '9999-12-31'
         """
+
+    @classmethod
+    def get_deserializer(cls) -> Callable[[Dict[str, Any]], "MergableEntity"]:
+        def deserializer(data: Dict[str, Any]) -> MergableEntity:
+            return dacite.from_dict(
+                MergableEntity,
+                {k.lower(): v for k, v in data.items()},
+                dacite.Config(
+                    type_hooks={
+                        int: lambda v: int(v),
+                        datetime: lambda d: datetime.fromisoformat(d) if type(d) == str else d,
+                        bool: lambda b: bool(b),
+                    }
+                ),
+            )
+
+        return deserializer

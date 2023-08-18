@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 from typing import List
-from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
+
 from pyflake_client.models.assets.role import Role
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
+from pyflake_client.models.assets.snowflake_principal_interface import (
+    ISnowflakePrincipal,
+)
 
 
 @dataclass
@@ -20,7 +24,7 @@ class Tag(ISnowflakeAsset):
         snowflake_principal_type = self.owner.get_snowflake_type().snowflake_type()
         if snowflake_principal_type not in ["ROLE", "DATABASE ROLE"]:
             raise NotImplementedError("Ownership is not implemented for asset of type {self.owner.__class__}")
-        
+
         query = ""
         query += f"CREATE OR REPLACE TAG {self.database_name}.{self.schema_name}.{self.tag_name}"
         if len(self.tag_values) > 0:

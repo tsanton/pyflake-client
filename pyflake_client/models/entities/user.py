@@ -1,4 +1,4 @@
-"""user"""
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Union
@@ -8,8 +8,6 @@ from pyflake_client.models.entities.snowflake_entity_interface import ISnowflake
 
 @dataclass(frozen=True)
 class User(ISnowflakeEntity):
-    """User"""
-
     name: str
     created_on: Union[datetime, None] = None
     login_name: Union[str, None] = None

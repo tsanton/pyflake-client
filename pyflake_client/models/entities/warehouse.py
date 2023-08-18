@@ -1,4 +1,4 @@
-"""warehouse"""
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -7,8 +7,6 @@ from pyflake_client.models.entities.snowflake_entity_interface import ISnowflake
 
 @dataclass(frozen=True)
 class Warehouse(ISnowflakeEntity):
-    """Warehouse"""
-
     name: str
     owner: str
     type: str

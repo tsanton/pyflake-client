@@ -1,7 +1,13 @@
+# -*- coding: utf-8 -*-
 from typing import List, TypeVar
-from pyflake_client.models.assets.grants.snowflake_grant_asset import ISnowflakeGrantAsset
-from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
+
+from pyflake_client.models.assets.grants.snowflake_grant_asset import (
+    ISnowflakeGrantAsset,
+)
 from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.snowflake_principal_interface import (
+    ISnowflakePrincipal,
+)
 from pyflake_client.models.enums.privilege import Privilege
 
 T = TypeVar("T", bound=ISnowflakePrincipal)

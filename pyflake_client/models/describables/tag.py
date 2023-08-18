@@ -1,10 +1,14 @@
+# -*- coding: utf-8 -*-
+import json
 from dataclasses import dataclass
-from typing import Union
+from typing import Any, Callable, Dict, List, Union
 
 import dacite
+
 from pyflake_client.models.describables.snowflake_describable_interface import (
     ISnowflakeDescribable,
 )
+from pyflake_client.models.entities.tag import Tag as TagEntity
 
 
 @dataclass(frozen=True)
@@ -20,5 +24,18 @@ class Tag(ISnowflakeDescribable):
     def is_procedure(self) -> bool:
         return False
 
-    def get_dacite_config(self) -> Union[dacite.Config, None]:
-        return None
+    @classmethod
+    def get_deserializer(cls) -> Callable[[Dict[str, Any]], TagEntity]:
+        def deserialize(data: Dict[str, Any]) -> TagEntity:
+            return dacite.from_dict(
+                TagEntity,
+                data,
+                dacite.Config(
+                    type_hooks={
+                        # datetime: lambda v: datetime.fromisoformat(v),
+                        List[str]: lambda v: json.loads(v),
+                    }
+                ),
+            )
+
+        return deserialize

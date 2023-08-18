@@ -1,9 +1,8 @@
-"""column_type"""
+# -*- coding: utf-8 -*-
 from enum import Enum
 
 
 class ColumnType(str, Enum):
-    """ColumnType"""
     NUMBER = "NUMBER"
     INTEGER = "INTEGER"
     FLOAT = "FLOAT"

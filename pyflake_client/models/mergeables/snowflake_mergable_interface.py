@@ -1,14 +1,19 @@
-"""snowflake_mergable_interface"""
+# -*- coding: utf-8 -*-
 from abc import ABC, abstractmethod
+from typing import Any, Callable, Dict, TypeVar
+
+T = TypeVar("T")
 
 
 class ISnowflakeMergable(ABC):
-    """ISnowflakeMergable"""
+    @abstractmethod
+    def merge_into_statement(self) -> str:
+        ...
 
     @abstractmethod
-    def merge_into_statement(self, db_name: str, schema_name: str) -> str:
-        """merge_into_statement"""
+    def select_statement(self) -> str:
+        ...
 
-    @abstractmethod
-    def select_statement(self, db_name: str, schema_name: str) -> str:
-        """select_statement"""
+    @classmethod
+    def get_deserializer(self) -> Callable[[Dict[str, Any]], T]:
+        ...

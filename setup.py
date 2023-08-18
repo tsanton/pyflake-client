@@ -1,5 +1,7 @@
-import setuptools
+# -*- coding: utf-8 -*-
 import os
+
+import setuptools
 
 with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
@@ -18,15 +20,13 @@ setuptools.setup(
     url="https://github.com/Tsanton/pyflake-client",
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
     install_requires=required,
     packages=setuptools.find_packages(exclude=["*tests*"]),
-    python_requires=">=3.8",
+    python_requires=">=3.9, <3.11",
 )

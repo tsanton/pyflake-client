@@ -1,10 +1,8 @@
-"""privilege_enum"""
+# -*- coding: utf-8 -*-
 from enum import Enum
 
 
 class Privilege(str, Enum):
-    """Privilege"""
-
     SELECT = "SELECT"
     INSERT = "INSERT"
     UPDATE = "UPDATE"

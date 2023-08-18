@@ -1,152 +1,64 @@
-"""pyflake_client"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 # pylint: disable=invalid-name
-import importlib
 import queue
-import json
-from typing import Any, List, Type, TypeVar, Union
+from typing import List, Union
 
-from dacite import from_dict
 from snowflake.connector import SnowflakeConnection
-from snowflake.connector.errors import ProgrammingError
+from snowflake.snowpark import Session
 
+from pyflake_client.async_asset_job import AsyncAssetJob, AsyncAwaitable
+from pyflake_client.async_call_job import AsyncCallJob
+from pyflake_client.async_describe_job import AsyncDescribeJob
 from pyflake_client.models.assets.snowflake_asset_interface import ISnowflakeAsset
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
-from pyflake_client.models.entities.snowflake_entity_interface import ISnowflakeEntity
-from pyflake_client.models.executables.snowflake_executable_interface import ISnowflakeExecutable
-from pyflake_client.models.mergeables.snowflake_mergable_interface import ISnowflakeMergable
-
-
-T = TypeVar("T", bound=ISnowflakeEntity)
-U = TypeVar("U", bound=ISnowflakeMergable)
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
 
 
 class PyflakeClient:
-    """PyflakeClient"""
-
-    def __init__(self, conn: SnowflakeConnection, gov_db: str = None, mgmt_schema: str = None) -> None:
+    def __init__(self, conn: SnowflakeConnection) -> None:
         self._conn: SnowflakeConnection = conn
-        self.gov_db = gov_db
-        self.mgmt_schema = mgmt_schema
+        self._session = Session.builder.config("connection", conn).create()
 
-    def execute_scalar(self, query: str) -> Any:
-        """execute_scalar"""
-        with self._conn.cursor() as cur:
-            cur.execute(query)
-            row = cur.fetchone()
-            if not row:
-                return None
-            return row[0]
+    def wait_all(self, waiters: List[AsyncAwaitable], timeout: int = 60) -> None:
+        for waiter in waiters:
+            waiter.wait()
 
-    def execute(self, executable: ISnowflakeExecutable) -> Any:
-        """execute"""
-        with self._conn.cursor() as cur:
-            cur.execute(executable.get_call_statement())
-            data = cur.fetchall()
-            if not data:
-                return None
-            if len(data) == 1:
-                return data[0][0]
-            return [x[0] for x in data]
+    def execute_async(self, statement: str) -> AsyncCallJob:
+        return AsyncCallJob(original=self._session.sql(statement).collect_nowait())
 
-    def create_asset(self, obj: ISnowflakeAsset) -> None:
-        """create_asset"""
-        self._create_asset(obj)
+    def create_asset_async(self, obj: ISnowflakeAsset) -> AsyncAssetJob:
+        return self._create_asset_async(obj, None)
 
-    def register_asset(self, obj: ISnowflakeAsset, asset_queue: queue.LifoQueue) -> None:
-        """register_asset"""
-        self._create_asset(obj)
-        asset_queue.put(obj)
+    def register_asset_async(self, obj: ISnowflakeAsset, asset_queue: queue.LifoQueue) -> AsyncAssetJob:
+        return self._create_asset_async(obj, asset_queue)
 
-    def _create_asset(self, obj: ISnowflakeAsset):
-        """create_asset"""
-        self._conn.execute_string(obj.get_create_statement())
+    def _create_asset_async(self, obj: ISnowflakeAsset, asset_queue: Union[queue.LifoQueue, None]) -> AsyncAssetJob:
+        cur = self._conn.cursor()
+        cur.execute(obj.get_create_statement().strip(), num_statements=0, _exec_async=True)
+        return AsyncAssetJob(conn=self._conn, cursor=cur, query_id=cur.sfqid, asset=obj, queue=asset_queue)
 
-    def delete_asset(self, obj: ISnowflakeAsset) -> None:
-        """delete_asset"""
-        self._delete_asset(obj)
+    def delete_asset_async(self, obj: ISnowflakeAsset) -> AsyncAssetJob:
+        return self._delete_asset_async(obj)
 
-    def delete_assets(self, asset_queue: queue.LifoQueue) -> None:
-        """delete_asset"""
+    def delete_assets(self, asset_queue: queue.LifoQueue[ISnowflakeAsset]) -> None:
+        statements = []
         while not asset_queue.empty():
-            self._delete_asset(asset_queue.get())
-
-    def _delete_asset(self, obj: ISnowflakeAsset) -> None:
-        """delete_asset"""
-        self._conn.execute_string(obj.get_delete_statement())
-
-    def describe_one(self, describable: ISnowflakeDescribable, entity: Type[T]) -> Union[T, None]:
-        class_ = entity
+            statements.append(asset_queue.get().get_delete_statement().strip())
         with self._conn.cursor() as cur:
-            try:
-                cur.execute(describable.get_describe_statement())
-            except ProgrammingError:
-                return None  # TODO : this seems unsafe
+            cur.execute(";\n".join(statements), num_statements=0)
 
-            row = cur.fetchone()
-            if not row:
-                return None
+    def _delete_asset_async(self, obj: ISnowflakeAsset) -> AsyncAssetJob:
+        cur = self._conn.cursor()
+        statement = obj.get_delete_statement().strip()
+        cur.execute(statement, num_statements=0, _exec_async=True)
+        return AsyncAssetJob(conn=self._conn, cursor=cur, query_id=cur.sfqid, asset=obj, queue=None)
 
-            if describable.is_procedure():
-                data = json.loads(row[0])
-                if data in ({}, []):
-                    return None
-
-                return class_.load_from_sf(data=data, config=describable.get_dacite_config())
-
-            return class_.load_from_sf(data=dict(zip([c[0] for c in cur.description], row)),config=describable.get_dacite_config())
-
-    def describe_many(self, describable: ISnowflakeDescribable, entity: Type[T]) -> Union[List[T], None]:
-        class_ = entity
-        with self._conn.cursor() as cur:
-            try:
-                cur.execute(describable.get_describe_statement())
-            except ProgrammingError:
-                return None  # TODO : this seems unsafe
-
-            res = cur.fetchall()
-            if not res:
-                return []
-
-            if describable.is_procedure():
-                data = [json.loads(r) for r in res[0]][0]
-                if data in ({}, []):
-                    return None
-
-                return [
-                    class_.load_from_sf(data=d, config=describable.get_dacite_config()) for d in data
-                ]
-
-            return [
-                class_.load_from_sf(
-                    data=dict(zip([c[0] for c in cur.description], r)),
-                    config=describable.get_dacite_config(),
-                )
-                for r in res
-            ]
-
-    def merge_into(self, obj: U) -> bool:
-        """merge_into"""
-        try:
-            self._conn.execute_string(obj.merge_into_statement(self.gov_db, self.mgmt_schema))
-            return True
-        except Exception as e:
-            # print(e)
-            print("merge_into threw an exception!")
-        return False
-
-    def get_mergeable(self, obj: U) -> U:
-        """get_mergeable"""
-        module = importlib.import_module(obj.__module__)
-        class_ = getattr(module, obj.__class__.__name__)
-        with self._conn.cursor() as cur:
-            cur.execute(obj.select_statement(self.gov_db, self.mgmt_schema))
-            row = cur.fetchone()
-            raw_data = dict(zip([c[0].lower() for c in cur.description], row))
-            data = {}
-            for k, v in raw_data.items():
-                if isinstance(v, str) and (v.startswith("{") or v.startswith("[")):
-                    data[k] = json.loads(v)
-                else:
-                    data[k] = v
-            return from_dict(data_class=class_, data=data, config=None)
+    def describe_async(self, describable: ISnowflakeDescribable) -> AsyncDescribeJob:
+        """The ISnowflakeDescribable must contain a single statement query (1x';')"""
+        return AsyncDescribeJob(
+            original=self._session.sql(describable.get_describe_statement()).collect_nowait(),
+            is_procedure=describable.is_procedure(),
+            deserializer=describable.get_deserializer(),
+        )

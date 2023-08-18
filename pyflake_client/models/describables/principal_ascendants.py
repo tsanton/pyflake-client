@@ -1,15 +1,22 @@
-"""principal_ascendants"""
+# -*- coding: utf-8 -*-
 # pylint: disable=consider-using-f-string
 from dataclasses import dataclass
-from typing import Union
+from datetime import datetime
+from typing import Any, Callable, Dict
+
 import dacite
 
+from pyflake_client.models.describables.database_role import (
+    DatabaseRole as DatabaseRoleDescribable,
+)
 from pyflake_client.models.describables.role import Role as RoleDescribable
-from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
-
-from pyflake_client.models.describables.snowflake_describable_interface import ISnowflakeDescribable
-
-from pyflake_client.models.describables.snowflake_grant_principal import ISnowflakeGrantPrincipal
+from pyflake_client.models.describables.snowflake_describable_interface import (
+    ISnowflakeDescribable,
+)
+from pyflake_client.models.describables.snowflake_grant_principal import (
+    ISnowflakeGrantPrincipal,
+)
+from pyflake_client.models.entities.principal_ascendant import PrincipalAscendant
 
 
 @dataclass(frozen=True)
@@ -19,7 +26,6 @@ class PrincipalAscendants(ISnowflakeDescribable):
     principal: ISnowflakeGrantPrincipal
 
     def get_describe_statement(self) -> str:
-        """get_describe_statement"""
         if isinstance(self.principal, RoleDescribable):
             principal_type = "ROLE"
             principal_identifier = self.principal.name
@@ -28,12 +34,12 @@ class PrincipalAscendants(ISnowflakeDescribable):
             principal_identifier = f"{self.principal.db_name}.{self.principal.name}"
         else:
             raise NotImplementedError()
-        
-        query =  """
+
+        query = """
 with show_all_roles_that_inherit_source as procedure(principal_type varchar, principal_identifier varchar)
     returns variant not null
     language python
-    runtime_version = '3.8'
+    runtime_version = '3.10'
     packages = ('snowflake-snowpark-python')
     handler = 'main_py'
 as $$
@@ -42,8 +48,8 @@ def show_grants_on_py(snowpark_session, principal_type_py:str, principal_identif
     try:
         for row in snowpark_session.sql(f'SHOW GRANTS OF {principal_type_py} {principal_identifier_py}').to_local_iterator():
             if row['granted_to'] in ['ROLE', 'DATABASE_ROLE']:
-                res.append({ 
-                    **row.as_dict(), 
+                res.append({
+                    **row.as_dict(),
                     **{ 'distance_from_source': links_removed, 'granted_on' : principal_type_py if principal_type_py != 'DATABASE ROLE' else 'DATABASE_ROLE' }
                 })
     except:
@@ -61,7 +67,7 @@ def show_all_roles_that_inherit_source_py(snowpark_session, principal_type: str,
     for role in show_inheritance:
         principal_type_iter:str = role['granted_to'] if role['granted_to'] != 'DATABASE_ROLE' else 'DATABASE ROLE'
         show_all_roles_that_inherit_source_py(snowpark_session, principal_type_iter, role['grantee_name'], links_removed +1, result, roles_shown)
-            
+
 def main_py(snowpark_session, principal_type_py:str, principal_identifier_py:str):
     res = []
     show_all_roles_that_inherit_source_py(snowpark_session, principal_type_py, principal_identifier_py, 0, res)
@@ -69,17 +75,33 @@ def main_py(snowpark_session, principal_type_py:str, principal_identifier_py:str
 $$
 call show_all_roles_that_inherit_source('%(s1)s', '%(s2)s');""" % {
             "s1": principal_type,
-            "s2": principal_identifier
+            "s2": principal_identifier,
         }
         return query
 
     def is_procedure(self) -> bool:
-        """is_procedure"""
         return True
 
-    def get_dacite_config(self) -> Union[dacite.Config, None]:
-        """get_dacite_config"""
-        return None
+    @classmethod
+    def get_deserializer(cls) -> Callable[[Dict[str, Any]], PrincipalAscendant]:
+        def deserialize(data: Dict[str, Any]) -> PrincipalAscendant:
+            renaming = {
+                "grantee_name": "grantee_identifier",
+                "granted_to": "principal_type",
+                "role": "granted_identifier",
+            }
+            for old_key, new_key in renaming.items():
+                data[new_key] = data.pop(old_key)
+            return dacite.from_dict(
+                PrincipalAscendant,
+                data,
+                dacite.Config(
+                    type_hooks={
+                        int: lambda v: int(v),
+                        bool: lambda b: bool(b),
+                        datetime: lambda d: datetime.fromisoformat(d),
+                    }
+                ),
+            )
 
-
-        
+        return deserialize

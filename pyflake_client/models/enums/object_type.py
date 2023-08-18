@@ -1,9 +1,8 @@
-"""object_type"""
+# -*- coding: utf-8 -*-
 from enum import Enum
 
 
 class ObjectType(str, Enum):
-    """ObjectType"""
     TABLE = "TABLE"
     VIEW = "VIEW"
     MATVIEW = "MATVIEW"
@@ -25,11 +24,7 @@ class ObjectType(str, Enum):
             return self.value
 
     def singularize(self) -> str:
-        """singularize"""
         return str(self)
 
     def pluralize(self) -> str:
-        """pluralize"""
-        # if self == ObjectType.TABLE: // If we have an object that can't be pluralized (i.e. MASKING POLICY -> MASKING POILICIES)
-        #     return "TABLES"
         return f"{str(self)}S"

@@ -1,61 +1,74 @@
-"""test_database"""
+# -*- coding: utf-8 -*-
 import queue
-import uuid
 
 from pyflake_client.client import PyflakeClient
-
 from pyflake_client.models.assets.database import Database as DatabaseAsset
-from pyflake_client.models.assets.grants.schema_grant import SchemaGrant
-from pyflake_client.models.assets.schema import Schema as SchemaAsset
-from pyflake_client.models.assets.grants.database_grant import DatabaseGrant
-from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.database_role import DatabaseRole as DatabaseRoleAsset
-
 from pyflake_client.models.assets.grant_action import GrantAction
-
-from pyflake_client.models.describables.database_role import DatabaseRole as DatabaseRoleDescribable
-from pyflake_client.models.describables.grant import Grant as GrantDescribable
-
-from pyflake_client.models.entities.grant import Grant as GrantEntity
-
+from pyflake_client.models.assets.grants.database_grant import DatabaseGrant
+from pyflake_client.models.assets.grants.schema_grant import SchemaGrant
+from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.schema import Schema as SchemaAsset
+from pyflake_client.models.describables.database_role import (
+    DatabaseRole as DatabaseRoleDescribable,
+)
+from pyflake_client.models.describables.role_grant import (
+    RoleGrant as RoleGrantDescribable,
+)
+from pyflake_client.models.entities.role_grant import RoleGrant as RoleGrantEntity
 from pyflake_client.models.enums.privilege import Privilege
 
-#TODO: test_describe_grant_for_non_existing_database_role
+# TODO: test_describe_grant_for_non_existing_database_role
 
-def test_describe_grant_for_non_existing_database_role(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_describe_grant_for_non_existing_database_role"""
+
+def test_describe_grant_for_non_existing_database_role(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
     sys_admin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin)
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin)
     try:
-            flake.register_asset(database, assets_queue)
-            ### Act ###
-            grants = flake.describe_many(describable=GrantDescribable(principal=DatabaseRoleDescribable(name="NON_EXISTING_DATABASE_ROLE", db_name=database.db_name)), entity=GrantEntity)
+        flake.register_asset_async(database, assets_queue).wait()
+        ### Act ###
+        grants = flake.describe_async(
+            describable=RoleGrantDescribable(
+                principal=DatabaseRoleDescribable(name="NON_EXISTING_DATABASE_ROLE", db_name=database.db_name)
+            )
+        ).deserialize_many(RoleGrantEntity)
 
-            ### Assert ###
+        ### Assert ###
 
-            assert grants is None
+        assert grants == []
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
 
 
-def test_database_role_database_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_database_role_database_grant"""
+def test_database_role_database_grant(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
     user_admin = RoleAsset("USERADMIN")
     sys_admin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin)
-    db_role = DatabaseRoleAsset("IGT_DB_ROLE", database.db_name, f"pyflake_client_test_{uuid.uuid4()}", user_admin)
-    grant = GrantAction(db_role, DatabaseGrant(database_name=database.db_name), [Privilege.CREATE_DATABASE_ROLE, Privilege.CREATE_SCHEMA])
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin)
+    db_role = DatabaseRoleAsset("PYFLAKE_CLIENT_TEST_DB_ROLE", database.db_name, comment, user_admin)
+    grant = GrantAction(
+        db_role,
+        DatabaseGrant(database_name=database.db_name),
+        [Privilege.CREATE_DATABASE_ROLE, Privilege.CREATE_SCHEMA],
+    )
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(db_role, assets_queue)
-        flake.register_asset(grant, assets_queue)
+        flake.register_asset_async(database, assets_queue).wait()
+        flake.register_asset_async(db_role, assets_queue).wait()
+        flake.register_asset_async(grant, assets_queue).wait()
 
         ### Act ###
-        grants = flake.describe_many(describable=GrantDescribable(principal=DatabaseRoleDescribable(name=db_role.name, db_name=database.db_name)), entity=GrantEntity)
+        grants = flake.describe_async(
+            describable=RoleGrantDescribable(
+                principal=DatabaseRoleDescribable(name=db_role.name, db_name=database.db_name)
+            )
+        ).deserialize_many(RoleGrantEntity)
 
         ### Assert ###
         assert grants is not None
@@ -63,12 +76,14 @@ def test_database_role_database_grant(flake: PyflakeClient, assets_queue: queue.
 
         usg = next((r for r in grants if r.privilege == Privilege.USAGE and r.granted_on == "DATABASE"), None)
         assert usg is not None
-        assert usg.granted_by == "" #Implisit usage grant on databases for database roles
+        assert usg.granted_by == ""  # Implisit usage grant on databases for database roles
         assert usg.grantee_identifier == db_role.name
         assert usg.grantee_type == "DATABASE_ROLE"
         assert usg.granted_identifier == database.db_name
 
-        cdr = next((r for r in grants if r.privilege == Privilege.CREATE_DATABASE_ROLE and r.granted_on == "DATABASE"), None)
+        cdr = next(
+            (r for r in grants if r.privilege == Privilege.CREATE_DATABASE_ROLE and r.granted_on == "DATABASE"), None
+        )
         assert cdr is not None
         assert cdr.granted_on == "DATABASE"
         assert cdr.granted_by == "SYSADMIN"
@@ -88,24 +103,32 @@ def test_database_role_database_grant(flake: PyflakeClient, assets_queue: queue.
         flake.delete_assets(assets_queue)
 
 
-def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_database_role_schema_grant"""
+def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
     ### Arrange ###
     user_admin = RoleAsset("USERADMIN")
     sys_admin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=sys_admin)
-    schema = SchemaAsset(database.db_name, "IGT_SCHEMA", f"pyflake_client_test_{uuid.uuid4()}", sys_admin)
-    db_role = DatabaseRoleAsset("IGT_DB_ROLE", database.db_name, f"pyflake_client_test_{uuid.uuid4()}", user_admin)
-    grant = GrantAction(db_role, SchemaGrant(database_name=database.db_name, schema_name=schema.schema_name), [Privilege.USAGE, Privilege.CREATE_TABLE])
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin)
+    schema = SchemaAsset(database.db_name, "TEST_SCHEMA", comment, sys_admin)
+    db_role = DatabaseRoleAsset("PYFLAKE_CLIENT_TEST_DB_ROLE", database.db_name, comment, user_admin)
+    grant = GrantAction(
+        db_role,
+        SchemaGrant(database_name=database.db_name, schema_name=schema.schema_name),
+        [Privilege.USAGE, Privilege.CREATE_TABLE],
+    )
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(schema, assets_queue)
-        flake.register_asset(db_role, assets_queue)
-        flake.register_asset(grant, assets_queue)
+        flake.register_asset_async(database, assets_queue).wait()
+        w1 = flake.register_asset_async(schema, assets_queue)
+        w2 = flake.register_asset_async(db_role, assets_queue)
+        flake.wait_all([w1, w2])
+        flake.register_asset_async(grant, assets_queue).wait()
 
         ### Act ###
-        grants = flake.describe_many(describable=GrantDescribable(principal=DatabaseRoleDescribable(name=db_role.name, db_name=database.db_name)), entity=GrantEntity)
+        grants = flake.describe_async(
+            describable=RoleGrantDescribable(
+                principal=DatabaseRoleDescribable(name=db_role.name, db_name=database.db_name)
+            )
+        ).deserialize_many(RoleGrantEntity)
 
         ### Assert ###
         assert grants is not None
@@ -113,7 +136,7 @@ def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.Li
 
         usg = next((r for r in grants if r.privilege == Privilege.USAGE and r.granted_on == "DATABASE"), None)
         assert usg is not None
-        assert usg.granted_by == "" #Implisit usage grant on databases for database roles
+        assert usg.granted_by == ""  # Implisit usage grant on databases for database roles
         assert usg.grantee_identifier == db_role.name
         assert usg.grantee_type == "DATABASE_ROLE"
         assert usg.granted_identifier == database.db_name
@@ -131,7 +154,7 @@ def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.Li
         assert ct.grantee_identifier == db_role.name
         assert ct.grantee_type == "DATABASE_ROLE"
         assert ct.granted_identifier == f"{database.db_name}.{schema.schema_name}"
-    
+
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)

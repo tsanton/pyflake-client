@@ -1,26 +1,34 @@
-"""test_procedures"""
+# -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 # pylint: disable=invalid-name
 # pylint: disable=too-many-locals
 
 import queue
+import secrets
+from typing import Tuple
 
+from snowflake.snowpark.row import Row
+
+from pyflake_client.client import PyflakeClient
+from pyflake_client.models.assets.database import Database
+from pyflake_client.models.assets.database_role import DatabaseRole
 from pyflake_client.models.assets.procedure import Procedure as ProcedureAsset
+from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.enums.column_type import ColumnType
 from pyflake_client.models.executables.procedure import Procedure as ProcedureExec
 from pyflake_client.models.executables.procedure_arg import ProcedureArg
-from pyflake_client.client import PyflakeClient
 
 
-from pyflake_client.tests.utilities import _spawn_with_rwc_privileges
-
-
-def test_call_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_call_procedure_zero_args"""
+def test_call_procedure_zero_args_string_scalar_return(
+    flake: PyflakeClient,
+    proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
+    assets_queue: queue.LifoQueue,
+):
     ### Arrange ###
-    db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
+    db, s, _, _, _ = proc_db
+    proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()
     sql: str = f"""
-    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.TEST_PROC()
+    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.{proc_name}()
         RETURNS VARCHAR(16777216)
         LANGUAGE SQL
         EXECUTE AS CALLER
@@ -30,14 +38,17 @@ def test_call_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.Lifo
         END
     $$;
     """
-    proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, "TEST_PROC", [], sql)
-    proc_exec = ProcedureExec(db.db_name, s.schema_name, "TEST_PROC", [])
+    proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, proc_name, [], sql)
+    proc_exec = ProcedureExec(db.db_name, s.schema_name, proc_name, [])
 
     try:
-        flake.register_asset(proc, assets_queue)
+        flake.register_asset_async(proc, assets_queue).wait()
 
         ### Act ###
-        res = flake.execute(proc_exec)
+        def deserializer_func(data: Row) -> str:
+            return data
+
+        res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(str, deserializer_func)
         ### Assert ###
         assert res == "Hello you"
 
@@ -46,12 +57,16 @@ def test_call_procedure_zero_args(flake: PyflakeClient, assets_queue: queue.Lifo
         flake.delete_assets(assets_queue)
 
 
-def test_call_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_call_procedure_one_arg"""
+def test_call_procedure_one_arg_string_scalar_return(
+    flake: PyflakeClient,
+    proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
+    assets_queue: queue.LifoQueue,
+):
     ### Arrange ###
-    db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
+    db, s, _, _, _ = proc_db
+    proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()
     sql: str = f"""
-    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.TEST_PROC(NAME VARCHAR(16777216))
+    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.{proc_name}(NAME VARCHAR(16777216))
         RETURNS VARCHAR(16777216)
         LANGUAGE SQL
         EXECUTE AS CALLER
@@ -61,14 +76,17 @@ def test_call_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.LifoQu
         END
     $$;
     """
-    proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, "TEST_PROC", [ColumnType.VARCHAR], sql)
-    proc_exec = ProcedureExec(db.db_name, s.schema_name, "TEST_PROC", [ProcedureArg(1, ColumnType.VARCHAR, "Tullebukk")])
+    proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, proc_name, [ColumnType.VARCHAR], sql)
+    proc_exec = ProcedureExec(db.db_name, s.schema_name, proc_name, [ProcedureArg(1, ColumnType.VARCHAR, "Tullebukk")])
 
     try:
-        flake.register_asset(proc, assets_queue)
+        flake.register_asset_async(proc, assets_queue).wait()
+
+        def deserializer_func(data: Row) -> str:
+            return data
 
         ### Act ###
-        res = flake.execute(proc_exec)
+        res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(str, deserializer_func)
         ### Assert ###
         assert res == "Hello Tullebukk"
 
@@ -77,12 +95,16 @@ def test_call_procedure_one_arg(flake: PyflakeClient, assets_queue: queue.LifoQu
         flake.delete_assets(assets_queue)
 
 
-def test_call_procedure_multiple_args(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    """test_call_procedure_multiple_args"""
+def test_call_procedure_multiple_args_string_scalar_return(
+    flake: PyflakeClient,
+    proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
+    assets_queue: queue.LifoQueue,
+):
     ### Arrange ###
-    db, s, _, _, _ = _spawn_with_rwc_privileges(flake, assets_queue)
+    db, s, _, _, _ = proc_db
+    proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()
     sql: str = f"""
-    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.TEST_PROC(MESSAGE VARCHAR(16777216), NAME VARCHAR(16777216))
+    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.{proc_name}(MESSAGE VARCHAR(16777216), NAME VARCHAR(16777216))
         RETURNS VARCHAR(16777216)
         LANGUAGE SQL
         EXECUTE AS CALLER
@@ -92,17 +114,24 @@ def test_call_procedure_multiple_args(flake: PyflakeClient, assets_queue: queue.
         END
     $$;
     """
-    proc: ProcedureAsset = ProcedureAsset(db.db_name, s.schema_name, "TEST_PROC", [ColumnType.VARCHAR, ColumnType.VARCHAR], sql)
-    proc_exec = ProcedureExec(db.db_name, s.schema_name, "TEST_PROC", [
-        ProcedureArg(1, ColumnType.VARCHAR, "Hello you"),
-        ProcedureArg(2, ColumnType.VARCHAR, "Tullebukk"),
-    ])
+    proc: ProcedureAsset = ProcedureAsset(
+        db.db_name, s.schema_name, proc_name, [ColumnType.VARCHAR, ColumnType.VARCHAR], sql
+    )
+    proc_exec = ProcedureExec(
+        db.db_name,
+        s.schema_name,
+        proc_name,
+        [
+            ProcedureArg(1, ColumnType.VARCHAR, "Hello you"),
+            ProcedureArg(2, ColumnType.VARCHAR, "Tullebukk"),
+        ],
+    )
 
     try:
-        flake.register_asset(proc, assets_queue)
+        flake.register_asset_async(proc, assets_queue).wait()
 
         ### Act ###
-        res = flake.execute(proc_exec)
+        res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(str, lambda x: x)
         ### Assert ###
         assert res == "Hello you Tullebukk"
 

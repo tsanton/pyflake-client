@@ -1,10 +1,15 @@
-"""database_object_future_grant"""
+# -*- coding: utf-8 -*-
 from dataclasses import dataclass
 from typing import List, TypeVar
-from pyflake_client.models.assets.grants.snowflake_grant_asset import ISnowflakeGrantAsset
-from pyflake_client.models.assets.snowflake_principal_interface import ISnowflakePrincipal
-from pyflake_client.models.assets.role import Role as RoleAsset
+
 from pyflake_client.models.assets.database_role import DatabaseRole as DatabaseRoleAsset
+from pyflake_client.models.assets.grants.snowflake_grant_asset import (
+    ISnowflakeGrantAsset,
+)
+from pyflake_client.models.assets.role import Role as RoleAsset
+from pyflake_client.models.assets.snowflake_principal_interface import (
+    ISnowflakePrincipal,
+)
 from pyflake_client.models.enums.object_type import ObjectType
 from pyflake_client.models.enums.privilege import Privilege
 

@@ -1,31 +1,30 @@
-"""test_table_number"""
+# -*- coding: utf-8 -*-
 import queue
-import uuid
 
-from pyflake_client.models.assets.table import Table as TableAsset
-from pyflake_client.models.assets.table_columns import Number
-from pyflake_client.models.entities.column import Number as NumberEntity
-from pyflake_client.models.entities.table import Table as TableEntity
-from pyflake_client.models.describables.table import Table as TableDescribable
+from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as DatabaseAsset
 from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.schema import Schema
-from pyflake_client.client import PyflakeClient
+from pyflake_client.models.assets.table import Table as TableAsset
+from pyflake_client.models.assets.table_columns import Number
+from pyflake_client.models.describables.table import Table as TableDescribable
+from pyflake_client.models.entities.column import Number as NumberEntity
+from pyflake_client.models.entities.table import Table as TableEntity
 
 
-def test_table_number(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+def test_table_number(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         db_name=database.db_name,
         schema_name="TEST_SCHEMA",
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        comment=comment,
         owner=RoleAsset("SYSADMIN"),
     )
     columns = [
         Number(name="NUMBER_COLUMN"),
     ]
     table = TableAsset(
-        db_name=database.db_name,    
+        db_name=database.db_name,
         schema_name=schema.schema_name,
         table_name="TEST_TABLE",
         columns=columns,  # type: ignore
@@ -33,19 +32,19 @@ def test_table_number(flake: PyflakeClient, assets_queue: queue.LifoQueue):
     )
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(schema, assets_queue)
-        flake.register_asset(table, assets_queue)
+        flake.register_asset_async(database, assets_queue).wait()
+        flake.register_asset_async(schema, assets_queue).wait()
+        flake.register_asset_async(table, assets_queue).wait()
 
         ### Act ###
-        sf_table = flake.describe_one(
+        sf_table = flake.describe_async(
             TableDescribable(
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 name=table.table_name,
-            ),
-            TableEntity,
-        )
+            )
+        ).deserialize_one(TableEntity)
+
         ### Assert ###
         assert sf_table is not None
         assert sf_table.name == table.table_name
@@ -68,19 +67,19 @@ def test_table_number(flake: PyflakeClient, assets_queue: queue.LifoQueue):
         flake.delete_assets(assets_queue)
 
 
-def test_table_number_primary_key(flake: PyflakeClient, assets_queue: queue.LifoQueue):
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+def test_table_number_primary_key(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         db_name=database.db_name,
         schema_name="TEST_SCHEMA",
-        comment=f"pyflake_client_test_{uuid.uuid4()}",
+        comment=comment,
         owner=RoleAsset("SYSADMIN"),
     )
     columns = [
         Number(name="NUMBER_COLUMN", primary_key=True),
     ]
     table = TableAsset(
-        db_name=database.db_name,    
+        db_name=database.db_name,
         schema_name=schema.schema_name,
         table_name="TEST_TABLE",
         columns=columns,  # type: ignore
@@ -88,19 +87,19 @@ def test_table_number_primary_key(flake: PyflakeClient, assets_queue: queue.Lifo
     )
 
     try:
-        flake.register_asset(database, assets_queue)
-        flake.register_asset(schema, assets_queue)
-        flake.register_asset(table, assets_queue)
+        flake.register_asset_async(database, assets_queue).wait()
+        flake.register_asset_async(schema, assets_queue).wait()
+        flake.register_asset_async(table, assets_queue).wait()
 
         ### Act ###
-        sf_table = flake.describe_one(
+        sf_table = flake.describe_async(
             TableDescribable(
                 database_name=database.db_name,
                 schema_name=schema.schema_name,
                 name=table.table_name,
-            ),
-            TableEntity,
-        )
+            )
+        ).deserialize_one(TableEntity)
+
         ### Assert ###
         assert sf_table is not None
         assert sf_table.name == table.table_name

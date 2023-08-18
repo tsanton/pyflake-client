@@ -1,32 +1,30 @@
-"""test_table"""
+# -*- coding: utf-8 -*-
 from datetime import date, datetime
-import uuid
 
+from pyflake_client.models.assets.database import Database as DatabaseAsset
+from pyflake_client.models.assets.role import Role as RoleAsset
 from pyflake_client.models.assets.schema import Schema
 from pyflake_client.models.assets.table import Table as TableAsset
 from pyflake_client.models.assets.table_columns import (
-    Varchar,
-    Integer,
-    Identity,
-    Timestamp,
     Date,
+    Identity,
+    Integer,
+    Timestamp,
+    Varchar,
 )
-from pyflake_client.models.assets.database import Database as DatabaseAsset
-from pyflake_client.models.assets.role import Role as RoleAsset
 
 
-def test_create_simple_table_ddl():
-    """test_create_simple_table_ddl"""
+def test_create_simple_table_ddl(comment: str):
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    d = DatabaseAsset(f"DEMO", comment, owner=RoleAsset("SYSADMIN"))
     schema = Schema(
-        db_name=database.db_name,
+        db_name=d.db_name,
         schema_name="S1",
         comment="SCHEMA",
         owner=RoleAsset("SYSADMIN"),
     )
     table = TableAsset(
-        database.db_name,
+        d.db_name,
         schema.schema_name,
         "TEST",
         [Integer(name="ID", identity=Identity(1, 1))],
@@ -36,13 +34,15 @@ def test_create_simple_table_ddl():
     ### Act ###
     definition = table.get_create_statement()
 
-    assert "CREATE OR REPLACE TABLE IGT_DEMO.S1.TEST (ID NUMBER(38,0) NOT NULL IDENTITY (1,1));GRANT OWNERSHIP ON TABLE IGT_DEMO.S1.TEST TO ROLE SYSADMIN;" == definition
+    assert (
+        f"CREATE OR REPLACE TABLE DEMO.S1.TEST (ID NUMBER(38,0) NOT NULL IDENTITY (1,1));GRANT OWNERSHIP ON TABLE DEMO.S1.TEST TO ROLE SYSADMIN;"
+        == definition
+    )
 
 
-def test_create_complex_table_ddl():
-    """test_create_complex_table_ddl"""
+def test_create_complex_table_ddl(comment: str):
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    database = DatabaseAsset("DEMO", comment, owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         db_name=database.db_name,
         schema_name="S1",
@@ -57,7 +57,7 @@ def test_create_complex_table_ddl():
             Integer(name="ID", identity=Identity(1, 1)),
             Varchar(name="VARCHAR_NO_DEFAULT"),
             Varchar(name="VARCHAR_DEFAULT", default_value="YES"),
-        ]
+        ],
     )
 
     ### Act ###
@@ -65,14 +65,13 @@ def test_create_complex_table_ddl():
 
     assert (
         definition
-        == "CREATE OR REPLACE TABLE IGT_DEMO.S1.TEST (ID NUMBER(38,0) NOT NULL IDENTITY (1,1),VARCHAR_NO_DEFAULT VARCHAR (16777216) NOT NULL,VARCHAR_DEFAULT VARCHAR (16777216) NOT NULL DEFAULT 'YES');"
+        == "CREATE OR REPLACE TABLE DEMO.S1.TEST (ID NUMBER(38,0) NOT NULL IDENTITY (1,1),VARCHAR_NO_DEFAULT VARCHAR (16777216) NOT NULL,VARCHAR_DEFAULT VARCHAR (16777216) NOT NULL DEFAULT 'YES');"
     )
 
 
-def test_create_complex_table_with_primary_key_ddl():
-    """test_create_complex_table_ddl"""
+def test_create_complex_table_with_primary_key_ddl(comment: str):
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    database = DatabaseAsset("DEMO", comment, owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         db_name=database.db_name,
         schema_name="S1",
@@ -90,7 +89,7 @@ def test_create_complex_table_with_primary_key_ddl():
                 name="VARCHAR_2",
                 primary_key=True,
             ),
-        ]
+        ],
     )
 
     ### Act ###
@@ -98,16 +97,13 @@ def test_create_complex_table_with_primary_key_ddl():
 
     assert (
         definition
-        == "CREATE OR REPLACE TABLE IGT_DEMO.S1.TEST (ID NUMBER(38,0) NOT NULL IDENTITY (1,1),VARCHAR_1 VARCHAR (16777216) NOT NULL,VARCHAR_2 VARCHAR (16777216) NOT NULL, PRIMARY KEY(VARCHAR_1,VARCHAR_2));"
+        == "CREATE OR REPLACE TABLE DEMO.S1.TEST (ID NUMBER(38,0) NOT NULL IDENTITY (1,1),VARCHAR_1 VARCHAR (16777216) NOT NULL,VARCHAR_2 VARCHAR (16777216) NOT NULL, PRIMARY KEY(VARCHAR_1,VARCHAR_2));"
     )
 
 
-def test_create_simple_table_with_default_date_ddl():
-    """test_create_simple_table_ddl
-    insert into <DB>.<SCHEMA>.TEST (SOME_DATE) values(default);
-    """
+def test_create_simple_table_with_default_date_ddl(comment: str):
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    database = DatabaseAsset("DEMO", comment, owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         db_name=database.db_name,
         schema_name="S1",
@@ -121,7 +117,7 @@ def test_create_simple_table_with_default_date_ddl():
         [
             Integer(name="ID", identity=Identity(1, 1)),
             Date(name="SOME_DATE", default_value=date(2000, 1, 1)),
-        ]
+        ],
     )
 
     ### Act ###
@@ -129,16 +125,13 @@ def test_create_simple_table_with_default_date_ddl():
 
     assert (
         definition
-        == "CREATE OR REPLACE TABLE IGT_DEMO.S1.TEST (ID NUMBER(38,0) NOT NULL IDENTITY (1,1),SOME_DATE DATE NOT NULL DEFAULT '2000-01-01'::date);"
+        == "CREATE OR REPLACE TABLE DEMO.S1.TEST (ID NUMBER(38,0) NOT NULL IDENTITY (1,1),SOME_DATE DATE NOT NULL DEFAULT '2000-01-01'::date);"
     )
 
 
-def test_create_simple_table_with_default_datetime_ddl():
-    """test_create_simple_table_ddl
-    insert into <DB>.<SCHEMA>.TEST (SOME_DATETIME) values(default);
-    """
+def test_create_simple_table_with_default_datetime_ddl(rand_str: str, comment: str):
     ### Arrange ###
-    database = DatabaseAsset("IGT_DEMO", f"pyflake_client_test_{uuid.uuid4()}", owner=RoleAsset("SYSADMIN"))
+    database = DatabaseAsset("DEMO", comment, owner=RoleAsset("SYSADMIN"))
     schema = Schema(
         db_name=database.db_name,
         schema_name="S1",
@@ -164,5 +157,5 @@ def test_create_simple_table_with_default_datetime_ddl():
 
     assert (
         definition
-        == """CREATE OR REPLACE TABLE IGT_DEMO.S1.TEST (ID NUMBER(38,0) IDENTITY (1,1),SOME_DATETIME TIMESTAMP(0) DEFAULT '2000-01-01T00:00:00.000000'::TIMESTAMP(0));"""
+        == """CREATE OR REPLACE TABLE DEMO.S1.TEST (ID NUMBER(38,0) IDENTITY (1,1),SOME_DATETIME TIMESTAMP(0) DEFAULT '2000-01-01T00:00:00.000000'::TIMESTAMP(0));"""
     )
