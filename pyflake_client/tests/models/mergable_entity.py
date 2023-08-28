@@ -36,13 +36,6 @@ TABLE_COLUMN_DEFINITION = [
 
 @dataclass
 class MergableEntity(ISnowflakeMergable):
-    def configure(self, db_name: str, schema_name: str, table_name: str):
-        self._db_name = db_name
-        self._schema_name = schema_name
-        self._table_name = table_name
-
-        return self
-
     the_primary_key: str
     enabled: Union[bool, None] = None
     valid_from: Union[datetime, None] = None

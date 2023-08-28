@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, TypeVar
+from typing import Any, Callable, Dict, Generic, TypeVar
 
-T = TypeVar("T")
+T = TypeVar("T", bound='ISnowflakeMergable')
 
 
-class ISnowflakeMergable(ABC):
+class ISnowflakeMergable(ABC, Generic[T]):
+    def configure(self, db_name: str, schema_name: str, table_name: str) -> T:
+        self._db_name = db_name
+        self._schema_name = schema_name
+        self._table_name = table_name
+
+        return self
+
     @abstractmethod
     def merge_into_statement(self) -> str:
         ...
@@ -17,3 +24,5 @@ class ISnowflakeMergable(ABC):
     @classmethod
     def get_deserializer(self) -> Callable[[Dict[str, Any]], T]:
         ...
+
+    
