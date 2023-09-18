@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import queue
 from datetime import date
 
@@ -91,6 +92,88 @@ def test_create_table_without_owner(flake: PyflakeClient, assets_queue: queue.Li
         assert t.owner == "ACCOUNTADMIN"
         assert t.retention_time == 1
         assert t.created_on.date() == date.today()
+    finally:
+        ### Cleanup ###
+        flake.delete_assets(assets_queue)
+
+
+def test_table_with_comment(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
+    json_comment = json.dumps({"comment": "this is a json formatted comment"})
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
+    schema = Schema(
+        db_name=database.db_name,
+        schema_name="TEST_SCHEMA",
+        comment=comment,
+        owner=RoleAsset("SYSADMIN"),
+    )
+    columns = [
+        Number("ID", identity=Identity(1, 1)),
+        Varchar("SOME_VARCHAR", primary_key=True),
+    ]
+    table = TableAsset(
+        db_name=database.db_name,
+        schema_name=schema.schema_name,
+        table_name="TEST",
+        columns=columns,
+        owner=RoleAsset("SYSADMIN"),
+        comment=json_comment,
+    )
+
+    try:
+        flake.register_asset_async(database, assets_queue).wait()
+        flake.register_asset_async(schema, assets_queue).wait()
+        flake.register_asset_async(table, assets_queue).wait()
+
+        ### Act ###
+        t = flake.describe_async(
+            TableDescribable(database.db_name, schema.schema_name, table.table_name),
+        ).deserialize_one(TableEntity)
+
+        ### Assert ###
+        assert t is not None
+        assert json.loads(t.comment) == json.loads(json_comment)
+    finally:
+        ### Cleanup ###
+        flake.delete_assets(assets_queue)
+
+
+def test_table_with_column_comment(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
+    json_comment = json.dumps({"comment": "this is a json formatted comment"})
+    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=RoleAsset("SYSADMIN"))
+    schema = Schema(
+        db_name=database.db_name,
+        schema_name="TEST_SCHEMA",
+        comment=comment,
+        owner=RoleAsset("SYSADMIN"),
+    )
+    columns = [
+        Number("ID", identity=Identity(1, 1)),
+        Varchar("SOME_VARCHAR", primary_key=True, comment=json_comment),
+    ]
+    table = TableAsset(
+        db_name=database.db_name,
+        schema_name=schema.schema_name,
+        table_name="TEST",
+        columns=columns,
+        owner=RoleAsset("SYSADMIN"),
+    )
+
+    try:
+        flake.register_asset_async(database, assets_queue).wait()
+        flake.register_asset_async(schema, assets_queue).wait()
+        flake.register_asset_async(table, assets_queue).wait()
+
+        ### Act ###
+        t = flake.describe_async(
+            TableDescribable(database.db_name, schema.schema_name, table.table_name),
+        ).deserialize_one(TableEntity)
+
+        ### Assert ###
+        assert t is not None
+        varchar_column = next(c for c in t.columns if c.name == "SOME_VARCHAR")
+        assert varchar_column is not None
+        assert varchar_column.comment is not None
+        assert json.loads(json_comment) == json.loads(varchar_column.comment)
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
