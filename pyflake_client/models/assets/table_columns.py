@@ -53,6 +53,7 @@ class Column(ABC):
     unique: bool = False
     tags: List[ClassificationTag] = field(default_factory=list)
     foreign_key: Union[ForeignKey, None] = None
+    comment: str = ""
 
     def __post_init__(self):
         """Must contain only letters (a-z, A-Z), numbers (0-9), or underscores ( _ )
@@ -96,6 +97,9 @@ class Varchar(Column):
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
 
+        if self.comment:
+            definition += f"; COMMENT '{self.comment}'"
+
         return definition
 
 
@@ -129,6 +133,8 @@ class Number(Column):
             raise NotImplementedError("Sequences are not supported as of now")
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
+        if self.comment:
+            definition += f"; COMMENT '{self.comment}'"
 
         return definition
 
@@ -188,6 +194,8 @@ class Bool(Column):
             definition += f" DEFAULT {self.default_value}"
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
+        if self.comment:
+            definition += f"; COMMENT '{self.comment}'"
 
         return definition
 
@@ -209,6 +217,8 @@ class Date(Column):
             definition += f" DEFAULT '{self.default_value.strftime('%Y-%m-%d')}'::date"
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
+        if self.comment:
+            definition += f"; COMMENT '{self.comment}'"
 
         return definition
 
@@ -232,6 +242,8 @@ class Time(Column):
             definition += f" DEFAULT {self.default_value.strftime('%H:%M:%S')}"
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
+        if self.comment:
+            definition += f"; COMMENT '{self.comment}'"
 
         return definition
 
@@ -259,6 +271,8 @@ class Timestamp(Column):
             )
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
+        if self.comment:
+            definition += f"; COMMENT '{self.comment}'"
 
         return definition
 
@@ -280,5 +294,7 @@ class Variant(Column):
             definition += f" DEFAULT '{self.default_value}'"
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
+        if self.comment:
+            definition += f"; COMMENT '{self.comment}'"
 
         return definition

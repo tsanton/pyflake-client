@@ -22,6 +22,7 @@ class Table(ISnowflakeAsset, ISnowflakeGrantPrincipal):
     tags: List[ClassificationTag] = field(default_factory=list)
     data_retention_time_days: int = 1
     owner: Union[ISnowflakePrincipal, None] = None
+    comment: str = ""
 
     def get_create_statement(self) -> str:
         table_identifier = f"{self.db_name}.{self.schema_name}.{self.table_name}"
@@ -47,6 +48,9 @@ class Table(ISnowflakeAsset, ISnowflakeGrantPrincipal):
                     value = ct.tag_value or ""
                     table_definition += f" ALTER TABLE {table_identifier} ALTER COLUMN {c.name}"
                     table_definition += f" SET TAG {ct.get_identifier()} = '{value}';"
+
+        if self.comment:
+            table_definition += f"COMMENT ON TABLE {table_identifier} IS '{self.comment}';"
 
         return table_definition
 
