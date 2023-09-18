@@ -98,7 +98,7 @@ class Varchar(Column):
             raise NotImplementedError("Foreign Keys not supported as of now")
 
         if self.comment:
-            definition += f"; COMMENT '{self.comment}'"
+            definition += f" COMMENT '{self.comment}'"
 
         return definition
 
@@ -134,7 +134,7 @@ class Number(Column):
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
         if self.comment:
-            definition += f"; COMMENT '{self.comment}'"
+            definition += f" COMMENT '{self.comment}'"
 
         return definition
 
@@ -195,7 +195,7 @@ class Bool(Column):
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
         if self.comment:
-            definition += f"; COMMENT '{self.comment}'"
+            definition += f" COMMENT '{self.comment}'"
 
         return definition
 
@@ -218,7 +218,7 @@ class Date(Column):
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
         if self.comment:
-            definition += f"; COMMENT '{self.comment}'"
+            definition += f" COMMENT '{self.comment}'"
 
         return definition
 
@@ -243,7 +243,7 @@ class Time(Column):
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
         if self.comment:
-            definition += f"; COMMENT '{self.comment}'"
+            definition += f" COMMENT '{self.comment}'"
 
         return definition
 
@@ -272,7 +272,7 @@ class Timestamp(Column):
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
         if self.comment:
-            definition += f"; COMMENT '{self.comment}'"
+            definition += f" COMMENT '{self.comment}'"
 
         return definition
 
@@ -295,6 +295,6 @@ class Variant(Column):
         if self.foreign_key is not None:
             raise NotImplementedError("Foreign Keys not supported as of now")
         if self.comment:
-            definition += f"; COMMENT '{self.comment}'"
+            definition += f" COMMENT '{self.comment}'"
 
         return definition
