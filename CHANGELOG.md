@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.10.1](https://github.com/Tsanton/pyflake-client/compare/v0.10.0...v0.10.1) (2023-09-18)
+
+
+### Features
+
+* add comment property and definition on table and column ([b4469ab](https://github.com/Tsanton/pyflake-client/commit/b4469abf319e23f063fe28e4cbb8e71ed7b01bb3))
+
+
+### Bug Fixes
+
+* comment definition bug ([47b1b1a](https://github.com/Tsanton/pyflake-client/commit/47b1b1a8e6908e72b985bfec020f95204b502241))
+
 ## [0.10.0](https://github.com/Tsanton/pyflake-client/compare/v0.9.0...v0.10.0) (2023-08-18)
 
 
