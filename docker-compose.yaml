@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   testing:
     environment:
@@ -13,5 +11,5 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        PYTHON_TAG: 3.10.9-slim-bullseye
+        PYTHON_TAG: 3.11-slim-buster
         REQUIREMENTS_FILE_PATH: requirements.txt
