@@ -2,6 +2,7 @@
 import json
 import queue
 from datetime import date
+import os
 
 from pyflake_client.client import PyflakeClient
 from pyflake_client.models.assets.database import Database as DatabaseAsset
@@ -89,7 +90,8 @@ def test_create_table_without_owner(flake: PyflakeClient, assets_queue: queue.Li
         assert t.database_name == database.db_name
         assert t.schema_name == schema.schema_name
         assert t.kind == "TABLE"
-        assert t.owner == "ACCOUNTADMIN"
+        # the role that created the table should by default be granted ownership
+        assert t.owner == os.environ.get("SNOWFLAKE_ROLE")
         assert t.retention_time == 1
         assert t.created_on.date() == date.today()
     finally:

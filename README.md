@@ -263,3 +263,22 @@ In order to read data and deserialize your response you can use either the `fetc
 No matter which approach you chose, both methods must be provided with a custom deserializer method, instructing the method on how to deserialize your response.
 
 For more inspiration/documentation on how to achieve the deserialization above, please see the deserialization lambdas that are use in [these](./pyflake_client/tests/test_callable_anonymous_procedure.py) tests 
+
+### Development
+
+#### Tests
+This project uses `pytest` as its testing framework. 
+
+To run the tests the file `.env` needs to be populated, this file can be created from the `.env.template` file:
+`cp .env.template .env`, populate the following environment variables:
+```shell
+SNOWFLAKE_ACCOUNT=
+SNOWFLAKE_UID=
+SNOWFLAKE_PWD=
+SNOWFLAKE_ROLE=
+SNOWFLAKE_WH=
+```
+Note that SNOWFLAKE_HOST should no longer be used, format for SNOWFLAKE_ACCOUNT can be found by logging into your snowflake instance and running the following query: 
+```sql
+SELECT CURRENT_ORGANIZATION_NAME() || '-' || CURRENT_ACCOUNT_NAME();
+```

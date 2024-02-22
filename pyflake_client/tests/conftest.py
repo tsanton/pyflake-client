@@ -28,7 +28,6 @@ from pyflake_client.models.enums.privilege import Privilege
 @pytest.fixture(scope="session")
 def flake() -> Generator[PyflakeClient, None, None]:
     conn: SnowflakeConnection = snowflake.connector.connect(
-        host=os.getenv("SNOWFLAKE_HOST"),
         account=os.getenv("SNOWFLAKE_ACCOUNT"),
         user=os.getenv("SNOWFLAKE_UID"),
         password=os.getenv("SNOWFLAKE_PWD"),
