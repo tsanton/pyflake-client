@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.11.0](https://github.com/tsanton/pyflake-client/compare/v0.10.1...v0.11.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* bump python and requirements versions. Refactor connection parameters to use format recommended by snowflake
+
+### Features
+
+* bump python and requirements versions. Refactor connection parameters to use format recommended by snowflake  ([1b05cda](https://github.com/tsanton/pyflake-client/commit/1b05cdafe60921ef1f0b8f453b1b3a2d5f26211a))
+
 ## [0.10.1](https://github.com/Tsanton/pyflake-client/compare/v0.10.0...v0.10.1) (2023-09-18)
 
 
