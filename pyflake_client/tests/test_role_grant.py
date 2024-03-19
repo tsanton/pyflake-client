@@ -119,7 +119,7 @@ def test_role_schema_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue,
     grant = GrantAction(
         role,
         SchemaGrant(database_name=database.db_name, schema_name=schema.schema_name),
-        [Privilege.MONITOR, Privilege.USAGE],
+        [Privilege.MONITOR, Privilege.USAGE, Privilege.CREATE_MODEL, Privilege.CREATE_SF_ML_ANOMALY_DETECTION],
     )
 
     try:
@@ -136,7 +136,7 @@ def test_role_schema_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue,
 
         ### Assert ###
         assert grants is not None
-        assert len(grants) == 2
+        assert len(grants) == 4
 
         m = next((r for r in grants if r.privilege == Privilege.MONITOR), None)
         assert m is not None
@@ -146,6 +146,20 @@ def test_role_schema_grants(flake: PyflakeClient, assets_queue: queue.LifoQueue,
         assert m.grantee_type == "ROLE"
 
         u = next((r for r in grants if r.privilege == Privilege.USAGE), None)
+        assert u is not None
+        assert u.granted_on == "SCHEMA"
+        assert u.granted_by == "SYSADMIN"
+        assert u.grantee_identifier == role.name
+        assert u.grantee_type == "ROLE"
+
+        ml_m = next((r for r in grants if r.privilege == Privilege.CREATE_MODEL), None)
+        assert m is not None
+        assert m.granted_on == "SCHEMA"
+        assert m.granted_by == "SYSADMIN"
+        assert m.grantee_identifier == role.name
+        assert m.grantee_type == "ROLE"
+
+        ml_ad = next((r for r in grants if r.privilege == Privilege.CREATE_SF_ML_ANOMALY_DETECTION), None)
         assert u is not None
         assert u.granted_on == "SCHEMA"
         assert u.granted_by == "SYSADMIN"
